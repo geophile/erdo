@@ -70,7 +70,8 @@ public class Account extends AbstractRecord<AccountId>
         this.balance = account.balance();
     }
 
-
+    public Account()
+    {}
 
     // Object state
 
