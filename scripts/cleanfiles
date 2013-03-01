@@ -1,0 +1,7 @@
+#!/bin/bash
+
+ERDO_DIR=$(dirname $0)/..
+
+pushd $ERDO_DIR
+mvn clean
+find . -type f | grep "~" | xargs rm

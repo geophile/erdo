@@ -1,0 +1,2 @@
+1362159514677 0000000.000 WARNING com.geophile.erdo.forest.ForestRecoveryOnDisk.recoverForest(ForestRecoveryOnDisk.java:28) Starting recovery of Database(/tmp/mydb)
+1362159514716 0000001.000 WARNING com.geophile.erdo.forest.ForestRecoveryOnDisk.recoverForest(ForestRecoveryOnDisk.java:77) Finished recovery of Database(/tmp/mydb)

@@ -1,0 +1,15 @@
+#!/usr/bin/python
+
+import sys
+import os
+import os.path
+
+dbdir = sys.argv[1]
+if len(sys.argv) > 2:
+    printtree_args = sys.argv[2:]
+else:
+    printtree_args = []
+
+for file in os.listdir(os.path.join(dbdir, 'forest')):
+    treeid = file[:file.find('.')]
+    os.system('printtree %s %s %s > t%s' % (dbdir, treeid, ' '.join(printtree_args), treeid))

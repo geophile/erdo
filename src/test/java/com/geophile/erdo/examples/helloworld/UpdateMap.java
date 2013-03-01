@@ -1,0 +1,54 @@
+package com.geophile.erdo.examples.helloworld;
+
+import com.geophile.erdo.*;
+
+import java.io.File;
+import java.io.IOException;
+
+public class UpdateMap
+{
+    public static void main(String[] args)
+        throws IOException,
+               InterruptedException,
+               DeadlockException,
+               TransactionRolledBackException
+    {
+        Database db = Database.openDatabase(DB_DIRECTORY);
+        OrderedMap musicians = db.openMap("musicians");
+
+        // Add records to map
+        musicians.put(new Person("James Booker", "December 17, 1939"));
+        musicians.put(new Person("Louis Armstrong", "August 4, 1901"));
+        musicians.put(new Person("Elvis Costello", "August 25, 1954"));
+        musicians.put(new Person("Dick Dale", "May 4, 1937"));
+        db.commitTransaction();
+
+        // Scan and print map contents
+        printDatabase(musicians, "original state");
+
+        // Add a record, but then roll back the transaction
+        musicians.put(new Person("Kenny Rogers", "August 21, 1938"));
+        printDatabase(musicians, "record added but not committed");
+        db.rollbackTransaction();
+
+        // Scan again, seeing only the original records
+        printDatabase(musicians, "after rollback");
+
+        // Shut down
+        db.close();
+    }
+
+    private static void printDatabase(OrderedMap family, String label)
+        throws IOException, InterruptedException
+    {
+        System.out.println(label);
+        Scan scan = family.scan();
+        Person person;
+        while ((person = (Person) scan.next()) != null) {
+            Name name = person.key();
+            System.out.println(String.format("    %s: %s", name.name, person.birthDate));
+        }
+    }
+
+    private static final File DB_DIRECTORY = new File("/tmp/mydb");
+}

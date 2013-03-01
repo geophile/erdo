@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ERDO_DIR=$(dirname $0)/../../..
+
+java -ea -Dpid=$$ -Djava.util.logging.config.file=$ERDO_DIR/src/test/resources/logging.properties -Dfile.encoding=UTF-8 -classpath $CLASSPATH com.geophile.erdo.examples.helloworld.CreateDatabase

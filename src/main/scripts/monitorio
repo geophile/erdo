@@ -1,0 +1,5 @@
+#!/bin/bash
+
+device=$1
+
+iostat -dxm 1 $device | grep --line-buffered $device | awk '{print systime() " " $0}'

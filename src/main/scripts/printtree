@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -ea -Dpid=$$ -Djava.util.logging.config.file=$ERDO_DIR/src/main/resources/testlogging.properties -Dfile.encoding=UTF-8 -classpath $CLASSPATH com.geophile.erdo.utilities.TreePrinter $*

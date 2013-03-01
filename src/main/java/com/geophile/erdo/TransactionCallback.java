@@ -1,0 +1,28 @@
+package com.geophile.erdo;
+
+/**
+ * A TransactionCallback has a method that is invoked after the records from a transaction, committed asynchronously,
+ * have been made durable.
+ */
+
+public interface TransactionCallback
+{
+    /**
+     * Invoked when the records from a transaction, committed asynchronously,
+     * have been made durable.
+     * @param commitInfo Second argument to
+     *     {@link com.geophile.erdo.Database#commitTransaction(TransactionCallback, Object)}. Intended to identify
+     *     the transaction whose records have just become durable.
+     */
+    void whenDurable(Object commitInfo);
+
+    /**
+     * Transaction callback that does nothing.
+     */
+    static TransactionCallback DO_NOTHING = new TransactionCallback()
+    {
+        public void whenDurable(Object commitInfo)
+        {
+        }
+    };
+}

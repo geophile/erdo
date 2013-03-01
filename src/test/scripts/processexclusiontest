@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ERDO_DIR=$(dirname $0)/../../..
+CLASSPATH="$JDK_HOME/jre/lib/rt.jar:$ERDO_DIR/target/test-classes:$ERDO_DIR/target/classes"
+
+COMMAND="java -ea -Dpid=$$ -Djava.util.logging.config.file=$ERDO_DIR/src/main/resources/testlogging.properties -Dfile.encoding=UTF-8 -classpath $CLASSPATH com.geophile.erdo.systemtest.singleprocess.ProcessExclusionTest"
+
+$COMMAND create &
+sleep 2
+$COMMAND &

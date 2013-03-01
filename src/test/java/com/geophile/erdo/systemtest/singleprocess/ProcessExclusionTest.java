@@ -1,0 +1,47 @@
+package com.geophile.erdo.systemtest.singleprocess;
+
+import com.geophile.erdo.Database;
+import com.geophile.erdo.util.FileUtil;
+
+import java.io.File;
+import java.io.IOException;
+
+// Assuming test driver creates a database, and then in a separate process,
+// opens a database within PAUSE_TIME_MSEC.
+
+public class ProcessExclusionTest
+{
+    public static void main(String[] args) throws IOException, InterruptedException
+    {
+        new ProcessExclusionTest(args).run();
+    }
+
+    private ProcessExclusionTest(String[] args)
+    {
+        createDB = args.length > 0 && args[0].equals("create");
+    }
+
+    private void run() throws IOException, InterruptedException
+    {
+        Database db;
+        if (createDB) {
+            FileUtil.deleteDirectory(DB_DIRECTORY);
+            db = Database.createDatabase(DB_DIRECTORY);
+            System.out.println(String.format("pid %s: %s created", pid(), db));
+            Thread.sleep(PAUSE_TIME_MSEC);
+        } else {
+            db = Database.openDatabase(DB_DIRECTORY);
+            System.out.println(String.format("pid %s: %s opened", pid(), db));
+        }
+    }
+
+    private String pid()
+    {
+        return System.getProperty("pid");
+    }
+
+    private static final File DB_DIRECTORY = new File("/tmp/erdo");
+    private static final int PAUSE_TIME_MSEC = 5_000;
+
+    private boolean createDB;
+}
