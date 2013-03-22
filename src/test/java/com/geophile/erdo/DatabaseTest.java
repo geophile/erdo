@@ -61,7 +61,7 @@ public class DatabaseTest
     {
         db = null;
         try {
-            db = Database.openDatabase(DB_DIRECTORY);
+            db = Database.useDatabase(DB_DIRECTORY);
             assertTrue(false);
         } catch (UsageError e) {
             // Expected
@@ -82,7 +82,7 @@ public class DatabaseTest
         FileUtil.checkFileExists(new File(DB_DIRECTORY, "database.properties"));
         db.close();
         FACTORY.reset();
-        db = Database.openDatabase(DB_DIRECTORY);
+        db = Database.useDatabase(DB_DIRECTORY);
         assertEquals(123L, db.configuration().diskCacheSizeBytes());
         db.close();
     }
@@ -107,7 +107,7 @@ public class DatabaseTest
     {
         db = Database.createDatabase(DB_DIRECTORY);
         try {
-            db.openMap(MAP_NAME);
+            db.useMap(MAP_NAME);
             assertTrue(false);
         } catch (UsageError e) {
             // Expected
@@ -123,8 +123,8 @@ public class DatabaseTest
         db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         db.close();
         FACTORY.reset();
-        db = Database.openDatabase(DB_DIRECTORY);
-        db.openMap(MAP_NAME);
+        db = Database.useDatabase(DB_DIRECTORY);
+        db.useMap(MAP_NAME);
         db.close();
     }
 
@@ -147,8 +147,8 @@ public class DatabaseTest
         db.commitTransaction();
         db.close();
         FACTORY.reset();
-        db = Database.openDatabase(DB_DIRECTORY);
-        map = db.openMap(MAP_NAME);
+        db = Database.useDatabase(DB_DIRECTORY);
+        map = db.useMap(MAP_NAME);
         LOG.log(Level.SEVERE, "About to start scan of reopened map");
         Scan scan = map.scan();
         TestRecord record;

@@ -19,8 +19,8 @@ public class UpdateMap
                DeadlockException,
                TransactionRolledBackException
     {
-        Database db = Database.openDatabase(DB_DIRECTORY);
-        OrderedMap musicians = db.openMap("musicians");
+        Database db = Database.useDatabase(DB_DIRECTORY);
+        OrderedMap musicians = db.useMap("musicians");
 
         // Add records to map
         musicians.put(new Person("James Booker", "December 17, 1939"));

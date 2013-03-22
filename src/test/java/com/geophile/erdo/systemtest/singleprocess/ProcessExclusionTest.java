@@ -36,7 +36,7 @@ public class ProcessExclusionTest
             System.out.println(String.format("pid %s: %s created", pid(), db));
             Thread.sleep(PAUSE_TIME_MSEC);
         } else {
-            db = Database.openDatabase(DB_DIRECTORY);
+            db = Database.useDatabase(DB_DIRECTORY);
             System.out.println(String.format("pid %s: %s opened", pid(), db));
         }
     }

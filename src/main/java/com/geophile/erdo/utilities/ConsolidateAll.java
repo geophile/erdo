@@ -37,7 +37,7 @@ public class ConsolidateAll
         // Turn off all background consolidation
         Configuration configuration = Configuration.emptyConfiguration();
         configuration.consolidationThreads(0);
-        db = (DatabaseOnDisk) Database.openDatabase(dbDirectory, configuration);
+        db = (DatabaseOnDisk) Database.useDatabase(dbDirectory, configuration);
         db.consolidateAll();
         db.close();
     }

@@ -13,7 +13,7 @@ import com.geophile.erdo.apiimpl.ConfigurationImpl;
  * To use a different configuration, call {@link #defaultConfiguration()} to obtain an initial configuration and then
  * apply changes. When a database is being opened, some aspects of configuration can be overridden. To do this, call
  * {@link #emptyConfiguration()} to obtain an initial configuration and then apply changes. See
- * {@link com.geophile.erdo.Database#openDatabase(java.io.File, Configuration)} for a list of configuration settings
+ * {@link com.geophile.erdo.Database#useDatabase(java.io.File, Configuration)} for a list of configuration settings
  * that can be modified.
  */
 

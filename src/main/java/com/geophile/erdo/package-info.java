@@ -7,8 +7,8 @@
 /**
  * Erdo is a transactional, ordered key/value store.
  *
- * An Erdo {@link com.geophile.erdo.Database} contains zero or more ordered maps.
- * Each {@link com.geophile.erdo.OrderedMap} contains zero or more key/value pairs.
+ * An Erdo {@link com.geophile.erdo.Database} contains ordered maps.
+ * Each {@link com.geophile.erdo.OrderedMap} contains key/value pairs.
  * Keys and record classes are provided by the application, extending
  * {@link com.geophile.erdo.AbstractRecord} and {@link com.geophile.erdo.AbstractKey}.
  * Keys are unique within a map. Maps are ordered, so when map contents are scanned,
@@ -31,7 +31,7 @@
  * <h2>Records and keys</h2>
  *
  * <p> An Erdo application provides key and value types by extending
- * {@link com.geophile.erdo.AbstractRecord} and {@link com.geophile.erdo.AbstractKey}. A key class must override
+ * {@link com.geophile.erdo.AbstractKey} and {@link com.geophile.erdo.AbstractRecord}. A key class must override
  * methods for hashing the key, comparing keys, serializing, deserializing, and estimating the
  * size of a serialized key. A record class has to define methods for serializing, deserializing, copying, and
  * estimating the size of a serialized record.
@@ -51,9 +51,7 @@
  * as soon as the database is open, or as soon as the previous transaction has ended. A transaction is ended by calling
  * either {@link com.geophile.erdo.Database#commitTransaction()} or
  * {@link com.geophile.erdo.Database#rollbackTransaction()}. commitTransaction makes the transaction's updates (if any)
- * durable and visible to new transactions. rollbackTransaction discards the transaction's updates. A transaction
- * that only reads the database must call either commitTransaction or rollbackTransaction. There is no advantage to
- * calling one or the other.
+ * durable and visible to new transactions. rollbackTransaction discards the transaction's updates.
  *
  * <p> Transaction state may be written to disk synchronously or asynchronously. Synchronous commits are slower, but
  * guarantee durability once commitTransaction returns. Asynchronous commits are faster but don't guarantee durability
@@ -69,10 +67,10 @@
  * <ul>
  *     <li>{@link com.geophile.erdo.OrderedMap#put(AbstractRecord)}: Inserts or updates a record, returning
  *          the previous record associated with the new record's key.
- *     <li>{@link com.geophile.erdo.OrderedMap#ensurePresent(AbstractRecord)}: Inserts or updates a record without
- *          returning any previous record.
  *     <li>{@link com.geophile.erdo.OrderedMap#delete(AbstractKey)}: Deletes a record, returning the previous
  *          record associated with the given key.
+ *     <li>{@link com.geophile.erdo.OrderedMap#ensurePresent(AbstractRecord)}: Inserts or updates a record without
+ *          returning any previous record.
  *     <li>{@link com.geophile.erdo.OrderedMap#ensureDeleted(AbstractKey)}: Deletes a record without
  *          returning the record previously associated with the given key.
  * </ul>
@@ -91,10 +89,10 @@
  * the record with a given key, or whose keys are within a  range.
  *
  * <p> The control of a Scan is simple: {@link com.geophile.erdo.Scan#next()} returns the next record, or null
- * if there are no more records. A Scan is considered to be open before next() returns null, closed once next()
+ * if there are no more records. A Scan is considered to be open until next() returns null, closed once next()
  * has returned null. Once a Scan is closed, all subsequent calls to next() will return null.
- * All Scans must be closed when a transaction commits, otherwise an exception will be raised. A Scan can be
- * closed explicitly using {@link com.geophile.erdo.Scan#close()}.
+ * A Scan can also be closed explicitly using {@link com.geophile.erdo.Scan#close()}.
+ * Any scans open at the end of a transaction will be closed by committing or rolling back the transaction.
  */
 
 package com.geophile.erdo;

@@ -74,7 +74,7 @@ public abstract class DatabaseImpl extends Database
     }
 
     // synchronized so that two threads opening the same map at the same time get the same OrderedMap object.
-    public synchronized OrderedMap openMap(String mapName)
+    public synchronized OrderedMap useMap(String mapName)
         throws UsageError, IOException
     {
         checkDatabaseOpen();

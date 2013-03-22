@@ -47,22 +47,23 @@ public abstract class Database
     }
 
     /**
-     * Open an existing Database. The configuration will be the one provided when the database was created,
-     * (or the default configuration if none was supplied).
+     * Provides access to an existing Database. The configuration will be the one provided when the database
+     * was created, (or the default configuration if none was supplied).
      * @param dbDirectory The directory containing the database.
      * @return The database contained in the given directory.
      * @throws IOException
      * @throws InterruptedException
      */
-    public static Database openDatabase(File dbDirectory)
+    public static Database useDatabase(File dbDirectory)
         throws IOException, InterruptedException
     {
         return DatabaseImpl.openDatabase(dbDirectory, null, DefaultFactory.class);
     }
 
     /**
-     * Open an existing Database. The configuration will be the one provided when the database was created,
-     * (or the default configuration if none was supplied), but with overrides from the given configuration.
+     * Provides access to an existing Database. The configuration will be the one provided when the database
+     * was created, (or the default configuration if none was supplied),
+     * but with overrides from the given configuration.
      * @param dbDirectory The directory containing the database.
      * @param configuration Overrides to the current database configuration, which apply only to the current process.
      * Only the following configuration properties may be specified:
@@ -79,7 +80,7 @@ public abstract class Database
      * @throws IOException
      * @throws InterruptedException
      */
-    public static Database openDatabase(File dbDirectory, Configuration configuration)
+    public static Database useDatabase(File dbDirectory, Configuration configuration)
         throws IOException, InterruptedException
     {
         return DatabaseImpl.openDatabase(dbDirectory, configuration, DefaultFactory.class);
@@ -99,12 +100,12 @@ public abstract class Database
         throws IOException;
 
     /**
-     * Opens the named map.
+     * Provides access to the named map.
      * @param mapName The name of the map to be opened.
      * @return The named map.
      * @throws IOException
      */
-    public abstract OrderedMap openMap(String mapName) throws IOException;
+    public abstract OrderedMap useMap(String mapName) throws IOException;
 
     public abstract void lock(AbstractKey key)
         throws InterruptedException,
