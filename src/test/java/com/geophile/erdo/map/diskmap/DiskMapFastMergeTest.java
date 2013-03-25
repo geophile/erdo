@@ -75,8 +75,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.scan(null), a.keyScan(null));
-        diskMapB.loadForConsolidation(b.scan(null), b.keyScan(null));
+        diskMapA.loadForConsolidation(a.scan(null, MissingKeyAction.FORWARD),
+                                      a.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
+                                      b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
         FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
@@ -85,12 +87,12 @@ public class DiskMapFastMergeTest
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithKeys(merge, 1000);
         // Check merged map
-        MapScan scan = mergedMap.scan(null);
+        MapScan scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = scan.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
-            int key = ((TestKey) record.key()).key();
+            int key = record.key().key();
             char v = record.stringValue().charAt(0);
             assertEquals(expected++, key);
             if (key < N) {
@@ -126,8 +128,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.scan(null), a.keyScan(null));
-        diskMapB.loadForConsolidation(b.scan(null), b.keyScan(null));
+        diskMapA.loadForConsolidation(a.scan(null, MissingKeyAction.FORWARD),
+                                      a.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
+                                      b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
         FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
@@ -180,8 +184,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.scan(null), a.keyScan(null));
-        diskMapB.loadForConsolidation(b.scan(null), b.keyScan(null));
+        diskMapA.loadForConsolidation(a.scan(null, MissingKeyAction.FORWARD),
+                                      a.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
+                                      b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
         FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
@@ -190,12 +196,12 @@ public class DiskMapFastMergeTest
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithoutKeys(merge);
         // Check merged map
-        MapScan scan = mergedMap.scan(null);
+        MapScan scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = scan.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
-            int key = ((TestKey) record.key()).key();
+            int key = record.key().key();
             char v = record.stringValue().charAt(0);
             assertEquals(expected++, key);
             if (key < 2 * N) {
@@ -229,7 +235,7 @@ public class DiskMapFastMergeTest
 
     private void dump(String label, DiskMap map) throws IOException, InterruptedException
     {
-        MapScan scan = map.scan(null);
+        MapScan scan = map.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int count = 0;
         while ((lazyRecord = scan.next()) != null) {

@@ -8,7 +8,7 @@ package com.geophile.erdo.map.privatemap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.MapScan;
 
 import java.io.IOException;
@@ -25,9 +25,7 @@ class PrivateMapScan extends MapScan
         if (!closed) {
             if (iterator.hasNext()) {
                 next = iterator.next();
-                if (next != null && 
-                    keyRange != null && 
-                    keyRange.classify(next.key()) == KeyRange.KEY_AFTER_RANGE) {
+                if (!isOpen(next.key())) {
                     next = null;
                     close();
                 }
@@ -52,18 +50,19 @@ class PrivateMapScan extends MapScan
 
     // PrivateMapScan interface
 
-    PrivateMapScan(PrivateMap map, KeyRange keyRange)
+    PrivateMapScan(PrivateMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
+        super(startKey, missingKeyAction);
         this.map = map;
-        this.keyRange = keyRange;
-        AbstractKey lo = keyRange == null ? null : keyRange.lo();
-        this.iterator = (lo == null ? map.contents : map.contents.tailMap(lo)).values().iterator();
+        this.iterator =
+            startKey == null
+            ? map.contents.values().iterator()
+            : map.contents.tailMap(startKey).values().iterator();
     }
 
     // State
 
     private final PrivateMap map;
-    private final KeyRange keyRange;
     private Iterator<AbstractRecord> iterator;
     private boolean closed = false;
 }

@@ -33,6 +33,7 @@ class DiskPageScan extends MapScan
 
     DiskPageScan(DiskPage page)
     {
+        super(null, null);
         this.page = page;
         this.pageAccessBuffers = page.accessBuffers();
         this.recordNumber = 0;

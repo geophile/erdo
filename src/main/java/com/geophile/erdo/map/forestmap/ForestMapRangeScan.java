@@ -7,11 +7,12 @@
 package com.geophile.erdo.map.forestmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 import com.geophile.erdo.map.SealedMap;
+import com.geophile.erdo.map.emptymap.EmptyMapScan;
 import com.geophile.erdo.map.mergescan.MergeScan;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ class ForestMapRangeScan extends ForestMapScan
         LazyRecord next = null;
         if (!done) {
             next = scan.next();
-            if (next == null) {
+            if (next == null || !isOpen(next.key())) {
                 close();
             }
         }
@@ -51,10 +52,10 @@ class ForestMapRangeScan extends ForestMapScan
 
     // ForestMapRangeScan interface
 
-    ForestMapRangeScan(ForestSnapshot forestSnapshot, KeyRange keyRange)
+    ForestMapRangeScan(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        super(forestSnapshot, keyRange);
+        super(forestSnapshot, startKey, missingKeyAction);
         MapScan smallTreeKeyScan = merge(forestSnapshot.smallTrees());
         MapScan bigTreeRecordScan = merge(forestSnapshot.bigTrees());
         MergeScan combinedScan = new MergeScan(TimestampMerger.only());
@@ -83,7 +84,7 @@ class ForestMapRangeScan extends ForestMapScan
     {
         MapScan smallMapScan = smallMapScans.get(map.mapId());
         if (smallMapScan == null) {
-            smallMapScan = map.scan(null);
+            smallMapScan = map.scan(null, MissingKeyAction.FORWARD);
             smallMapScans.put(map.mapId(), smallMapScan);
         }
         smallMapScan.goTo(key);
@@ -93,12 +94,15 @@ class ForestMapRangeScan extends ForestMapScan
     private MapScan merge(List<SealedMap> maps) throws IOException, InterruptedException
     {
         MapScan scan;
-        if (maps.size() == 1) {
-            scan = maps.get(0).scan(keyRange);
+        int mapSize = maps.size();
+        if (mapSize == 0) {
+            scan = new EmptyMapScan();
+        } else if (mapSize == 1) {
+            scan = maps.get(0).scan(startKey, missingKeyAction);
         } else {
             MergeScan mergeScan = new MergeScan(TimestampMerger.only());
             for (SealedMap map : maps) {
-                mergeScan.addInput(map.keyScan(keyRange));
+                mergeScan.addInput(map.keyScan(startKey, missingKeyAction));
             }
             mergeScan.start();
             scan = mergeScan;
@@ -145,6 +149,7 @@ class ForestMapRangeScan extends ForestMapScan
 
         public KeyToUpdatedRecordScan(MapScan scan)
         {
+            super(null, null);
             this.scan = scan;
         }
 

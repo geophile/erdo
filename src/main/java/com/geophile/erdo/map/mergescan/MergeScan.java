@@ -67,6 +67,7 @@ public class MergeScan extends MapScan
 
     public MergeScan(Merger merger)
     {
+        super(null, null);
         this.merger = merger;
     }
 

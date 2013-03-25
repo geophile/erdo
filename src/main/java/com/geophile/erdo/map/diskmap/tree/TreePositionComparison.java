@@ -6,6 +6,7 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
+/** @deprecated */
 enum TreePositionComparison
 {
     // Why no ==: Because by the time we are searching a tree, key = x has been turned into key >=x and key <= x.

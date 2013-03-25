@@ -6,10 +6,7 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.Configuration;
-import com.geophile.erdo.TestFactory;
-import com.geophile.erdo.TestKey;
-import com.geophile.erdo.TestRecord;
+import com.geophile.erdo.*;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.apiimpl.DeletedRecord;
 import com.geophile.erdo.map.arraymap.ArrayMap;
@@ -57,7 +54,7 @@ public class MapBehaviorTestBase
     {
         SealedMap privateMap = privateMap(testRecords);
         ArrayMap arrayMap = new ArrayMap(FACTORY, new TimestampSet(1L));
-        arrayMap.loadForConsolidation(privateMap.scan(null), null);
+        arrayMap.loadForConsolidation(privateMap.scan(null, MissingKeyAction.FORWARD), null);
         return arrayMap;
     }
 
@@ -80,7 +77,8 @@ public class MapBehaviorTestBase
         }
         DiskMap diskMap = DiskMap.create(db, new TimestampSet(1L), null);
         SealedMap privateMap = privateMap(testRecords);
-        diskMap.loadForConsolidation(privateMap.scan(null), privateMap.keyScan(null));
+        diskMap.loadForConsolidation(privateMap.scan(null, MissingKeyAction.FORWARD),
+                                     privateMap.keyScan(null, MissingKeyAction.FORWARD));
         return diskMap;
     }
 

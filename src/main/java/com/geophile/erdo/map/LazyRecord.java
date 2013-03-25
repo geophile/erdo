@@ -21,7 +21,7 @@ public abstract class LazyRecord<KEY extends AbstractKey>
 
     public abstract ByteBuffer keyBuffer() throws IOException, InterruptedException;
 
-    public abstract AbstractRecord materializeRecord() throws IOException, InterruptedException;
+    public abstract AbstractRecord<KEY> materializeRecord() throws IOException, InterruptedException;
 
     public abstract ByteBuffer recordBuffer() throws IOException, InterruptedException;
 

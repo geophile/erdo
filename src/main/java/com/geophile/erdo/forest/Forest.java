@@ -7,6 +7,7 @@
 package com.geophile.erdo.forest;
 
 import com.geophile.erdo.Configuration;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.consolidate.Consolidation;
 import com.geophile.erdo.consolidate.ConsolidationSet;
@@ -107,10 +108,10 @@ public class Forest extends TransactionManager implements Consolidation.Containe
             List<SealedMap> obsoleteTrees = new ArrayList<>();
             for (Element element : obsolete) {
                 SealedMap map = (SealedMap) element;
-                recordScan.addInput(slowmerge ? map.scan(null) : map.consolidationScan());
+                recordScan.addInput(slowmerge ? map.scan(null, MissingKeyAction.FORWARD) : map.consolidationScan());
                 if (keyScan != null) {
                     if (map.keysInMemory()) {
-                        keyScan.addInput(map.keyScan(null));
+                        keyScan.addInput(map.keyScan(null, MissingKeyAction.FORWARD));
                     } else {
                         keyScan.close();
                         keyScan = null;

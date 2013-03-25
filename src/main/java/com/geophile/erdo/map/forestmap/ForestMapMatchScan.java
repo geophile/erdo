@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.forestmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.bloomfilter.BloomFilter;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
@@ -45,8 +45,8 @@ class ForestMapMatchScan extends ForestMapScan
                 }
                 for (SealedMap smallTree : smallTrees) {
                     smallTreeRecordScan.addInput(BloomFilter.USE_BLOOM_FILTER
-                                                 ? smallTree.scan(keyRange)
-                                                 : smallTree.keyScan(keyRange));
+                                                 ? smallTree.scan(startKey, MissingKeyAction.STOP)
+                                                 : smallTree.keyScan(startKey, MissingKeyAction.STOP));
                 }
                 smallTreeRecordScan.start();
                 // If smallTreeKeyScan.next() returns a key, it is the one and only key that
@@ -62,7 +62,7 @@ class ForestMapMatchScan extends ForestMapScan
                 } else {
                     bigTreeRecordScan = new MergeScan(TimestampMerger.only());
                     for (SealedMap bigTree : forestSnapshot.bigTrees()) {
-                        bigTreeRecordScan.addInput(bigTree.scan(keyRange));
+                        bigTreeRecordScan.addInput(bigTree.scan(startKey, MissingKeyAction.STOP));
                     }
                     bigTreeRecordScan.start();
                     next = bigTreeRecordScan.next();
@@ -92,10 +92,10 @@ class ForestMapMatchScan extends ForestMapScan
 
     // ForestMapMatchScan interface
 
-    ForestMapMatchScan(ForestSnapshot forestSnapshot, KeyRange keyRange)
+    ForestMapMatchScan(ForestSnapshot forestSnapshot, AbstractKey key)
         throws IOException, InterruptedException
     {
-        super(forestSnapshot, keyRange);
+        super(forestSnapshot, key, MissingKeyAction.STOP);
     }
 
     // For use by this class
@@ -107,7 +107,7 @@ class ForestMapMatchScan extends ForestMapScan
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapScan scan = map.scan(new KeyRange(key, true, key, true));
+        MapScan scan = map.scan(key, MissingKeyAction.STOP);
         LazyRecord updateRecord = scan.next();
         scan.close();
         assert updateRecord != null : key;

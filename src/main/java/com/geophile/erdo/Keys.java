@@ -12,6 +12,7 @@ import com.geophile.erdo.apiimpl.KeyRange;
  * A Keys object defines a range of key values, for use in defining a set of records to retrieve using a
  * {@link com.geophile.erdo.Scan} object
  * returned by {@link com.geophile.erdo.OrderedMap#scan(Keys)}.
+ * @deprecated
  */
 
 public class Keys

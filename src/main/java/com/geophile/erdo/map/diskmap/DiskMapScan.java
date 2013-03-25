@@ -48,6 +48,7 @@ class DiskMapScan extends MapScan
 
     DiskMapScan(MapScan treeLevelScan)
     {
+        super(null, null);
         this.treeLevelScan = treeLevelScan;
     }
 

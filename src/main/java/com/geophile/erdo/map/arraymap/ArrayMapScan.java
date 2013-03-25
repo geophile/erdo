@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.arraymap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 
@@ -23,7 +23,7 @@ public class ArrayMapScan extends MapScan
         LazyRecord next = null;
         if (!done && position < map.recordCount()) {
             next = map.records.get(position);
-            if (keyRange != null && keyRange.classify(next.key()) == KeyRange.KEY_AFTER_RANGE) {
+            if (!isOpen(next.key())) {
                 next = null;
             } else {
                 position++;
@@ -52,14 +52,18 @@ public class ArrayMapScan extends MapScan
 
     // ArrayMapScan interface
 
-    ArrayMapScan(ArrayMap map, KeyRange keyRange) throws IOException, InterruptedException
+    ArrayMapScan(ArrayMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
+        super(startKey, missingKeyAction);
         this.map = map;
-        this.keyRange = keyRange;
-        AbstractKey lo = keyRange == null ? null : keyRange.lo();
-        this.position = lo == null ? 0 : binarySearch(lo);
-        if (this.position < 0) {
-            this.position = -this.position - 1;
+        if (startKey == null) {
+            this.position = 0;
+        } else {
+            this.position = binarySearch(startKey);
+            if (this.position < 0) {
+                this.position = -this.position - 1;
+            }
         }
     }
 
@@ -71,7 +75,7 @@ public class ArrayMapScan extends MapScan
 
         int low = 0;
         int high = map.records.size() - 1;
-        AbstractKey midKey = null;
+        AbstractKey midKey;
         while (low <= high) {
             int mid = (low + high) >>> 1;
             midKey = map.records.get(mid).key();
@@ -90,7 +94,6 @@ public class ArrayMapScan extends MapScan
     // Object state
 
     private final ArrayMap map;
-    private final KeyRange keyRange;
     private int position;
     private boolean done = false;
 }

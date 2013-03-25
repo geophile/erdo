@@ -8,6 +8,7 @@ package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
@@ -48,8 +49,8 @@ public class FastMergeTest
             TestArrayMap a = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 0);
             TestArrayMap b = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 1);
             FastMergeScan merge = new FastMergeScan(MERGER);
-            merge.addInput(a.scan(null));
-            merge.addInput(b.scan(null));
+            merge.addInput(a.scan(null, MissingKeyAction.FORWARD));
+            merge.addInput(b.scan(null, MissingKeyAction.FORWARD));
             merge.start();
             // Should see 0 .. 2 * KEYS - 1
             int expected = 0;
@@ -76,7 +77,7 @@ public class FastMergeTest
     private void dump(String label, TestArrayMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        MapScan scan = map.scan(null);
+        MapScan scan = map.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         while ((lazyRecord = scan.next()) != null) {
             System.out.println(String.format("    %s", lazyRecord.materializeRecord()));
@@ -125,7 +126,7 @@ public class FastMergeTest
             // Start a merge of the ArrayMaps
             FastMergeScan merge = new FastMergeScan(MERGER);
             for (TestArrayMap arrayMap : arrayMaps) {
-                merge.addInput(arrayMap.scan(null));
+                merge.addInput(arrayMap.scan(null, MissingKeyAction.FORWARD));
             }
             merge.start();
             // Check contents

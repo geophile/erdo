@@ -56,7 +56,7 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
         LOG.log(Level.INFO,
                 "{0}: Record scan: {1} - {2}",
                 new Object[]{this, loZeroPosition, hiZeroPosition});
-        return TreeLevelScan.endInclusive(loZeroPosition, hiZeroPosition);
+        return new LevelOneMultiRecordScan(loZeroPosition, hiZeroPosition);
     }
 
     // LazyRecord interface (key() is provided by AbstractRecord)
@@ -101,7 +101,7 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
         LOG.log(Level.INFO,
                 "{0}: Level one scan: {1} - {2}",
                 new Object[]{this, loOnePosition, hiOnePosition});
-        return TreeLevelScan.endExclusive(loOnePosition, hiOnePosition);
+        return new LevelOneMultiRecordScan(loOnePosition, hiOnePosition);
     }
 
     public TreeSegment leafSegment()

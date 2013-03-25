@@ -6,7 +6,8 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.transaction.Transaction;
 
@@ -51,7 +52,8 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     // SealedMap interface
 
-    public abstract MapScan scan(KeyRange keyRange) throws IOException, InterruptedException;
+    public abstract MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException;
 
     public abstract long recordCount();
 
@@ -66,11 +68,12 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     public abstract boolean keysInMemory();
 
-    public abstract MapScan keyScan(KeyRange keyRange) throws IOException, InterruptedException;
+    public abstract MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException;
 
     public MapScan consolidationScan() throws IOException, InterruptedException
     {
-        return scan(null);
+        return scan(null, MissingKeyAction.FORWARD);
     }
 
     // Consolidation.Element interface

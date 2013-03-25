@@ -77,19 +77,34 @@ public class OrderedMapImpl extends OrderedMap
     }
 
     @Override
-    public Scan scan() throws IOException, InterruptedException
+    public AbstractRecord find(AbstractKey key) throws IOException, InterruptedException
     {
-        return scan(null);
+        checkNotNull(key);
+        if (key != null) {
+            key.erdoId(erdoId);
+        }
+        return newScan(key, MissingKeyAction.STOP).next();
     }
 
     @Override
-    public Scan scan(Keys keys) throws IOException, InterruptedException
+    public Scan find(AbstractKey startKey, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
     {
-        KeyRange keyRange = (KeyRange) keys;
-        if (keyRange != null) {
-            keyRange.erdoId(erdoId);
+        if (startKey != null) {
+            startKey.erdoId(erdoId);
         }
-        return new ScanImpl(transactionManager, transactionalMap().scan(keyRange));
+        return newScan(startKey, missingKeyAction);
+    }
+
+    @Override
+    public final Scan findAll() throws IOException, InterruptedException
+    {
+        return find(null, MissingKeyAction.FORWARD);
+    }
+
+    @Override
+    public Scan first() throws IOException, InterruptedException
+    {
+        return newScan(erdoIdKey, MissingKeyAction.FORWARD);
     }
 
     // OrderedMapImpl interface
@@ -104,6 +119,7 @@ public class OrderedMapImpl extends OrderedMap
         assert transactionManager != null;
         this.transactionManager = transactionManager;
         this.erdoId = erdoId;
+        this.erdoIdKey = new ErdoId(erdoId);
     }
 
     public int erdoId()
@@ -113,9 +129,21 @@ public class OrderedMapImpl extends OrderedMap
 
     // For use by this class
 
+    private Scan newScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    {
+        return new ScanImpl(transactionManager, transactionalMap().scan(key, missingKeyAction));
+    }
+
     private TransactionalMap transactionalMap()
     {
         return transactionManager.currentTransaction().transactionalMap();
+    }
+
+    private void checkNotNull(AbstractKey key)
+    {
+        if (key == null) {
+            throw new IllegalArgumentException();
+        }
     }
 
     // Class state
@@ -126,4 +154,5 @@ public class OrderedMapImpl extends OrderedMap
 
     private final TransactionManager transactionManager;
     private final int erdoId;
+    private final ErdoId erdoIdKey;
 }

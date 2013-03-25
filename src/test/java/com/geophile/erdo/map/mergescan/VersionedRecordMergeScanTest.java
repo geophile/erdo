@@ -6,6 +6,7 @@
 
 package com.geophile.erdo.map.mergescan;
 
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestKey;
 import com.geophile.erdo.TestRecord;
 import com.geophile.erdo.map.MapBehaviorTestBase;
@@ -37,7 +38,7 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
                 record.key().transactionTimestamp(version);
                 map.put(record, false);
             }
-            mergeScan.addInput(map.scan(null));
+            mergeScan.addInput(map.scan(null, MissingKeyAction.FORWARD));
         }
         mergeScan.start();
         TestRecord record;

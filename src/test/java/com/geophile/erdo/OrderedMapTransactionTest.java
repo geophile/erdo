@@ -43,7 +43,7 @@ public class OrderedMapTransactionTest
             record = TestRecord.createRecord(i, null);
             map.put(record);
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         int expected = 0;
         while ((record = (TestRecord) scan.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
@@ -63,7 +63,7 @@ public class OrderedMapTransactionTest
             map.put(TestRecord.createRecord(i, null));
         }
         db.commitTransaction();
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) scan.next()) != null) {
@@ -84,7 +84,7 @@ public class OrderedMapTransactionTest
             map.put(TestRecord.createRecord(i, null));
         }
         db.rollbackTransaction();
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         while (scan.next() != null) {
             Assert.assertTrue(false);
         }
@@ -109,7 +109,7 @@ public class OrderedMapTransactionTest
             } else {
                 db.rollbackTransaction();
             }
-            Scan scan = map.scan();
+            Scan scan = map.findAll();
             TestRecord record;
             int expected = 0;
             while ((record = (TestRecord) scan.next()) != null) {
@@ -136,7 +136,7 @@ public class OrderedMapTransactionTest
         for (int i = 0; i < N; i++) {
             map.put(TestRecord.createRecord(i, null));
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         db.commitTransaction();
         try {
             scan.next();
@@ -152,7 +152,7 @@ public class OrderedMapTransactionTest
         for (int i = 0; i < N; i++) {
             map.put(TestRecord.createRecord(i, null));
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         db.rollbackTransaction();
         try {
             scan.next();
@@ -168,7 +168,7 @@ public class OrderedMapTransactionTest
         for (int i = 0; i < N; i++) {
             map.put(TestRecord.createRecord(i, null));
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         db.commitTransaction();
         try {
             scan.close();
@@ -184,7 +184,7 @@ public class OrderedMapTransactionTest
         for (int i = 0; i < N; i++) {
             map.put(TestRecord.createRecord(i, null));
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         db.rollbackTransaction();
         try {
             scan.close();

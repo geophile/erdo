@@ -48,7 +48,7 @@ public class TransactionOptionsTest
     {
         OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         db.commitTransaction();
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         assertNull(scan.next());
     }
 
@@ -67,7 +67,7 @@ public class TransactionOptionsTest
             map.put(record);
         }
         db.commitTransaction();
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         int expected = 0;
         while ((record = (TestRecord) scan.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
@@ -108,7 +108,7 @@ public class TransactionOptionsTest
                 lock.wait();
             }
         }
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         int expected = 0;
         while ((record = (TestRecord) scan.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
@@ -121,7 +121,7 @@ public class TransactionOptionsTest
     {
         OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         db.rollbackTransaction();
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         assertNull(scan.next());
     }
 

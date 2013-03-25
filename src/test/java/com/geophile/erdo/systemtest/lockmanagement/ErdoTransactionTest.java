@@ -100,7 +100,7 @@ public class ErdoTransactionTest
     private void verify() throws IOException, InterruptedException
     {
         long sum = 0;
-        Scan scan = accounts.scan();
+        Scan scan = accounts.findAll();
         Account account;
         while ((account = (Account) scan.next()) != null) {
             LOG.log(Level.INFO, "{0}", account);

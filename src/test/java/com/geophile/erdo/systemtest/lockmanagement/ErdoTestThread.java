@@ -105,10 +105,7 @@ public class ErdoTestThread extends Thread
     
     private Account account(AccountId accountId) throws IOException, InterruptedException
     {
-        Scan scan = accounts.scan(Keys.eq(accountId));
-        Account account = (Account) scan.next();
-        scan.close();
-        return account;
+        return (Account) accounts.find(accountId);
     }
     
     private Transaction transaction()

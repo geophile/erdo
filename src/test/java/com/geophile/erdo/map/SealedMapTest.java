@@ -6,9 +6,9 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.Keys;
+import com.geophile.erdo.MissingKeyAction;
+import com.geophile.erdo.TestKey;
 import com.geophile.erdo.TestRecord;
-import com.geophile.erdo.apiimpl.KeyRange;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class SealedMapTest extends MapBehaviorTestBase
             boolean expectedEmpty;
             LazyRecord lazyRecord;
             // Full scan
-            scan = map.scan(null);
+            scan = map.scan(null, MissingKeyAction.FORWARD);
             expectedKey = 0;
             while ((lazyRecord = scan.next()) != null) {
                 assertEquals(expectedKey, key(lazyRecord));
@@ -65,12 +65,13 @@ public class SealedMapTest extends MapBehaviorTestBase
                                 continue;
                             }
 //                            print("i: %s, start: %s, end: %s", i, start, end);
-                            scan = map.scan((KeyRange) Keys.gele(newKey(start), newKey(end)));
+                            scan = map.scan(newKey(start), MissingKeyAction.FORWARD);
+                            TestKey endKey = newKey(end);
                             expectedKey = start <= startBase ? startBase : startBase + GAP;
                             expectedLastKey = end >= endBase ? endBase : endBase - GAP;
                             expectedEmpty = start > end || start <= end && (end >= startBase || start <= endBase);
                             boolean empty = true;
-                            while ((lazyRecord = scan.next()) != null) {
+                            while ((lazyRecord = scan.next()) != null && lazyRecord.key().compareTo(endKey) <= 0) {
 //                                print("scan %s:%s: %s", start, end, key(record));
                                 assertEquals(expectedKey, key(lazyRecord));
                                 expectedKey += GAP;

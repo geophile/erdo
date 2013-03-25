@@ -40,7 +40,7 @@ public class TransactionalMap extends OpenMapBase
         LazyRecord uncommitted = updateMap().put(record, returnReplaced);
         if (returnReplaced && uncommitted == null) {
             AbstractKey key = record.key();
-            MapScan scan = ForestMapScan.newScan(forestSnapshot, new KeyRange(key, true, key, true));
+            MapScan scan = ForestMapScan.newScan(forestSnapshot, key, MissingKeyAction.STOP);
             LazyRecord committed = scan.next();
             scan.close();
             replaced = committed;
@@ -59,9 +59,9 @@ public class TransactionalMap extends OpenMapBase
     }
 
     @Override
-    public MapScan scan(KeyRange keyRange) throws IOException, InterruptedException
+    public MapScan scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
     {
-        return new TransactionalMapScan(this, keyRange);
+        return new TransactionalMapScan(this, key, missingKeyAction);
     }
 
     // TransactionalMap interface

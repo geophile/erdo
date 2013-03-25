@@ -6,7 +6,8 @@
 
 package com.geophile.erdo.map.transactionalmap;
 
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 import com.geophile.erdo.map.forestmap.ForestMapScan;
@@ -17,7 +18,7 @@ import java.io.IOException;
 
 class TransactionalMapScan extends MapScan
 {
-    // Scan interface
+    // MapScan interface
 
     public LazyRecord next() throws IOException, InterruptedException
     {
@@ -41,17 +42,18 @@ class TransactionalMapScan extends MapScan
 
     // TransactionalMapScan interface
 
-    TransactionalMapScan(TransactionalMap transactionalMap, KeyRange keyRange)
+    TransactionalMapScan(TransactionalMap transactionalMap, AbstractKey startKey, MissingKeyAction missingKeyAction)
          throws IOException, InterruptedException
     {
-        MapScan snapshotScan = ForestMapScan.newScan(transactionalMap.forestSnapshot, keyRange);
+        super(null, null);
+        MapScan snapshotScan = ForestMapScan.newScan(transactionalMap.forestSnapshot, startKey, missingKeyAction);
         if (transactionalMap.updates == null || // dynamic map was rolled back.
             transactionalMap.updates.recordCount() == 0) {
             scan = snapshotScan;
         } else {
             MergeScan mergeScan = new MergeScan(TimestampMerger.only());
             mergeScan.addInput(snapshotScan);
-            mergeScan.addInput(transactionalMap.updates.scan(keyRange));
+            mergeScan.addInput(transactionalMap.updates.scan(startKey, missingKeyAction));
             mergeScan.start();
             scan = mergeScan;
         }

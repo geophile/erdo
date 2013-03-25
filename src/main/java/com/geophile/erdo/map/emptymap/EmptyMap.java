@@ -6,6 +6,8 @@
 
 package com.geophile.erdo.map.emptymap;
 
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.MapScan;
@@ -34,7 +36,15 @@ public class EmptyMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapScan scan(KeyRange keyRange)
+    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
+    {
+        return new EmptyMapScan();
+    }
+
+    @Override
+    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
         return new EmptyMapScan();
     }
@@ -62,12 +72,6 @@ public class EmptyMap extends SealedMapBase
     public boolean keysInMemory()
     {
         return true;
-    }
-
-    @Override
-    public MapScan keyScan(KeyRange keyRange)
-    {
-        return scan(keyRange);
     }
 
     @Override

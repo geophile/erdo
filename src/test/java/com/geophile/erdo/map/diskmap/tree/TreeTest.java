@@ -6,10 +6,7 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
-import com.geophile.erdo.TestFactory;
-import com.geophile.erdo.TestKey;
-import com.geophile.erdo.TestRecord;
-import com.geophile.erdo.TransactionCallback;
+import com.geophile.erdo.*;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 import com.geophile.erdo.map.RecordFactory;
@@ -60,7 +57,7 @@ public class TreeTest
         WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
         Tree tree = writeableTree.close();
         startTransaction();
-        MapScan scan = tree.scan(null);
+        MapScan scan = tree.scan(null, MissingKeyAction.FORWARD);
         assertNull(scan.next());
     }
 
@@ -80,12 +77,12 @@ public class TreeTest
         }
         Tree tree = writeableTree.close();
         startTransaction();
-        MapScan scan = tree.scan(null);
+        MapScan scan = tree.scan(null, MissingKeyAction.FORWARD);
         int expected = 0;
         LazyRecord lazyRecord;
         while ((lazyRecord = scan.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
-            int key = ((TestKey) record.key()).key();
+            int key = record.key().key();
             assertEquals(expected, key);
             assertEquals(VALUES[key % 10], record.stringValue());
             expected++;

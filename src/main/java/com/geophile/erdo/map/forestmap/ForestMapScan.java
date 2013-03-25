@@ -6,7 +6,8 @@
 
 package com.geophile.erdo.map.forestmap;
 
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.MapScan;
 
@@ -47,24 +48,27 @@ public abstract class ForestMapScan extends MapScan
 {
     // ForestMapScan interface
 
-    public static ForestMapScan newScan(ForestSnapshot forestSnapshot, KeyRange keyRange)
+    public static ForestMapScan newScan(ForestSnapshot forestSnapshot,
+                                        AbstractKey startKey,
+                                        MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
+        assert !(startKey == null && missingKeyAction == MissingKeyAction.STOP);
         return
-            keyRange == null
-            ? new ForestMapRangeScan(forestSnapshot, null) :
-            keyRange.singleKey()
-            ? new ForestMapMatchScan(forestSnapshot, keyRange)
-            : new ForestMapRangeScan(forestSnapshot, keyRange);
+            missingKeyAction == MissingKeyAction.STOP
+            ? new ForestMapMatchScan(forestSnapshot, startKey)
+            : new ForestMapRangeScan(forestSnapshot, startKey, missingKeyAction);
     }
 
     // For use by subclasses
 
-    protected ForestMapScan(ForestSnapshot forestSnapshot, KeyRange keyRange)
+    protected ForestMapScan(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
+        super(startKey, missingKeyAction);
+        this.startKey = startKey;
+        this.missingKeyAction = missingKeyAction;
         this.forestSnapshot = forestSnapshot;
-        this.keyRange = keyRange;
     }
 
     // Class state
@@ -74,6 +78,7 @@ public abstract class ForestMapScan extends MapScan
     // Object state
 
     protected final ForestSnapshot forestSnapshot;
-    protected final KeyRange keyRange;
+    protected final AbstractKey startKey;
+    protected final MissingKeyAction missingKeyAction;
     protected boolean done = false;
 }

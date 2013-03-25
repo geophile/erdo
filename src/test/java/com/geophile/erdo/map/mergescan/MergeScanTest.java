@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestKey;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapBehaviorTestBase;
@@ -113,7 +114,7 @@ public class MergeScanTest extends MapBehaviorTestBase
             }
             MergeScan scan = new MergeScan(TimestampMerger.only());
             for (PrivateMap map : maps) {
-                scan.addInput(map.scan(null));
+                scan.addInput(map.scan(null, MissingKeyAction.FORWARD));
             }
             scan.start();
             LazyRecord lazyRecord;
@@ -129,7 +130,7 @@ public class MergeScanTest extends MapBehaviorTestBase
     {
         MergeScan mergeScan = new MergeScan(TimestampMerger.only());
         for (SealedMap input : inputs) {
-            mergeScan.addInput(input.scan(null));
+            mergeScan.addInput(input.scan(null, MissingKeyAction.FORWARD));
         }
         mergeScan.start();
         return mergeScan;

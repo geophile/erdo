@@ -48,6 +48,7 @@ class LevelOneScanToFindLevelZeroSegments extends MapScan
 
     LevelOneScanToFindLevelZeroSegments(Tree tree) throws IOException, InterruptedException
     {
+        super(null, null);
         this.tree = tree;
         this.levelOnePosition =
             tree.newPosition().level(1).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage();

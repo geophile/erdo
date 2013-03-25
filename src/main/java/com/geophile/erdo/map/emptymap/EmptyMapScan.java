@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.emptymap;
 
 import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 
@@ -32,6 +33,8 @@ public class EmptyMapScan extends MapScan
 
     // EmptyMapScan interface
 
-    EmptyMapScan()
-    { }
+    public EmptyMapScan()
+    {
+        super(null, MissingKeyAction.FORWARD);
+    }
 }

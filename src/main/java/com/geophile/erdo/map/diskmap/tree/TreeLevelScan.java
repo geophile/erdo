@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 import com.geophile.erdo.map.diskmap.DiskPage;
@@ -33,11 +34,10 @@ class TreeLevelScan extends MapScan
     {
         TreePosition next = null;
         if (!closed) {
-            if (end != null && position.equals(end)) {
-                next = endInclusive ? position.copy() : null;
+            next = position.copy();
+            if (atEnd()) {
                 close();
             } else {
-                next = position.copy();
                 position.advanceRecord();
                 if (position.atEnd()) {
                     close();
@@ -72,37 +72,44 @@ class TreeLevelScan extends MapScan
         DiskPage page = position.page();
         // If the key we're looking for is on the current page then find it there. Otherwise search from the root.
         if (key.compareTo(page.firstKey()) >= 0 && key.compareTo(page.lastKey()) <= 0) {
-            position.recordNumber(tree.recordNumber(position.page(), TreePositionComparison.GE, key));
+            position.recordNumber(tree.recordNumber(position.page(), key, MissingKeyAction.FORWARD));
         } else {
             position.level(tree.levels() - 1).firstSegmentOfLevel().firstPageOfSegment();
-            tree.descendToLeaf(position, TreePositionComparison.GE, key);
+            tree.descendToLeaf(position, key, MissingKeyAction.FORWARD);
         }
+    }
+
+    @Override
+    protected boolean isOpen(AbstractKey key)
+    {
+        throw new UnsupportedOperationException(getClass().getName());
     }
 
     // TreeLevelScan interface
 
-    static TreeLevelScan endInclusive(TreePosition start, TreePosition end)
+    static TreeLevelScan startScan(TreePosition start)
     {
-        return new TreeLevelScan(start, end, true);
+        return new TreeLevelScan(start);
     }
 
-    static TreeLevelScan endExclusive(TreePosition start, TreePosition end)
+    // For use by this package
+
+    boolean atEnd()
     {
-        return new TreeLevelScan(start, end, false);
+        return position.atEnd();
     }
 
-    // For use by this class
-
-    private TreeLevelScan(TreePosition start, TreePosition end, boolean endInclusive)
+    TreeLevelScan(TreePosition start)
     {
+        super(null, null);
         assert start != null;
-        assert end == null || start.level() == end.level();
         this.tree = start.tree();
-        this.end = end;
-        this.endInclusive = endInclusive;
         this.position = start.copy();
+        if (atEnd()) {
+            close();
+        }
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "{0} open", this);
+            LOG.log(Level.INFO, "{0} {1}", new Object[]{this, closed ? "closed at start" : "open"});
         }
     }
 
@@ -115,9 +122,7 @@ class TreeLevelScan extends MapScan
 
     private final long id = idGenerator.nextId();
     private final Tree tree;
-    private final TreePosition end;
-    private final boolean endInclusive;
-    private final TreePosition position;
+    protected final TreePosition position;
     private boolean closed = false;
 }
 

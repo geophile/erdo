@@ -7,6 +7,7 @@
 package com.geophile.erdo.map;
 
 import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 
 import java.io.IOException;
 
@@ -21,7 +22,45 @@ public abstract class MapScan
         throw new UnsupportedOperationException();
     }
 
-    public static final MapScan EMPTY = new MapScan()
+    protected boolean isOpen(AbstractKey key)
+    {
+        if (key == null) {
+            // scan is over because we've run off the end
+            return false;
+        }
+        if (startKey == null) {
+            // scanning the entire map, regardless of erdoId, so any non-null key is part of the scan
+            return true;
+        }
+        if (key.erdoId() == startKey.erdoId()) {
+            // In the same OrderedMap as startKey
+            return !exactMatch || key.equals(startKey);
+        } else {
+            return false;
+        }
+    }
+
+    protected MapScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    {
+        this.startKey = startKey;
+        this.exactMatch = missingKeyAction == MissingKeyAction.STOP;
+        this.canCheckIsOpen = !(startKey == null && missingKeyAction == null);
+    }
+
+    // Object state
+
+    // Kinds of scans:
+    // - Complete scan of map, across all erdoIds: startKey == null, exactMatch == false. Used in consolidation.
+    // - Exact match: startKey != null, exactMatch = true
+    // - Start at key, limited to one erdoId: startKey != null, exactMatch = false
+    // - Other: canCheckIsOpen is false, meaning the actual class will check loop termination.
+    private final AbstractKey startKey;
+    private final boolean exactMatch;
+    private final boolean canCheckIsOpen;
+
+    // Inner classes
+
+    public static final MapScan EMPTY = new MapScan(null, MissingKeyAction.FORWARD)
     {
         @Override
         public LazyRecord next() throws IOException, InterruptedException

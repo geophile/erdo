@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.testarraymap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 
@@ -23,7 +23,7 @@ public class TestArrayMapScan extends MapScan
         LazyRecord next = null;
         if (!done && position < map.recordCount()) {
             next = map.records.get(position);
-            if (keyRange != null && keyRange.classify(next.key()) == KeyRange.KEY_AFTER_RANGE) {
+            if (!isOpen(next.key())) {
                 next = null;
             } else {
                 position++;
@@ -52,21 +52,23 @@ public class TestArrayMapScan extends MapScan
 
     // ArrayMapScan interface
 
-    TestArrayMapScan(TestArrayMap map, KeyRange keyRange)
+    TestArrayMapScan(TestArrayMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
+        super(startKey, missingKeyAction);
         this.map = map;
-        this.keyRange = keyRange;
-        AbstractKey lo = keyRange == null ? null : keyRange.lo();
-        this.position = lo == null ? 0 : map.keys.binarySearch(lo);
-        if (this.position < 0) {
-            this.position = -this.position - 1;
+        if (startKey == null) {
+            this.position = 0;
+        } else {
+            this.position = map.keys.binarySearch(startKey);
+            if (this.position < 0) {
+                this.position = -this.position - 1;
+            }
         }
     }
 
     // Object state
 
     private final TestArrayMap map;
-    private final KeyRange keyRange;
     private int position;
     private boolean done = false;
 }

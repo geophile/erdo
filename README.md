@@ -93,7 +93,8 @@ empty map within it:
                 Database db = Database.useDatabase(DB_DIRECTORY);
                 db.createMap("musicians", Name.class, Person.class);
                 db.close();
-                System.out.println(String.format("Created 'musicians' map in database %s", DB_DIRECTORY));
+                System.out.println(String.format("Created 'musicians' map in database %s", 
+                                   DB_DIRECTORY));
             }
         
             private static final File DB_DIRECTORY = new File("/tmp/mydb");
@@ -155,7 +156,8 @@ The following program opens an existing Erdo map and creates some records.
                 Person person;
                 while ((person = (Person) scan.next()) != null) {
                     Name name = person.key();
-                    System.out.println(String.format("    %s: %s", name.name, person.birthDate));
+                    System.out.println(String.format("    %s: %s", 
+                                                     name.name, person.birthDate));
                 }
             }
         

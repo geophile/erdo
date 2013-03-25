@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.TestKey;
 import com.geophile.erdo.map.RecordFactory;
@@ -41,7 +42,7 @@ public class KeyArrayTest
         // size
         assertEquals(0, a.size());
         // scan
-        assertNull(a.scan(null).next());
+        assertNull(a.scan(null, MissingKeyAction.FORWARD).next());
         // binary search
         assertEquals(-1, a.binarySearch(key));
         // subscript
@@ -68,7 +69,7 @@ public class KeyArrayTest
             // size
             assertEquals(n, a.size());
             // scan
-            KeyArrayScan scan = a.scan(null);
+            KeyArrayScan scan = a.scan(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 10;
             while ((record = scan.next()) != null) {
@@ -112,7 +113,7 @@ public class KeyArrayTest
             // size
             assertEquals(N, a.size());
             // scan
-            KeyArrayScan scan = a.scan(null);
+            KeyArrayScan scan = a.scan(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 0;
             while ((record = scan.next()) != null) {

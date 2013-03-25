@@ -41,7 +41,7 @@ public class ScanTest
     @Test
     public void testNoOpenScansAfterCompletingScan() throws IOException, InterruptedException
     {
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         TestRecord record;
         int expectedKey = 0;
         while ((record = (TestRecord) scan.next()) != null) {
@@ -58,7 +58,7 @@ public class ScanTest
     @Test
     public void testNoOpenScansAfterClosingScanEarly() throws IOException, InterruptedException
     {
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         TestRecord record;
         record = (TestRecord) scan.next();
         assertNotNull(record);
@@ -72,7 +72,7 @@ public class ScanTest
     @Test
     public void testCommitWithOpenScan() throws IOException, InterruptedException
     {
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         TestRecord record;
         record = (TestRecord) scan.next();
         assertNotNull(record);
@@ -85,7 +85,7 @@ public class ScanTest
     @Test
     public void testRollbackWithOpenScan() throws IOException, InterruptedException
     {
-        Scan scan = map.scan();
+        Scan scan = map.findAll();
         TestRecord record;
         record = (TestRecord) scan.next();
         assertNotNull(record);

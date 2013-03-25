@@ -53,6 +53,7 @@ class RemoveDeletedRecordScan extends MapScan
 
     public RemoveDeletedRecordScan(MapScan scan, long maxDeletionTimestamp)
     {
+        super(null, null);
         this.scan = scan;
         this.maxDeletionTimestamp = maxDeletionTimestamp;
     }

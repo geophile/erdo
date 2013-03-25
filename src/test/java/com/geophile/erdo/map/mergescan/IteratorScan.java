@@ -31,6 +31,7 @@ public class IteratorScan extends MapScan
 
     public IteratorScan(Iterator iterator)
     {
+        super(null, null);
         this.iterator = iterator;
     }
 

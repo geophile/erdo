@@ -8,7 +8,7 @@ package com.geophile.erdo.map.privatemap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
@@ -55,9 +55,16 @@ public class PrivateMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapScan scan(KeyRange keyRange)
+    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
-        return new PrivateMapScan(this, keyRange);
+        return new PrivateMapScan(this, startKey, missingKeyAction);
+    }
+
+    @Override
+    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
+    {
+        return new PrivateMapKeyScan(contents, startKey, missingKeyAction);
     }
 
     // SealedMap interface
@@ -85,12 +92,6 @@ public class PrivateMap extends OpenOrSealedMapBase
     public boolean keysInMemory()
     {
         return true;
-    }
-
-    @Override
-    public MapScan keyScan(KeyRange keyRange)
-    {
-        return new PrivateMapKeyScan(contents, keyRange);
     }
 
     // PrivateMap interface

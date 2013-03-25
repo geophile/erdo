@@ -6,7 +6,8 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.transaction.TransactionUpdates;
 
 import java.io.IOException;
@@ -58,15 +59,22 @@ public interface SealedMapOperations extends Map, TransactionUpdates
     boolean keysInMemory();
 
     /**
-     * Start a key-ordered scan of this map's keys in the given keyRange.
-     * If keyRange is null, then all keys are visited.
-     *
-     * @param keyRange Range of keys to visit.
+     * Start a key-ordered scan of this map's keys, starting with the given key. If the key is not
+     * present, then missingKeyAction determines how to proceed:
+     * - {@link MissingKeyAction#FORWARD}: Start the scan with the smallest key present that is larger than key.
+     *   If there is no such key, then the returned {@link MapScan} is closed.
+     * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
+     *   If there is no such key, then the returned {@link MapScan} is closed.
+     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapScan}.
+     * If key is null then all keys are visited. In this case, missingKeyAction must not be
+     * {@link MissingKeyAction#STOP}.
+     * @param key The starting key.
+     * @param missingKeyAction Specifies where to start the scan if key is not present.
      * @return MapScan object representing scan of keys, each contained in a KeyOnlyRecord.
      * @throws IOException
      * @throws InterruptedException
      */
-    MapScan keyScan(KeyRange keyRange) throws IOException, InterruptedException;
+    MapScan keyScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
 
     /**
      * Return a scan used to consolidate records. The records obtained from the scan may be

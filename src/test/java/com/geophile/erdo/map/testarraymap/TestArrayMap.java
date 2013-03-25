@@ -6,8 +6,9 @@
 
 package com.geophile.erdo.map.testarraymap;
 
+import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
@@ -48,9 +49,19 @@ public class TestArrayMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapScan scan(KeyRange keyRange)
+    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
-        return new TestArrayMapScan(this, keyRange);
+        return new TestArrayMapScan(this, startKey, missingKeyAction);
+    }
+
+    @Override
+    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
+    {
+        return
+            keys == null
+            ? scan(startKey, missingKeyAction)
+            : keys.scan(startKey, missingKeyAction);
     }
 
     @Override
@@ -82,15 +93,6 @@ public class TestArrayMap extends OpenOrSealedMapBase
     public boolean keysInMemory()
     {
         return true;
-    }
-
-    @Override
-    public MapScan keyScan(KeyRange keyRange)
-    {
-        return
-            keys == null
-            ? scan(keyRange)
-            : keys.scan(keyRange);
     }
 
     // ArrayMap interface

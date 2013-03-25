@@ -9,6 +9,7 @@ package com.geophile.erdo.apiimpl;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.Keys;
 
+/** @deprecated */
 public class KeyRange extends Keys
 {
     // Object interface

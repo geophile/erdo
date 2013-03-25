@@ -7,8 +7,8 @@
 package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.UsageError;
-import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.config.ConfigurationKeys;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.MapScan;
@@ -35,12 +35,13 @@ public class Tree
 
     // Tree interface
 
-    public MapScan scan(KeyRange keyRange) throws IOException, InterruptedException
+    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
         return
             level(0).leafLevelEmpty()
             ? MapScan.EMPTY
-            : leafScan(keyRange);
+            : leafScan(startKey, missingKeyAction);
     }
 
     public MapScan consolidationScan() throws IOException, InterruptedException
@@ -49,7 +50,7 @@ public class Tree
         // is dependent on the existence of level 1, to delimit level 0 files.
         return
             levels.size() <= 1
-            ? scan(null)
+            ? scan(null, MissingKeyAction.FORWARD)
             : new LevelOneScanToFindLevelZeroSegments(this);
     }
 
@@ -158,83 +159,68 @@ public class Tree
         return treePosition;
     }
 
-    void descendToLeaf(TreePosition position, TreePositionComparison comparison, AbstractKey key)
+    void descendToLeaf(TreePosition position, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         int level = position.level().levelNumber();
-        position.recordNumber(recordNumber(position.page(), comparison, key));
+        position.recordNumber(recordNumber(position.page(), startKey, missingKeyAction));
         if (level > 0) {
             IndexRecord indexRecord = (IndexRecord) position.materializeRecord();
             position.level(level - 1).pageAddress(indexRecord.childPageAddress());
-            descendToLeaf(position, comparison, key);
+            descendToLeaf(position, startKey, missingKeyAction);
         }
     }
 
-    int recordNumber(DiskPage page, TreePositionComparison comparison, AbstractKey key)
+    int recordNumber(DiskPage page, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        int recordNumber = page.recordNumber(key);
+        int recordNumber = page.recordNumber(startKey);
         if (recordNumber >= 0) {
-            if (comparison == TreePositionComparison.GT && recordNumber < page.nRecords() - 1) {
-                recordNumber++;
-            } else if (comparison == TreePositionComparison.LT && recordNumber > 0) {
-                recordNumber--;
-            }
+            // startKey found
         } else if (page.level() == 0) {
             // recordNumber is -p-1 where p is insertion point of key. Adjust based on comparison.
             recordNumber = -recordNumber - 1;
-            if (recordNumber == page.nRecords() ||
-                (comparison == TreePositionComparison.LT || comparison == TreePositionComparison.LE) &&
-                recordNumber > 0) {
+            if (recordNumber == page.nRecords() || missingKeyAction == MissingKeyAction.BACKWARD && recordNumber > 0) {
                 recordNumber--;
             }
         } else {
             // recordNumber is -p-1 where p is insertion point of key. We are above the leaf level so
             // we want the preceding record. if p = 0, then either this is the left most node (page 0),
             // or we made a mistake getting here from the parent.
-            assert page.level() > 0 : key;
+            assert page.level() > 0 : startKey;
             if (recordNumber == -1) {
                 int pageNumber = pageNumber(page.pageAddress());
-                assert pageNumber == 0 : key;
+                assert pageNumber == 0 : startKey;
                 recordNumber = 0;
             } else {
                 recordNumber = -recordNumber - 2;
             }
         }
-        assert recordNumber >= 0 && recordNumber < page.nRecords() : key;
+        assert recordNumber >= 0 && recordNumber < page.nRecords() : startKey;
         return recordNumber;
     }
 
     // For use by this class
 
-    private MapScan leafScan(KeyRange keyRange) throws IOException, InterruptedException
+    private MapScan leafScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
         MapScan treeLevelScan;
-        if (keyRange == null) {
+        boolean singleKey = missingKeyAction == MissingKeyAction.STOP;
+        if (startKey == null) {
+            // Scan an entire Map
             // TODO: This does an unnecessary page read if the usage is to create a scan and then position
-            // TODO: it as necessary from ForestMapScan. Allowing null KeyRange on scan constructor is a bad idea.
+            // TODO: it as necessary from ForestMapScan.
             TreePosition start = newPosition().level(0).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage();
-            treeLevelScan = TreeLevelScan.endInclusive(start, null);
-        } else if (keyRange.singleKey() && !level(0).keyPossiblyPresent(keyRange.lo())) {
+            treeLevelScan = TreeLevelScan.startScan(start);
+        } else if (singleKey && !level(0).keyPossiblyPresent(startKey)) {
+            // Exact match for missing key
             treeLevelScan = MapScan.EMPTY;
         } else {
-            TreePosition left = newPosition().level(levels.size() - 1).firstSegmentOfLevel().firstPageOfSegment();
-            descendToLeaf(left,
-                          keyRange.loInclusive() ? TreePositionComparison.GE : TreePositionComparison.GT,
-                          keyRange.lo());
-            TreePosition right;
-            if (keyRange.singleKey()) {
-                right = left;
-            } else {
-                right = newPosition().level(levels.size() - 1).firstSegmentOfLevel().firstPageOfSegment();
-                descendToLeaf(right,
-                              keyRange.hiInclusive() ? TreePositionComparison.LE : TreePositionComparison.LT,
-                              keyRange.hi());
-            }
-            treeLevelScan = !(keyRange.classify(left.materializeRecord().key()) == KeyRange.KEY_IN_RANGE &&
-                              keyRange.classify(right.materializeRecord().key()) == KeyRange.KEY_IN_RANGE)
-                            ? MapScan.EMPTY
-                            : TreeLevelScan.endInclusive(left, right);
+            // Start scan at startKey
+            TreePosition startPosition = newPosition().level(levels.size() - 1).firstSegmentOfLevel().firstPageOfSegment();
+            descendToLeaf(startPosition, startKey, missingKeyAction);
+            treeLevelScan = TreeLevelScan.startScan(startPosition);
         }
         return treeLevelScan;
     }

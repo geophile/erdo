@@ -20,8 +20,7 @@ import java.io.IOException;
  * {@link #delete(AbstractKey)} returns the record previously associated with the given key, while
  * {@link #ensureDeleted(AbstractKey)} does not. {@link #ensureDeleted(AbstractKey)} is therefore likely to be faster.
  *
- * <p> Retrieval of a map's records is done by using {@link #scan()} to visit all records, or {@link #scan(Keys)} to
- * visit records whose keys lie within a given range.
+ * <p> TBD: RETRIEVAL using find, first
  *
  * <p> Keys are locked for write through {@link #put(AbstractRecord)},
  * {@link #ensurePresent(AbstractRecord)}, {@link #delete(AbstractKey)}, and {@link #ensureDeleted(AbstractKey)}.
@@ -89,21 +88,14 @@ public abstract class OrderedMap
                DeadlockException,
                TransactionRolledBackException;
 
-    /**
-     * Return a scan that will visit all records present in the map in key order
-     * @return a scan that will visit records whose key is between start and end inclusive.
-     */
-    public abstract Scan scan()
-        throws IOException, 
-               InterruptedException;
+    public abstract AbstractRecord find(AbstractKey key) throws IOException, InterruptedException;
 
-    /**
-     * Return a scan that will visit, in key order, records whose key is in the range specified by keys.
-     * If keys is null then all records are visited.
-     * @param keys The range of keys to be visited.
-     * @return a scan that will visit records whose key is between start and end inclusive.
-     */
-    public abstract Scan scan(Keys keys)
-        throws IOException, 
-               InterruptedException;
+    public abstract Scan find(AbstractKey key, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException;
+
+    public abstract Scan findAll()
+        throws IOException, InterruptedException;
+
+    public abstract Scan first() throws IOException, InterruptedException;
+
 }

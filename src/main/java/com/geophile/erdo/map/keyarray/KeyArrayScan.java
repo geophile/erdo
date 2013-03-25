@@ -8,7 +8,7 @@ package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.apiimpl.KeyRange;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.KeyOnlyRecord;
 import com.geophile.erdo.map.MapScan;
 
@@ -24,7 +24,7 @@ public class KeyArrayScan extends MapScan
             // key. But we're returning a KeyOnlyRecord containing a key. If multiple KeyOnlyRecords
             // wrap the same AbstractKey object, that's bad. null forces allocation of a new key.
             AbstractKey currentKey = keys.key(current, null);
-            if (keyRange == null || keyRange.classify(currentKey) == KeyRange.KEY_IN_RANGE) {
+            if (isOpen(currentKey)) {
                 next = currentKey;
                 current++;
             }
@@ -42,16 +42,16 @@ public class KeyArrayScan extends MapScan
 
     // KeyArrayScan interface
 
-    KeyArrayScan(KeyArray keys, KeyRange keyRange)
+    KeyArrayScan(KeyArray keys, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
+        super(startKey, missingKeyAction);
         this.keys = keys;
-        this.keyRange = keyRange;
-        AbstractKey lo = keyRange == null ? null : keyRange.lo();
-        if (lo == null) {
+        if (startKey == null) {
             this.current = 0;
         } else {
-            this.current = keys.binarySearch(lo);
+            this.current = keys.binarySearch(startKey);
             if (this.current < 0) {
+                assert missingKeyAction == MissingKeyAction.FORWARD;
                 this.current = -this.current - 1;
             }
         }
@@ -59,7 +59,6 @@ public class KeyArrayScan extends MapScan
 
     // Object state
 
-    private final KeyRange keyRange;
     private KeyArray keys;
     private int current;
 }

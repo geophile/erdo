@@ -6,8 +6,9 @@
 
 package com.geophile.erdo.map.diskmap;
 
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
-import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapScan;
 import com.geophile.erdo.map.SealedMap;
@@ -39,10 +40,27 @@ public class DiskMap extends SealedMapBase
     // SealedMapBase interface
 
     @Override
-    public MapScan scan(KeyRange keyRange) throws IOException, InterruptedException
+    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapScan(tree.scan(keyRange));
+        return new DiskMapScan(tree.scan(startKey, missingKeyAction));
+    }
+
+    @Override
+    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
+    {
+        assert !destroyed : this;
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE,
+                    "{0} keyScan: keys in memory: {1}",
+                    new Object[]{this, keys != null});
+        }
+        return
+            keys == null
+            ? scan(startKey, missingKeyAction)
+            : keys.scan(startKey, missingKeyAction);
     }
 
     @Override
@@ -149,21 +167,6 @@ public class DiskMap extends SealedMapBase
     }
 
     @Override
-    public MapScan keyScan(KeyRange keyRange) throws IOException, InterruptedException
-    {
-        assert !destroyed : this;
-        if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE,
-                    "{0} keyScan: keys in memory: {1}",
-                    new Object[]{this, keys != null});
-        }
-        return
-            keys == null
-            ? scan(keyRange)
-            : keys.scan(keyRange);
-    }
-
-    @Override
     public MapScan consolidationScan() throws IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -238,7 +241,7 @@ public class DiskMap extends SealedMapBase
         if (recordCount <= inMemoryMapLimit) {
             this.keys = new KeyArray(factory, (int) recordCount);
             try {
-                MapScan scan = scan(null);
+                MapScan scan = scan(null, MissingKeyAction.FORWARD);
                 LazyRecord record;
                 while ((record = scan.next()) != null) {
                     this.keys.append(record.key());

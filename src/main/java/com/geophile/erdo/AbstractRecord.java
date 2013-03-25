@@ -121,7 +121,7 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
      * in any way, the other is not affected.
      * @return A copy of this record.
      */
-    public abstract AbstractRecord copy();
+    public abstract AbstractRecord<KEY> copy();
 
     public static AbstractRecord deserialize(Factory factory,
                                              DiskPage.AccessBuffers pageAccessBuffers,
