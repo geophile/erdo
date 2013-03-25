@@ -15,7 +15,6 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 
 public class OrderedMapTransactionTest
 {
@@ -47,7 +46,7 @@ public class OrderedMapTransactionTest
         Cursor cursor = map.first();
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
-            Assert.assertEquals(expected++, ((TestKey) record.key()).key());
+            Assert.assertEquals(expected++, record.key().key());
         }
         Assert.assertEquals(N, expected);
         db.close();
@@ -68,7 +67,7 @@ public class OrderedMapTransactionTest
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
-            Assert.assertEquals(expected++, ((TestKey) record.key()).key());
+            Assert.assertEquals(expected++, record.key().key());
         }
         Assert.assertEquals(N, expected);
         db.close();
@@ -118,7 +117,7 @@ public class OrderedMapTransactionTest
                 if (recordTransaction % 2 == 1 && expected % N == 0) {
                     expected += N;
                 }
-                Assert.assertEquals(expected, ((TestKey) record.key()).key());
+                Assert.assertEquals(expected, record.key().key());
                 expected++;
             }
             if (t % 2 == 0) {
