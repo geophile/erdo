@@ -43,7 +43,7 @@ public abstract class MapCursor
     protected MapCursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         this.startKey = startKey;
-        this.exactMatch = missingKeyAction == MissingKeyAction.STOP;
+        this.exactMatch = missingKeyAction == MissingKeyAction.CLOSE;
         this.canCheckIsOpen = !(startKey == null && missingKeyAction == null);
     }
 

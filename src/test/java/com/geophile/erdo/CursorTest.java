@@ -41,7 +41,7 @@ public class CursorTest
     @Test
     public void testNoOpenScansAfterCompletingScan() throws IOException, InterruptedException
     {
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         int expectedKey = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
@@ -58,7 +58,7 @@ public class CursorTest
     @Test
     public void testNoOpenScansAfterClosingScanEarly() throws IOException, InterruptedException
     {
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);
@@ -72,7 +72,7 @@ public class CursorTest
     @Test
     public void testCommitWithOpenScan() throws IOException, InterruptedException
     {
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);
@@ -85,7 +85,7 @@ public class CursorTest
     @Test
     public void testRollbackWithOpenScan() throws IOException, InterruptedException
     {
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);

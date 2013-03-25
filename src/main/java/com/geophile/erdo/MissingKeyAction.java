@@ -28,5 +28,5 @@ public enum MissingKeyAction
     /**
      * The resulting {@link Cursor} will be closed.
      */
-    STOP
+    CLOSE
 }

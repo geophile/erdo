@@ -80,10 +80,8 @@ public class OrderedMapImpl extends OrderedMap
     public AbstractRecord find(AbstractKey key) throws IOException, InterruptedException
     {
         checkNotNull(key);
-        if (key != null) {
-            key.erdoId(erdoId);
-        }
-        return newScan(key, MissingKeyAction.STOP).next();
+        key.erdoId(erdoId);
+        return newScan(key, MissingKeyAction.CLOSE).next();
     }
 
     @Override
@@ -93,12 +91,6 @@ public class OrderedMapImpl extends OrderedMap
             startKey.erdoId(erdoId);
         }
         return newScan(startKey, missingKeyAction);
-    }
-
-    @Override
-    public final Cursor findAll() throws IOException, InterruptedException
-    {
-        return find(null, MissingKeyAction.FORWARD);
     }
 
     @Override

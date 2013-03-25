@@ -9,22 +9,25 @@ package com.geophile.erdo;
 import java.io.IOException;
 
 /**
- * A Cursor object is used to visit the records of an {@link com.geophile.erdo.OrderedMap}. The scan order is always
- * in ascending key order as defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
+ * A {@link Cursor} object is used to visit the records of an {@link com.geophile.erdo.OrderedMap}.
+ * Key order is defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
  */
 
 public abstract class Cursor
 {
     /**
-     * Return the next record of the scan, or null if there are no more records to be visited.
-     * @return The next record of the scan, or null if there are no more records to be visited.
+     * If this cursor is positioned on a record, then the current record is returned, and the cursor is
+     * moved to the record with the next larger key. If the cursor is closed (i.e., not positioned on a record),
+     * then null is returned.
+     * @return The current record of the scan, or null if the cursor is closed.
      * @throws IOException
      * @throws InterruptedException
      */
     public abstract AbstractRecord next() throws IOException, InterruptedException;
 
     /**
-     * Terminates the scan. Subsequent calls to {@link #next()} will return null.
+     * Closes the cursor. After close() returns, the cursor is not positioned on any record, and subsequent
+     * calls to {@link #next()} will return null.
      */
     public abstract void close();
 }

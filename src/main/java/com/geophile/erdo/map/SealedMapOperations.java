@@ -65,9 +65,9 @@ public interface SealedMapOperations extends Map, TransactionUpdates
      *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapCursor}.
+     * - {@link MissingKeyAction#CLOSE}: Return a closed {@link MapCursor}.
      * If key is null then all keys are visited. In this case, missingKeyAction must not be
-     * {@link MissingKeyAction#STOP}.
+     * {@link MissingKeyAction#CLOSE}.
      * @param key The starting key.
      * @param missingKeyAction Specifies where to start the scan if key is not present.
      * @return MapCursor object representing scan of keys, each contained in a KeyOnlyRecord.

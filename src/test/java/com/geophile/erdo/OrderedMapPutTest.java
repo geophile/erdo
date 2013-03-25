@@ -91,7 +91,7 @@ public class OrderedMapPutTest
                 Thread.sleep(500);
             }
         } while (count > 1);
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {

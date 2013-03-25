@@ -86,7 +86,7 @@ public class OrderedMapTransactionTimestampTest
             record = TestRecord.createRecord(i, null);
             map.put(record);
             db.commitTransaction();
-            Cursor cursor = map.findAll();
+            Cursor cursor = map.first();
             while (cursor.next() != null);
             db.commitTransaction();
         }

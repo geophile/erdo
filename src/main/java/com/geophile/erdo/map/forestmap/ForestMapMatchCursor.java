@@ -45,8 +45,8 @@ class ForestMapMatchCursor extends ForestMapCursor
                 }
                 for (SealedMap smallTree : smallTrees) {
                     smallTreeRecordScan.addInput(BloomFilter.USE_BLOOM_FILTER
-                                                 ? smallTree.scan(startKey, MissingKeyAction.STOP)
-                                                 : smallTree.keyScan(startKey, MissingKeyAction.STOP));
+                                                 ? smallTree.scan(startKey, MissingKeyAction.CLOSE)
+                                                 : smallTree.keyScan(startKey, MissingKeyAction.CLOSE));
                 }
                 smallTreeRecordScan.start();
                 // If smallTreeKeyScan.next() returns a key, it is the one and only key that
@@ -62,7 +62,7 @@ class ForestMapMatchCursor extends ForestMapCursor
                 } else {
                     bigTreeRecordScan = new MergeCursor(TimestampMerger.only());
                     for (SealedMap bigTree : forestSnapshot.bigTrees()) {
-                        bigTreeRecordScan.addInput(bigTree.scan(startKey, MissingKeyAction.STOP));
+                        bigTreeRecordScan.addInput(bigTree.scan(startKey, MissingKeyAction.CLOSE));
                     }
                     bigTreeRecordScan.start();
                     next = bigTreeRecordScan.next();
@@ -95,7 +95,7 @@ class ForestMapMatchCursor extends ForestMapCursor
     ForestMapMatchCursor(ForestSnapshot forestSnapshot, AbstractKey key)
         throws IOException, InterruptedException
     {
-        super(forestSnapshot, key, MissingKeyAction.STOP);
+        super(forestSnapshot, key, MissingKeyAction.CLOSE);
     }
 
     // For use by this class
@@ -107,7 +107,7 @@ class ForestMapMatchCursor extends ForestMapCursor
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapCursor scan = map.scan(key, MissingKeyAction.STOP);
+        MapCursor scan = map.scan(key, MissingKeyAction.CLOSE);
         LazyRecord updateRecord = scan.next();
         scan.close();
         assert updateRecord != null : key;

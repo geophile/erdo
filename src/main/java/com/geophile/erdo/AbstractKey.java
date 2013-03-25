@@ -6,6 +6,7 @@
 
 package com.geophile.erdo;
 
+import com.geophile.erdo.apiimpl.ErdoId;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.RecordFactory;
 import com.geophile.erdo.transaction.Transaction;
@@ -61,7 +62,15 @@ public abstract class AbstractKey implements Comparable<AbstractKey>, Transferra
      */
     public int compareTo(AbstractKey that)
     {
-        return (this.erdoId & ~ERDO_ID_DELETED_MASK) - (that.erdoId & ~ERDO_ID_DELETED_MASK);
+        int c = (this.erdoId & ~ERDO_ID_DELETED_MASK) - (that.erdoId & ~ERDO_ID_DELETED_MASK);
+        if (c == 0) {
+            if (this instanceof ErdoId) {
+                c = -1;
+            } else if (that instanceof ErdoId) {
+                c = 1;
+            }
+        }
+        return c;
     }
 
     // Transferrable interface

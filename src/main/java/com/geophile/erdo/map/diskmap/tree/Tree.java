@@ -206,7 +206,7 @@ public class Tree
         throws IOException, InterruptedException
     {
         MapCursor treeLevelScan;
-        boolean singleKey = missingKeyAction == MissingKeyAction.STOP;
+        boolean singleKey = missingKeyAction == MissingKeyAction.CLOSE;
         if (startKey == null) {
             // Scan an entire Map
             // TODO: This does an unnecessary page read if the usage is to create a scan and then position

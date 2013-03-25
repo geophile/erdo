@@ -46,7 +46,7 @@ public class OrderedMapTest
             Assert.assertEquals(i, ((TestKey) replaced.key()).key());
             Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
         }
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
@@ -72,7 +72,7 @@ public class OrderedMapTest
         for (int i = 0; i < N; i++) {
             map.ensurePresent(TestRecord.createRecord(i, "second"));
         }
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
@@ -101,7 +101,7 @@ public class OrderedMapTest
             Assert.assertEquals(i, ((TestKey) replaced.key()).key());
             Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
         }
-        Assert.assertNull(map.findAll().next());
+        Assert.assertNull(map.first().next());
         db.close();
     }
 
@@ -120,7 +120,7 @@ public class OrderedMapTest
         for (int i = 0; i < N; i++) {
             map.ensureDeleted(new TestKey(i));
         }
-        Assert.assertNull(map.findAll().next());
+        Assert.assertNull(map.first().next());
         db.close();
     }
 
@@ -145,7 +145,7 @@ public class OrderedMapTest
             map.put(TestRecord.createRecord(i * gap, null));
         }
         // Full scan
-        cursor = map.findAll();
+        cursor = map.first();
         expectedKey = 0;
         while ((record = cursor.next()) != null) {
             Assert.assertEquals(expectedKey, key(record));
@@ -190,7 +190,7 @@ public class OrderedMapTest
     private void dump(String label, OrderedMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         AbstractRecord record;
         while ((record = cursor.next()) != null) {
             System.out.println(String.format("    %s, deleted: %s", record, record.deleted()));

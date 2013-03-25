@@ -39,7 +39,7 @@ public class TransactionalMap extends OpenMapBase
         LazyRecord uncommitted = updateMap().put(record, returnReplaced);
         if (returnReplaced && uncommitted == null) {
             AbstractKey key = record.key();
-            MapCursor scan = ForestMapCursor.newScan(forestSnapshot, key, MissingKeyAction.STOP);
+            MapCursor scan = ForestMapCursor.newScan(forestSnapshot, key, MissingKeyAction.CLOSE);
             LazyRecord committed = scan.next();
             scan.close();
             replaced = committed;

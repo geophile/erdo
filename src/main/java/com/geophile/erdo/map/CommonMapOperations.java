@@ -33,7 +33,7 @@ public interface CommonMapOperations extends Map
      *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapCursor}.
+     * - {@link MissingKeyAction#CLOSE}: Return a closed {@link MapCursor}.
      * @param key The starting key.
      * @param missingKeyAction Specifies where to start the scan if key is not present.
      * @return A {@link MapCursor} that will visit qualifying records in key order.

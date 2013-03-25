@@ -150,7 +150,7 @@ public class DatabaseTest
         db = Database.useDatabase(DB_DIRECTORY);
         map = db.useMap(MAP_NAME);
         LOG.log(Level.SEVERE, "About to start scan of reopened map");
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         TestRecord record;
         int expectedKey = 0;
         while ((record = (TestRecord) cursor.next()) != null) {

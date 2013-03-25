@@ -9,8 +9,6 @@
  *
  * An Erdo {@link com.geophile.erdo.Database} contains ordered maps.
  * Each {@link com.geophile.erdo.OrderedMap} contains key/value pairs.
- * Keys and record classes are provided by the application, extending
- * {@link com.geophile.erdo.AbstractRecord} and {@link com.geophile.erdo.AbstractKey}.
  * Keys are unique within a map. Maps are ordered, so when map contents are scanned,
  * records are visited in key order, as defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
  *
@@ -28,7 +26,7 @@
  * Within a database, ordered maps may be created and opened. All created and opened maps remain open until
  * the database is closed.
  *
- * <h2>Records and keys</h2>
+ * <h2>Keys and Records</h2>
  *
  * <p> An Erdo application provides key and value types by extending
  * {@link com.geophile.erdo.AbstractKey} and {@link com.geophile.erdo.AbstractRecord}. A key class must override
@@ -83,10 +81,11 @@
  *
  * <h2>Retrieval</h2>
  *
- * <p> {@link Cursor} objects are used to retrieve the contents of a map.
- * {@link com.geophile.erdo.OrderedMap#scan()} returns a Cursor object that visits all records in key order.
- * {@link com.geophile.erdo.OrderedMap#scan(Keys)} returns a Cursor object that visits
- * the record with a given key, or whose keys are within a  range.
+ * <p> {@link Cursor} objects are used to access the contents of a map.
+ * {@link com.geophile.erdo.OrderedMap#findAll()} returns a Cursor object that visits all records in key order.
+ * {@link com.geophile.erdo.OrderedMap#find(AbstractKey, MissingKeyAction)} returns a {@link Cursor} object positioned
+ * at a given key, and that can visit neighboring records. (The {@link MissingKeyAction} argument specifies how
+ * to position the cursor when the specified key is not present.)
  *
  * <p> The control of a Cursor is simple: {@link Cursor#next()} returns the next record, or null
  * if there are no more records. A Cursor is considered to be open until next() returns null, closed once next()

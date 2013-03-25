@@ -53,9 +53,9 @@ public abstract class ForestMapCursor extends MapCursor
                                         MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        assert !(startKey == null && missingKeyAction == MissingKeyAction.STOP);
+        assert !(startKey == null && missingKeyAction == MissingKeyAction.CLOSE);
         return
-            missingKeyAction == MissingKeyAction.STOP
+            missingKeyAction == MissingKeyAction.CLOSE
             ? new ForestMapMatchCursor(forestSnapshot, startKey)
             : new ForestMapRangeCursor(forestSnapshot, startKey, missingKeyAction);
     }

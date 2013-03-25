@@ -63,7 +63,7 @@ public class CommitTest
             }
         }
         // Check contents
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         AbstractRecord record;
         int expected = 0;
         while ((record = cursor.next()) != null) {
@@ -133,7 +133,7 @@ public class CommitTest
         System.out.println("Callbacks complete");
 */
         // Check contents
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         AbstractRecord record;
         expected = 0;
         while ((record = cursor.next()) != null) {
@@ -150,7 +150,7 @@ public class CommitTest
     private void dump(String label, OrderedMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        Cursor cursor = map.findAll();
+        Cursor cursor = map.first();
         AbstractRecord record;
         while ((record = cursor.next()) != null) {
             System.out.println(String.format("    %s, deleted: %s", record, record.deleted()));
