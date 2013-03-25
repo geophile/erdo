@@ -82,15 +82,15 @@
  * <h2>Retrieval</h2>
  *
  * <p> {@link Cursor} objects are used to access the contents of a map.
- * {@link com.geophile.erdo.OrderedMap#findAll()} returns a Cursor object that visits all records in key order.
+ * {@link com.geophile.erdo.OrderedMap#first()} returns a Cursor object that visits all records in key order.
  * {@link com.geophile.erdo.OrderedMap#find(AbstractKey, MissingKeyAction)} returns a {@link Cursor} object positioned
  * at a given key, and that can visit neighboring records. (The {@link MissingKeyAction} argument specifies how
  * to position the cursor when the specified key is not present.)
  *
- * <p> The control of a Cursor is simple: {@link Cursor#next()} returns the next record, or null
+ * <p> The control of a Cursor is simple: {@link com.geophile.erdo.Cursor#next()} returns the next record, or null
  * if there are no more records. A Cursor is considered to be open until next() returns null, closed once next()
  * has returned null. Once a Cursor is closed, all subsequent calls to next() will return null.
- * A Cursor can also be closed explicitly using {@link Cursor#close()}.
+ * A Cursor can also be closed explicitly using {@link com.geophile.erdo.Cursor#close()}.
  * Any scans open at the end of a transaction will be closed by committing or rolling back the transaction.
  */
 

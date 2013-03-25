@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 public class OrderedMapTransactionTest
@@ -138,11 +139,7 @@ public class OrderedMapTransactionTest
         }
         Cursor cursor = map.first();
         db.commitTransaction();
-        try {
-            cursor.next();
-            fail();
-        } catch (UsageError e) {
-        }
+        assertNull(cursor.next());
     }
 
     @Test
@@ -154,11 +151,7 @@ public class OrderedMapTransactionTest
         }
         Cursor cursor = map.first();
         db.rollbackTransaction();
-        try {
-            cursor.next();
-            fail();
-        } catch (UsageError e) {
-        }
+        assertNull(cursor.next());
     }
 
     @Test
@@ -170,11 +163,8 @@ public class OrderedMapTransactionTest
         }
         Cursor cursor = map.first();
         db.commitTransaction();
-        try {
-            cursor.close();
-            fail();
-        } catch (UsageError e) {
-        }
+        cursor.close();
+        assertNull(cursor.next());
     }
 
     @Test
@@ -186,11 +176,8 @@ public class OrderedMapTransactionTest
         }
         Cursor cursor = map.first();
         db.rollbackTransaction();
-        try {
-            cursor.close();
-            fail();
-        } catch (UsageError e) {
-        }
+        cursor.close();
+        assertNull(cursor.next());
     }
 
     private static final TestFactory FACTORY = new TestFactory();
