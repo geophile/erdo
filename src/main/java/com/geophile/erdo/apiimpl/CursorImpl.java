@@ -24,33 +24,35 @@ public class CursorImpl extends Cursor
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
     {
-        AbstractRecord record;
-        LazyRecord next;
-        boolean deleted = false;
-        checkTransaction();
-        do {
-            next = mapScan.next();
-            if (next != null) {
-                deleted = next.key().deleted();
-                if (deleted) {
-                    next.destroyRecordReference();
+        AbstractRecord record = null;
+        if (mapScan != null) {
+            LazyRecord next;
+            boolean deleted = false;
+            checkTransaction();
+            do {
+                next = mapScan.next();
+                if (next != null) {
+                    deleted = next.key().deleted();
+                    if (deleted) {
+                        next.destroyRecordReference();
+                    }
                 }
+            } while (next != null && deleted);
+            if (next != null) {
+                record = next.materializeRecord();
+                next.destroyRecordReference();
+                if (!next.prefersSerialized()) {
+                    // LazyRecord stores an actual record that is part of the database. Copy it so that any
+                    // changes by the application don't modify database state.
+                    record = record.copy();
+                }
+                // Give application a records without a timestamp set, which will allow it to update
+                // the record, setting the transaction.
+                record.key().clearTransactionState();
+            } else {
+                record = null;
+                close();
             }
-        } while (next != null && deleted);
-        if (next != null) {
-            record = next.materializeRecord();
-            next.destroyRecordReference();
-            if (!next.prefersSerialized()) {
-                // LazyRecord stores an actual record that is part of the database. Copy it so that any
-                // changes by the application don't modify database state.
-                record = record.copy();
-            }
-            // Give application a records without a timestamp set, which will allow it to update
-            // the record, setting the transaction.
-            record.key().clearTransactionState();
-        } else {
-            record = null;
-            close();
         }
         return record;
     }
@@ -58,12 +60,11 @@ public class CursorImpl extends Cursor
     @Override
     public void close()
     {
-        checkTransaction();
         if (mapScan != null) {
+            checkTransaction();
             transaction.unregisterScan(this);
             mapScan.close();
             mapScan = null;
-            transaction = null;
             DiskPageCache.destroyRemainingTreePositions();
         }
     }
