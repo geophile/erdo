@@ -48,8 +48,8 @@ public class TransactionOptionsTest
     {
         OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         db.commitTransaction();
-        Scan scan = map.findAll();
-        assertNull(scan.next());
+        Cursor cursor = map.findAll();
+        assertNull(cursor.next());
     }
 
     @Test
@@ -67,9 +67,9 @@ public class TransactionOptionsTest
             map.put(record);
         }
         db.commitTransaction();
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         int expected = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
         }
         Assert.assertEquals(N, expected);
@@ -108,9 +108,9 @@ public class TransactionOptionsTest
                 lock.wait();
             }
         }
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         int expected = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
         }
         Assert.assertEquals(N, expected);
@@ -121,8 +121,8 @@ public class TransactionOptionsTest
     {
         OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         db.rollbackTransaction();
-        Scan scan = map.findAll();
-        assertNull(scan.next());
+        Cursor cursor = map.findAll();
+        assertNull(cursor.next());
     }
 
     private static TestFactory FACTORY;

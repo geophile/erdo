@@ -7,14 +7,14 @@
 package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.IndexRecord;
 
 import java.io.IOException;
 
-class LevelOneScanToFindLevelZeroSegments extends MapScan
+class LevelOneCursorToFindLevelZeroSegments extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -46,7 +46,7 @@ class LevelOneScanToFindLevelZeroSegments extends MapScan
 
     // TreeLevelOneScanToFindLevelZeroFiles interface
 
-    LevelOneScanToFindLevelZeroSegments(Tree tree) throws IOException, InterruptedException
+    LevelOneCursorToFindLevelZeroSegments(Tree tree) throws IOException, InterruptedException
     {
         super(null, null);
         this.tree = tree;

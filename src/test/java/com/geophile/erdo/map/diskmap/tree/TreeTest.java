@@ -8,7 +8,7 @@ package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.*;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
@@ -57,7 +57,7 @@ public class TreeTest
         WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
         Tree tree = writeableTree.close();
         startTransaction();
-        MapScan scan = tree.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = tree.scan(null, MissingKeyAction.FORWARD);
         assertNull(scan.next());
     }
 
@@ -77,7 +77,7 @@ public class TreeTest
         }
         Tree tree = writeableTree.close();
         startTransaction();
-        MapScan scan = tree.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = tree.scan(null, MissingKeyAction.FORWARD);
         int expected = 0;
         LazyRecord lazyRecord;
         while ((lazyRecord = scan.next()) != null) {

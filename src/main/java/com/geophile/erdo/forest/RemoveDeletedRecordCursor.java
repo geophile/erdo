@@ -8,14 +8,14 @@ package com.geophile.erdo.forest;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.mergescan.AbstractMultiRecord;
 
 import java.io.IOException;
 
-class RemoveDeletedRecordScan extends MapScan
+class RemoveDeletedRecordCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -49,9 +49,9 @@ class RemoveDeletedRecordScan extends MapScan
         scan = null;
     }
 
-    // RemoveDeletedRecordScan interface
+    // RemoveDeletedRecordCursor interface
 
-    public RemoveDeletedRecordScan(MapScan scan, long maxDeletionTimestamp)
+    public RemoveDeletedRecordCursor(MapCursor scan, long maxDeletionTimestamp)
     {
         super(null, null);
         this.scan = scan;
@@ -70,6 +70,6 @@ class RemoveDeletedRecordScan extends MapScan
 
     // Object state
 
-    private MapScan scan;
+    private MapCursor scan;
     private final long maxDeletionTimestamp;
 }

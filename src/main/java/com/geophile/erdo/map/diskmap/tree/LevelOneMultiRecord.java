@@ -8,7 +8,7 @@ package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.IndexRecord;
 import com.geophile.erdo.map.mergescan.AbstractMultiRecord;
 import com.geophile.erdo.map.mergescan.MultiRecordKey;
@@ -51,12 +51,12 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     }
 
     @Override
-    public MapScan scan()
+    public MapCursor scan()
     {
         LOG.log(Level.INFO,
                 "{0}: Record scan: {1} - {2}",
                 new Object[]{this, loZeroPosition, hiZeroPosition});
-        return new LevelOneMultiRecordScan(loZeroPosition, hiZeroPosition);
+        return new LevelOneMultiRecordCursor(loZeroPosition, hiZeroPosition);
     }
 
     // LazyRecord interface (key() is provided by AbstractRecord)
@@ -96,12 +96,12 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
 
     // LevelOneMultiRecord interface
 
-    public MapScan levelOneScan() throws IOException, InterruptedException
+    public MapCursor levelOneScan() throws IOException, InterruptedException
     {
         LOG.log(Level.INFO,
                 "{0}: Level one scan: {1} - {2}",
                 new Object[]{this, loOnePosition, hiOnePosition});
-        return new LevelOneMultiRecordScan(loOnePosition, hiOnePosition);
+        return new LevelOneMultiRecordCursor(loOnePosition, hiOnePosition);
     }
 
     public TreeSegment leafSegment()

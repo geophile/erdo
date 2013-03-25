@@ -11,7 +11,7 @@ import com.geophile.erdo.MissingKeyAction;
 
 import java.io.IOException;
 
-public abstract class MapScan
+public abstract class MapCursor
 {
     public abstract LazyRecord next() throws IOException, InterruptedException;
 
@@ -40,7 +40,7 @@ public abstract class MapScan
         }
     }
 
-    protected MapScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    protected MapCursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         this.startKey = startKey;
         this.exactMatch = missingKeyAction == MissingKeyAction.STOP;
@@ -60,7 +60,7 @@ public abstract class MapScan
 
     // Inner classes
 
-    public static final MapScan EMPTY = new MapScan(null, MissingKeyAction.FORWARD)
+    public static final MapCursor EMPTY = new MapCursor(null, MissingKeyAction.FORWARD)
     {
         @Override
         public LazyRecord next() throws IOException, InterruptedException

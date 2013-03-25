@@ -87,7 +87,7 @@ public class OrderedMapImpl extends OrderedMap
     }
 
     @Override
-    public Scan find(AbstractKey startKey, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    public Cursor find(AbstractKey startKey, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
     {
         if (startKey != null) {
             startKey.erdoId(erdoId);
@@ -96,13 +96,13 @@ public class OrderedMapImpl extends OrderedMap
     }
 
     @Override
-    public final Scan findAll() throws IOException, InterruptedException
+    public final Cursor findAll() throws IOException, InterruptedException
     {
         return find(null, MissingKeyAction.FORWARD);
     }
 
     @Override
-    public Scan first() throws IOException, InterruptedException
+    public Cursor first() throws IOException, InterruptedException
     {
         return newScan(erdoIdKey, MissingKeyAction.FORWARD);
     }
@@ -129,9 +129,9 @@ public class OrderedMapImpl extends OrderedMap
 
     // For use by this class
 
-    private Scan newScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    private Cursor newScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
     {
-        return new ScanImpl(transactionManager, transactionalMap().scan(key, missingKeyAction));
+        return new CursorImpl(transactionManager, transactionalMap().scan(key, missingKeyAction));
     }
 
     private TransactionalMap transactionalMap()

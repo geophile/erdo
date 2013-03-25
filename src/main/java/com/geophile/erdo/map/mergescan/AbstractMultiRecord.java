@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 public abstract class AbstractMultiRecord extends AbstractRecord
 {
@@ -39,7 +39,7 @@ public abstract class AbstractMultiRecord extends AbstractRecord
 
     public abstract void append(AbstractRecord record);
 
-    public abstract MapScan scan();
+    public abstract MapCursor scan();
 
     // For use by subclasses
 

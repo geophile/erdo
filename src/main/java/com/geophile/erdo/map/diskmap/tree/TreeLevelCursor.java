@@ -9,7 +9,7 @@ package com.geophile.erdo.map.diskmap.tree;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskPage;
 import com.geophile.erdo.util.IdGenerator;
 
@@ -17,17 +17,17 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class TreeLevelScan extends MapScan
+class TreeLevelCursor extends MapCursor
 {
     // Object interface
 
     @Override
     public String toString()
     {
-        return String.format("TreeLevelScan(%s)", id);
+        return String.format("TreeLevelCursor(%s)", id);
     }
 
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -85,11 +85,11 @@ class TreeLevelScan extends MapScan
         throw new UnsupportedOperationException(getClass().getName());
     }
 
-    // TreeLevelScan interface
+    // TreeLevelCursor interface
 
-    static TreeLevelScan startScan(TreePosition start)
+    static TreeLevelCursor startScan(TreePosition start)
     {
-        return new TreeLevelScan(start);
+        return new TreeLevelCursor(start);
     }
 
     // For use by this package
@@ -99,7 +99,7 @@ class TreeLevelScan extends MapScan
         return position.atEnd();
     }
 
-    TreeLevelScan(TreePosition start)
+    TreeLevelCursor(TreePosition start)
     {
         super(null, null);
         assert start != null;
@@ -115,7 +115,7 @@ class TreeLevelScan extends MapScan
 
     // Class state
 
-    private static final Logger LOG = Logger.getLogger(TreeLevelScan.class.getName());
+    private static final Logger LOG = Logger.getLogger(TreeLevelCursor.class.getName());
     private static final IdGenerator idGenerator = new IdGenerator(0);
 
     // Object state

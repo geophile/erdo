@@ -9,7 +9,7 @@ package com.geophile.erdo.map.forestmap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * biggest trees. These in-memory keys are used to speed up ForestMap scans.
  *
  * A ForestMap scan can be done in two ways:
- * 1) Put all of the forest's trees into a MergeScan.
+ * 1) Put all of the forest's trees into a MergeCursor.
  * 2) Merge the keys of the biggest trees (whose keys are not in memory) with the in-memory keys
  * from the smaller trees. This merge yields the newest version of each key. For each key provided
  * by the merge, find the associated record.
@@ -41,14 +41,14 @@ import java.util.logging.Logger;
  *    In this case, we search one small tree and we're done.
  *
  * So we want to implement #2, to optimize start = end scans. This case is handled by
- * ForestMapMatchScan. All other scans are handled by ForestMapRangeScan, which implements #1.
+ * ForestMapMatchCursor. All other scans are handled by ForestMapRangeCursor, which implements #1.
  */
 
-public abstract class ForestMapScan extends MapScan
+public abstract class ForestMapCursor extends MapCursor
 {
-    // ForestMapScan interface
+    // ForestMapCursor interface
 
-    public static ForestMapScan newScan(ForestSnapshot forestSnapshot,
+    public static ForestMapCursor newScan(ForestSnapshot forestSnapshot,
                                         AbstractKey startKey,
                                         MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
@@ -56,13 +56,13 @@ public abstract class ForestMapScan extends MapScan
         assert !(startKey == null && missingKeyAction == MissingKeyAction.STOP);
         return
             missingKeyAction == MissingKeyAction.STOP
-            ? new ForestMapMatchScan(forestSnapshot, startKey)
-            : new ForestMapRangeScan(forestSnapshot, startKey, missingKeyAction);
+            ? new ForestMapMatchCursor(forestSnapshot, startKey)
+            : new ForestMapRangeCursor(forestSnapshot, startKey, missingKeyAction);
     }
 
     // For use by subclasses
 
-    protected ForestMapScan(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    protected ForestMapCursor(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         super(startKey, missingKeyAction);
@@ -73,7 +73,7 @@ public abstract class ForestMapScan extends MapScan
 
     // Class state
 
-    protected static final Logger LOG = Logger.getLogger(ForestMapScan.class.getName());
+    protected static final Logger LOG = Logger.getLogger(ForestMapCursor.class.getName());
 
     // Object state
 

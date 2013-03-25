@@ -69,7 +69,7 @@ public class KeyArrayTest
             // size
             assertEquals(n, a.size());
             // scan
-            KeyArrayScan scan = a.scan(null, MissingKeyAction.FORWARD);
+            KeyArrayCursor scan = a.scan(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 10;
             while ((record = scan.next()) != null) {
@@ -113,7 +113,7 @@ public class KeyArrayTest
             // size
             assertEquals(N, a.size());
             // scan
-            KeyArrayScan scan = a.scan(null, MissingKeyAction.FORWARD);
+            KeyArrayCursor scan = a.scan(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 0;
             while ((record = scan.next()) != null) {

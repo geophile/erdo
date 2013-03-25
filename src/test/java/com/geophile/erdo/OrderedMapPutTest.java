@@ -91,10 +91,10 @@ public class OrderedMapPutTest
                 Thread.sleep(500);
             }
         } while (count > 1);
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
         int expected = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expected, record.key().key());
             if (expected < N / 2) {
                 Assert.assertEquals("first", record.stringValue());

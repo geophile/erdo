@@ -152,9 +152,9 @@ The following program opens an existing Erdo map and creates some records.
                 throws IOException, InterruptedException
             {
                 System.out.println(label);
-                Scan scan = family.scan();
+                Scan cursor = family.cursor();
                 Person person;
-                while ((person = (Person) scan.next()) != null) {
+                while ((person = (Person) cursor.next()) != null) {
                     Name name = person.key();
                     System.out.println(String.format("    %s: %s", 
                                                      name.name, person.birthDate));

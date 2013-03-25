@@ -7,7 +7,7 @@
 package com.geophile.erdo.transaction;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.Scan;
+import com.geophile.erdo.Cursor;
 import com.geophile.erdo.TransactionCallback;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
@@ -169,20 +169,20 @@ public class Transaction
         return lockedForWrite;
     }
 
-    public void registerScan(Scan scan)
+    public void registerScan(Cursor cursor)
     {
-        Scan replaced = openScans.add(scan);
+        Cursor replaced = openScans.add(cursor);
         assert replaced == null;
     }
 
-    public void unregisterScan(Scan scan)
+    public void unregisterScan(Cursor cursor)
     {
-        Scan removed = openScans.remove(scan);
-        assert removed == scan;
+        Cursor removed = openScans.remove(cursor);
+        assert removed == cursor;
     }
 
     // For testing
-    public IdentitySet<Scan> openScans()
+    public IdentitySet<Cursor> openScans()
     {
         return openScans;
     }
@@ -277,8 +277,8 @@ public class Transaction
 
     private void closeOpenScans()
     {
-        for (Scan scan : openScans.values()) {
-            scan.close();
+        for (Cursor cursor : openScans.values()) {
+            cursor.close();
         }
         openScans = null;
     }
@@ -312,7 +312,7 @@ public class Transaction
     private volatile AbstractKey waitingFor;
     private volatile Termination termination;
     private volatile boolean irrelevant = false;
-    private IdentitySet<Scan> openScans = new IdentitySet<>();
+    private IdentitySet<Cursor> openScans = new IdentitySet<>();
 
     // Inner classes
     

@@ -8,7 +8,6 @@ package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
-import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.diskmap.CompressibleLongArray;
 import com.geophile.erdo.memorymonitor.MemoryMonitor;
@@ -31,10 +30,10 @@ public class KeyArray
         return array.object().size();
     }
 
-    public KeyArrayScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public KeyArrayCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         assert closed;
-        return new KeyArrayScan(this, startKey, missingKeyAction);
+        return new KeyArrayCursor(this, startKey, missingKeyAction);
     }
 
     public void close()

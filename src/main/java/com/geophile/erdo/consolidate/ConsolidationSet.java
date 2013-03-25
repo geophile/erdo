@@ -8,7 +8,7 @@ package com.geophile.erdo.consolidate;
 
 import com.geophile.erdo.Configuration;
 import com.geophile.erdo.MissingKeyAction;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskMap;
 
 import java.io.IOException;
@@ -146,7 +146,7 @@ public class ConsolidationSet
             }
             try {
                 assert newMap != null;
-                MapScan mapScan = newMap.scan(null, MissingKeyAction.FORWARD);
+                MapCursor mapScan = newMap.scan(null, MissingKeyAction.FORWARD);
                 while (mapScan.next() == null);
             } catch (IOException | InterruptedException e) {
                 assert false : e;

@@ -10,10 +10,10 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
-import com.geophile.erdo.map.emptymap.EmptyMapScan;
-import com.geophile.erdo.map.mergescan.MergeScan;
+import com.geophile.erdo.map.emptymap.EmptyMapCursor;
+import com.geophile.erdo.map.mergescan.MergeCursor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-class ForestMapRangeScan extends ForestMapScan
+class ForestMapRangeCursor extends ForestMapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -44,22 +44,22 @@ class ForestMapRangeScan extends ForestMapScan
         if (!done) {
             done = true;
             scan.close();
-            for (MapScan smallMapScan : smallMapScans.values()) {
+            for (MapCursor smallMapScan : smallMapScans.values()) {
                 smallMapScan.close();
             }
         }
     }
 
-    // ForestMapRangeScan interface
+    // ForestMapRangeCursor interface
 
-    ForestMapRangeScan(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    ForestMapRangeCursor(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         super(forestSnapshot, startKey, missingKeyAction);
-        MapScan smallTreeKeyScan = merge(forestSnapshot.smallTrees());
-        MapScan bigTreeRecordScan = merge(forestSnapshot.bigTrees());
-        MergeScan combinedScan = new MergeScan(TimestampMerger.only());
-        combinedScan.addInput(new KeyToUpdatedRecordScan(smallTreeKeyScan));
+        MapCursor smallTreeKeyScan = merge(forestSnapshot.smallTrees());
+        MapCursor bigTreeRecordScan = merge(forestSnapshot.bigTrees());
+        MergeCursor combinedScan = new MergeCursor(TimestampMerger.only());
+        combinedScan.addInput(new KeyToUpdatedRecordCursor(smallTreeKeyScan));
         combinedScan.addInput(bigTreeRecordScan);
         combinedScan.start();
         scan = combinedScan;
@@ -74,15 +74,15 @@ class ForestMapRangeScan extends ForestMapScan
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapScan scan = mapScan(map, key);
+        MapCursor scan = mapScan(map, key);
         LazyRecord updateRecord = scan.next();
         assert updateRecord != null : key;
         return updateRecord;
     }
 
-    private MapScan mapScan(SealedMap map, AbstractKey key) throws IOException, InterruptedException
+    private MapCursor mapScan(SealedMap map, AbstractKey key) throws IOException, InterruptedException
     {
-        MapScan smallMapScan = smallMapScans.get(map.mapId());
+        MapCursor smallMapScan = smallMapScans.get(map.mapId());
         if (smallMapScan == null) {
             smallMapScan = map.scan(null, MissingKeyAction.FORWARD);
             smallMapScans.put(map.mapId(), smallMapScan);
@@ -91,16 +91,16 @@ class ForestMapRangeScan extends ForestMapScan
         return smallMapScan;
     }
 
-    private MapScan merge(List<SealedMap> maps) throws IOException, InterruptedException
+    private MapCursor merge(List<SealedMap> maps) throws IOException, InterruptedException
     {
-        MapScan scan;
+        MapCursor scan;
         int mapSize = maps.size();
         if (mapSize == 0) {
-            scan = new EmptyMapScan();
+            scan = new EmptyMapCursor();
         } else if (mapSize == 1) {
             scan = maps.get(0).scan(startKey, missingKeyAction);
         } else {
-            MergeScan mergeScan = new MergeScan(TimestampMerger.only());
+            MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
             for (SealedMap map : maps) {
                 mergeScan.addInput(map.keyScan(startKey, missingKeyAction));
             }
@@ -112,14 +112,14 @@ class ForestMapRangeScan extends ForestMapScan
 
     // Object state
 
-    private final MapScan scan;
-    private final Map<Long, MapScan> smallMapScans = new HashMap<>(); // mapId -> MapScan
+    private final MapCursor scan;
+    private final Map<Long, MapCursor> smallMapScans = new HashMap<>(); // mapId -> MapCursor
 
     // Inner classes
 
-    private class KeyToUpdatedRecordScan extends MapScan
+    private class KeyToUpdatedRecordCursor extends MapCursor
     {
-        // MapScan interface
+        // MapCursor interface
 
         @Override
         public LazyRecord next() throws IOException, InterruptedException
@@ -145,9 +145,9 @@ class ForestMapRangeScan extends ForestMapScan
             }
         }
 
-        // KeyToUpdatedRecordScan interface
+        // KeyToUpdatedRecordCursor interface
 
-        public KeyToUpdatedRecordScan(MapScan scan)
+        public KeyToUpdatedRecordCursor(MapCursor scan)
         {
             super(null, null);
             this.scan = scan;
@@ -155,6 +155,6 @@ class ForestMapRangeScan extends ForestMapScan
 
         // Object state
 
-        private MapScan scan;
+        private MapCursor scan;
     }
 }

@@ -48,9 +48,9 @@ public class UpdateMap
         throws IOException, InterruptedException
     {
         System.out.println(label);
-        Scan scan = family.findAll();
+        Cursor cursor = family.findAll();
         Person person;
-        while ((person = (Person) scan.next()) != null) {
+        while ((person = (Person) cursor.next()) != null) {
             Name name = person.key();
             System.out.println(String.format("    %s: %s", name.name, person.birthDate));
         }

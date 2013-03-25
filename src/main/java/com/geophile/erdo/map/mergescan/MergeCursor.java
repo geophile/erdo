@@ -7,15 +7,15 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MergeScan extends MapScan
+public class MergeCursor extends MapCursor
 {
-    // Scan interface
+    // Cursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -35,7 +35,7 @@ public class MergeScan extends MapScan
     public void close()
     {
         if (inputs != null) {
-            for (MapScan input : inputs) {
+            for (MapCursor input : inputs) {
                 input.close();
             }
             inputs = null;
@@ -43,9 +43,9 @@ public class MergeScan extends MapScan
         }
     }
 
-    // MergeScan interface
+    // MergeCursor interface
 
-    public void addInput(MapScan input)
+    public void addInput(MapCursor input)
     {
         inputs.add(input);
     }
@@ -65,7 +65,7 @@ public class MergeScan extends MapScan
         root.prime();
     }
 
-    public MergeScan(Merger merger)
+    public MergeCursor(Merger merger)
     {
         super(null, null);
         this.merger = merger;
@@ -78,7 +78,7 @@ public class MergeScan extends MapScan
         return new MergeNode(this, position, left, right);
     }
 
-    Node inputNode(int position, MapScan input)
+    Node inputNode(int position, MapCursor input)
     {
         return new InputNode(position, input);
     }
@@ -104,7 +104,7 @@ public class MergeScan extends MapScan
     // State
 
     final Merger merger;
-    private List<MapScan> inputs = new ArrayList<>();
+    private List<MapCursor> inputs = new ArrayList<>();
     private int firstLeaf;
     private Node root;
 }

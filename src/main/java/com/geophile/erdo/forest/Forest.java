@@ -12,12 +12,12 @@ import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.consolidate.Consolidation;
 import com.geophile.erdo.consolidate.ConsolidationSet;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.forestmap.TimestampMerger;
-import com.geophile.erdo.map.mergescan.FastMergeScan;
-import com.geophile.erdo.map.mergescan.MergeScan;
+import com.geophile.erdo.map.mergescan.FastMergeCursor;
+import com.geophile.erdo.map.mergescan.MergeCursor;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
 import com.geophile.erdo.transaction.*;
 
@@ -97,14 +97,14 @@ public class Forest extends TransactionManager implements Consolidation.Containe
             start = System.currentTimeMillis();
         }
         boolean slowmerge = Boolean.getBoolean("slowmerge");
-        MergeScan recordScan = null;
-        MergeScan keyScan = null;
+        MergeCursor recordScan = null;
+        MergeCursor keyScan = null;
         try {
             recordScan =
                 slowmerge || !inputDurable // If !inputDurable, fast merge has no benefit
-                ? new MergeScan(TimestampMerger.only())
-                : new FastMergeScan(TimestampMerger.only());
-            keyScan = new MergeScan(TimestampMerger.only());
+                ? new MergeCursor(TimestampMerger.only())
+                : new FastMergeCursor(TimestampMerger.only());
+            keyScan = new MergeCursor(TimestampMerger.only());
             List<SealedMap> obsoleteTrees = new ArrayList<>();
             for (Element element : obsolete) {
                 SealedMap map = (SealedMap) element;
@@ -134,15 +134,15 @@ public class Forest extends TransactionManager implements Consolidation.Containe
                 }
             }
             recordScan.start();
-            MapScan cleanupRecordScan =
+            MapCursor cleanupRecordScan =
                     maxDeletionTimestamp >= 0
-                    ? new RemoveDeletedRecordScan(recordScan, maxDeletionTimestamp)
+                    ? new RemoveDeletedRecordCursor(recordScan, maxDeletionTimestamp)
                     : recordScan;
-            MapScan cleanupKeyScan = null;
+            MapCursor cleanupKeyScan = null;
             if (keyScan != null) {
                 keyScan.start();
                 if (maxDeletionTimestamp >= 0) {
-                    cleanupKeyScan = new RemoveDeletedRecordScan(keyScan, maxDeletionTimestamp);
+                    cleanupKeyScan = new RemoveDeletedRecordCursor(keyScan, maxDeletionTimestamp);
                 } else {
                     cleanupKeyScan = keyScan;
                 }

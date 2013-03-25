@@ -7,14 +7,14 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-public class IteratorScan extends MapScan
+public class IteratorCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
@@ -27,9 +27,9 @@ public class IteratorScan extends MapScan
     {
     }
 
-    // IteratorScan interface
+    // IteratorCursor interface
 
-    public IteratorScan(Iterator iterator)
+    public IteratorCursor(Iterator iterator)
     {
         super(null, null);
         this.iterator = iterator;

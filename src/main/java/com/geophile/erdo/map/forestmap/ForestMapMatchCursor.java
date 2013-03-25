@@ -11,23 +11,23 @@ import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.bloomfilter.BloomFilter;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
-import com.geophile.erdo.map.mergescan.MergeScan;
+import com.geophile.erdo.map.mergescan.MergeCursor;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 
-class ForestMapMatchScan extends ForestMapScan
+class ForestMapMatchCursor extends ForestMapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        MergeScan smallTreeRecordScan = null;
-        MergeScan bigTreeRecordScan = null;
+        MergeCursor smallTreeRecordScan = null;
+        MergeCursor bigTreeRecordScan = null;
         LazyRecord next = null;
         List<SealedMap> smallTrees = null;
         try {
@@ -38,7 +38,7 @@ class ForestMapMatchScan extends ForestMapScan
                 // - keyScan uses KeyArrays, probably slower than bloom filter, but has the
                 //   advantage of finding only the most recent.
                 // - Big trees don't have KeyArrays.
-                smallTreeRecordScan = new MergeScan(TimestampMerger.only());
+                smallTreeRecordScan = new MergeCursor(TimestampMerger.only());
                 smallTrees = forestSnapshot.smallTrees();
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.log(Level.FINE, "Scanning small trees: {0}", smallTrees);
@@ -60,7 +60,7 @@ class ForestMapMatchScan extends ForestMapScan
                         next = updateRecord(key);
                     }
                 } else {
-                    bigTreeRecordScan = new MergeScan(TimestampMerger.only());
+                    bigTreeRecordScan = new MergeCursor(TimestampMerger.only());
                     for (SealedMap bigTree : forestSnapshot.bigTrees()) {
                         bigTreeRecordScan.addInput(bigTree.scan(startKey, MissingKeyAction.STOP));
                     }
@@ -90,9 +90,9 @@ class ForestMapMatchScan extends ForestMapScan
     {
     }
 
-    // ForestMapMatchScan interface
+    // ForestMapMatchCursor interface
 
-    ForestMapMatchScan(ForestSnapshot forestSnapshot, AbstractKey key)
+    ForestMapMatchCursor(ForestSnapshot forestSnapshot, AbstractKey key)
         throws IOException, InterruptedException
     {
         super(forestSnapshot, key, MissingKeyAction.STOP);
@@ -107,7 +107,7 @@ class ForestMapMatchScan extends ForestMapScan
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapScan scan = map.scan(key, MissingKeyAction.STOP);
+        MapCursor scan = map.scan(key, MissingKeyAction.STOP);
         LazyRecord updateRecord = scan.next();
         scan.close();
         assert updateRecord != null : key;

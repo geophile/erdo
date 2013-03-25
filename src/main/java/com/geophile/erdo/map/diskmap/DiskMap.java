@@ -10,7 +10,7 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.SealedMapBase;
 import com.geophile.erdo.map.diskmap.tree.Tree;
@@ -40,15 +40,15 @@ public class DiskMap extends SealedMapBase
     // SealedMapBase interface
 
     @Override
-    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapScan(tree.scan(startKey, missingKeyAction));
+        return new DiskMapCursor(tree.scan(startKey, missingKeyAction));
     }
 
     @Override
-    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -78,7 +78,7 @@ public class DiskMap extends SealedMapBase
     }
 
     @Override
-    public void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    public void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -167,10 +167,10 @@ public class DiskMap extends SealedMapBase
     }
 
     @Override
-    public MapScan consolidationScan() throws IOException, InterruptedException
+    public MapCursor consolidationScan() throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapScan(tree.consolidationScan());
+        return new DiskMapCursor(tree.consolidationScan());
     }
 
     // DiskMap interface
@@ -241,7 +241,7 @@ public class DiskMap extends SealedMapBase
         if (recordCount <= inMemoryMapLimit) {
             this.keys = new KeyArray(factory, (int) recordCount);
             try {
-                MapScan scan = scan(null, MissingKeyAction.FORWARD);
+                MapCursor scan = scan(null, MissingKeyAction.FORWARD);
                 LazyRecord record;
                 while ((record = scan.next()) != null) {
                     this.keys.append(record.key());
@@ -257,7 +257,7 @@ public class DiskMap extends SealedMapBase
     }
 
     // Used only by DiskMapFastMergeTest
-    void loadWithKeys(MapScan scan, long recordCount)
+    void loadWithKeys(MapCursor scan, long recordCount)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -286,7 +286,7 @@ public class DiskMap extends SealedMapBase
     }
 
     // Used only by DiskMapFastMergeTest
-    void loadWithoutKeys(MapScan scan)
+    void loadWithoutKeys(MapCursor scan)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert !destroyed : this;

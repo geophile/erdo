@@ -10,7 +10,7 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMapBase;
 import com.geophile.erdo.transaction.TimestampSet;
 
@@ -33,14 +33,14 @@ public class ArrayMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        return new ArrayMapScan(this, startKey, missingKeyAction);
+        return new ArrayMapCursor(this, startKey, missingKeyAction);
     }
 
     @Override
-    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         return scan(startKey, missingKeyAction);
@@ -59,7 +59,7 @@ public class ArrayMap extends SealedMapBase
     }
 
     @Override
-    public void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    public void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         estimatedSizeBytes = 0;

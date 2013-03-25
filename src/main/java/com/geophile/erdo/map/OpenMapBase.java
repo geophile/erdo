@@ -20,7 +20,7 @@ public abstract class OpenMapBase extends MapBase implements OpenMap
     public abstract LazyRecord put(AbstractRecord record, boolean returnReplaced)
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException;
 
-    public abstract MapScan scan(AbstractKey key, MissingKeyAction missingKeyAction)
+    public abstract MapCursor scan(AbstractKey key, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException;
 
     // For use by subclasses

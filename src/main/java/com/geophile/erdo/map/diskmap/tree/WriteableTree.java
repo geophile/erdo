@@ -8,7 +8,7 @@ package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.map.diskmap.IndexRecord;
 import com.geophile.erdo.map.mergescan.AbstractMultiRecord;
@@ -91,7 +91,7 @@ public class WriteableTree extends Tree
         if (levels.size() == 1) {
             levels.add(WriteableTreeLevel.create(this, 1));
         }
-        MapScan levelOneScan = multiRecord.levelOneScan();
+        MapCursor levelOneScan = multiRecord.levelOneScan();
         LazyRecord lazyIndexRecord;
         while ((lazyIndexRecord = levelOneScan.next()) != null) {
             indexRecord = (IndexRecord) lazyIndexRecord.materializeRecord();

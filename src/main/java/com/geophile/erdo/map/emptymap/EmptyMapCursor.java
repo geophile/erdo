@@ -9,13 +9,13 @@ package com.geophile.erdo.map.emptymap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 
-public class EmptyMapScan extends MapScan
+public class EmptyMapCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next()
@@ -31,9 +31,9 @@ public class EmptyMapScan extends MapScan
     public void goTo(AbstractKey key) throws IOException, InterruptedException
     {}
 
-    // EmptyMapScan interface
+    // EmptyMapCursor interface
 
-    public EmptyMapScan()
+    public EmptyMapCursor()
     {
         super(null, MissingKeyAction.FORWARD);
     }

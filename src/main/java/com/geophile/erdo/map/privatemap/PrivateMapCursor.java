@@ -9,14 +9,14 @@ package com.geophile.erdo.map.privatemap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-class PrivateMapScan extends MapScan
+class PrivateMapCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public AbstractRecord next()
@@ -48,9 +48,9 @@ class PrivateMapScan extends MapScan
         iterator = map.contents.tailMap(key).values().iterator();
     }
 
-    // PrivateMapScan interface
+    // PrivateMapCursor interface
 
-    PrivateMapScan(PrivateMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    PrivateMapCursor(PrivateMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         super(startKey, missingKeyAction);
         this.map = map;

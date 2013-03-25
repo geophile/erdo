@@ -68,7 +68,7 @@ class MergeNode extends Node
         right.dump(level + 1);
     }
 
-    public MergeNode(MergeScan mergeScan, int position, Node left, Node right)
+    public MergeNode(MergeCursor mergeScan, int position, Node left, Node right)
     {
         super(position);
         this.mergeScan = mergeScan;
@@ -78,7 +78,7 @@ class MergeNode extends Node
 
     // Object state
 
-    private MergeScan mergeScan;
+    private MergeCursor mergeScan;
     private final Node left;
     private final Node right;
 }

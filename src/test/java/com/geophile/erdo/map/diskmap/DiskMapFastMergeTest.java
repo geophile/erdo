@@ -9,11 +9,11 @@ package com.geophile.erdo.map.diskmap;
 import com.geophile.erdo.*;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.RecordFactory;
 import com.geophile.erdo.map.diskmap.tree.LevelOneMultiRecord;
 import com.geophile.erdo.map.forestmap.TimestampMerger;
-import com.geophile.erdo.map.mergescan.FastMergeScan;
+import com.geophile.erdo.map.mergescan.FastMergeCursor;
 import com.geophile.erdo.map.mergescan.MultiRecordKey;
 import com.geophile.erdo.map.testarraymap.TestArrayMap;
 import com.geophile.erdo.transaction.TimestampSet;
@@ -80,14 +80,14 @@ public class DiskMapFastMergeTest
         diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
                                       b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
-        FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
+        FastMergeCursor merge = new FastMergeCursor(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
         merge.addInput(diskMapB.consolidationScan());
         merge.start();
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithKeys(merge, 1000);
         // Check merged map
-        MapScan scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = scan.next()) != null) {
@@ -133,7 +133,7 @@ public class DiskMapFastMergeTest
         diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
                                       b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
-        FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
+        FastMergeCursor merge = new FastMergeCursor(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
         merge.addInput(diskMapB.consolidationScan());
         merge.start();
@@ -189,14 +189,14 @@ public class DiskMapFastMergeTest
         diskMapB.loadForConsolidation(b.scan(null, MissingKeyAction.FORWARD),
                                       b.keyScan(null, MissingKeyAction.FORWARD));
         // Merge
-        FastMergeScan merge = new FastMergeScan(TimestampMerger.only());
+        FastMergeCursor merge = new FastMergeCursor(TimestampMerger.only());
         merge.addInput(diskMapA.consolidationScan());
         merge.addInput(diskMapB.consolidationScan());
         merge.start();
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithoutKeys(merge);
         // Check merged map
-        MapScan scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = mergedMap.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = scan.next()) != null) {
@@ -235,7 +235,7 @@ public class DiskMapFastMergeTest
 
     private void dump(String label, DiskMap map) throws IOException, InterruptedException
     {
-        MapScan scan = map.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = map.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         int count = 0;
         while ((lazyRecord = scan.next()) != null) {

@@ -9,11 +9,11 @@ package com.geophile.erdo;
 import java.io.IOException;
 
 /**
- * A Scan object is used to visit the records of an {@link com.geophile.erdo.OrderedMap}. The scan order is always
+ * A Cursor object is used to visit the records of an {@link com.geophile.erdo.OrderedMap}. The scan order is always
  * in ascending key order as defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
  */
 
-public abstract class Scan
+public abstract class Cursor
 {
     /**
      * Return the next record of the scan, or null if there are no more records to be visited.

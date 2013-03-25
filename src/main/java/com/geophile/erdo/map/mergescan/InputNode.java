@@ -6,7 +6,7 @@
 
 package com.geophile.erdo.map.mergescan;
 
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 
@@ -28,11 +28,11 @@ class InputNode extends Node
         key = record == null ? null : record.key();
     }
 
-    public InputNode(int position, MapScan input)
+    public InputNode(int position, MapCursor input)
     {
         super(position);
         this.input = input;
     }
 
-    private final MapScan input;
+    private final MapCursor input;
 }

@@ -100,9 +100,9 @@ public class ErdoTransactionTest
     private void verify() throws IOException, InterruptedException
     {
         long sum = 0;
-        Scan scan = accounts.findAll();
+        Cursor cursor = accounts.findAll();
         Account account;
-        while ((account = (Account) scan.next()) != null) {
+        while ((account = (Account) cursor.next()) != null) {
             LOG.log(Level.INFO, "{0}", account);
             sum += account.balance();
         }

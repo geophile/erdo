@@ -7,19 +7,19 @@
 package com.geophile.erdo.apiimpl;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.Scan;
+import com.geophile.erdo.Cursor;
 import com.geophile.erdo.UsageError;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
 
 import java.io.IOException;
 
-public class ScanImpl extends Scan
+public class CursorImpl extends Cursor
 {
-    // Scan interface
+    // Cursor interface
 
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
@@ -68,9 +68,9 @@ public class ScanImpl extends Scan
         }
     }
 
-    // ScanImpl interface
+    // CursorImpl interface
 
-    ScanImpl(TransactionManager transactionManager, MapScan mapScan)
+    CursorImpl(TransactionManager transactionManager, MapCursor mapScan)
     {
         this.mapScan = mapScan;
         this.transactionManager = transactionManager;
@@ -83,7 +83,7 @@ public class ScanImpl extends Scan
     private void checkTransaction()
     {
         if (transactionManager.currentTransaction() != transaction) {
-            throw new UsageError("Scan cannot be used across transaction boundaries");
+            throw new UsageError("Cursor cannot be used across transaction boundaries");
         }
     }
 
@@ -91,5 +91,5 @@ public class ScanImpl extends Scan
 
     private TransactionManager transactionManager;
     private Transaction transaction;
-    private MapScan mapScan;
+    private MapCursor mapScan;
 }

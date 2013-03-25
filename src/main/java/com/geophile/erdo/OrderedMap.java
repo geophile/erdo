@@ -90,12 +90,12 @@ public abstract class OrderedMap
 
     public abstract AbstractRecord find(AbstractKey key) throws IOException, InterruptedException;
 
-    public abstract Scan find(AbstractKey key, MissingKeyAction missingKeyAction)
+    public abstract Cursor find(AbstractKey key, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException;
 
-    public abstract Scan findAll()
+    public abstract Cursor findAll()
         throws IOException, InterruptedException;
 
-    public abstract Scan first() throws IOException, InterruptedException;
+    public abstract Cursor first() throws IOException, InterruptedException;
 
 }

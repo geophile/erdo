@@ -11,7 +11,7 @@ import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.testarraymap.TestArrayMap;
 import com.geophile.erdo.transaction.TimestampSet;
 import org.junit.After;
@@ -48,7 +48,7 @@ public class FastMergeTest
         for (int t = 0; t < TRIALS; t++) {
             TestArrayMap a = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 0);
             TestArrayMap b = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 1);
-            FastMergeScan merge = new FastMergeScan(MERGER);
+            FastMergeCursor merge = new FastMergeCursor(MERGER);
             merge.addInput(a.scan(null, MissingKeyAction.FORWARD));
             merge.addInput(b.scan(null, MissingKeyAction.FORWARD));
             merge.start();
@@ -59,7 +59,7 @@ public class FastMergeTest
                 AbstractRecord record = lazyRecord.materializeRecord();
                 if (record instanceof TestMultiRecord) {
                     TestMultiRecord multiRecord = (TestMultiRecord) record;
-                    MapScan scan = multiRecord.scan();
+                    MapCursor scan = multiRecord.scan();
                     LazyRecord lazyScanRecord;
                     while ((lazyScanRecord = scan.next()) != null) {
                         assertEquals(expected++, ((TestKey) lazyScanRecord.key()).key());
@@ -77,7 +77,7 @@ public class FastMergeTest
     private void dump(String label, TestArrayMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        MapScan scan = map.scan(null, MissingKeyAction.FORWARD);
+        MapCursor scan = map.scan(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
         while ((lazyRecord = scan.next()) != null) {
             System.out.println(String.format("    %s", lazyRecord.materializeRecord()));
@@ -124,7 +124,7 @@ public class FastMergeTest
                 arrayMaps[a].put(record, false);
             }
             // Start a merge of the ArrayMaps
-            FastMergeScan merge = new FastMergeScan(MERGER);
+            FastMergeCursor merge = new FastMergeCursor(MERGER);
             for (TestArrayMap arrayMap : arrayMaps) {
                 merge.addInput(arrayMap.scan(null, MissingKeyAction.FORWARD));
             }

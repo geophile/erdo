@@ -96,7 +96,7 @@ public class DiskPageTest
 */
         page = readable(erdoIdBuffer, timestampBuffer, keyBuffer, recordBuffer);
         startTransaction();
-        DiskPageScan scan = new DiskPageScan(page);
+        DiskPageCursor scan = new DiskPageCursor(page);
         TestRecord record;
         i = 0;
         while ((record = (TestRecord) scan.next()) != null) {

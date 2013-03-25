@@ -83,15 +83,15 @@
  *
  * <h2>Retrieval</h2>
  *
- * <p> {@link com.geophile.erdo.Scan} objects are used to retrieve the contents of a map.
- * {@link com.geophile.erdo.OrderedMap#scan()} returns a Scan object that visits all records in key order.
- * {@link com.geophile.erdo.OrderedMap#scan(Keys)} returns a Scan object that visits
+ * <p> {@link Cursor} objects are used to retrieve the contents of a map.
+ * {@link com.geophile.erdo.OrderedMap#scan()} returns a Cursor object that visits all records in key order.
+ * {@link com.geophile.erdo.OrderedMap#scan(Keys)} returns a Cursor object that visits
  * the record with a given key, or whose keys are within a  range.
  *
- * <p> The control of a Scan is simple: {@link com.geophile.erdo.Scan#next()} returns the next record, or null
- * if there are no more records. A Scan is considered to be open until next() returns null, closed once next()
- * has returned null. Once a Scan is closed, all subsequent calls to next() will return null.
- * A Scan can also be closed explicitly using {@link com.geophile.erdo.Scan#close()}.
+ * <p> The control of a Cursor is simple: {@link Cursor#next()} returns the next record, or null
+ * if there are no more records. A Cursor is considered to be open until next() returns null, closed once next()
+ * has returned null. Once a Cursor is closed, all subsequent calls to next() will return null.
+ * A Cursor can also be closed explicitly using {@link Cursor#close()}.
  * Any scans open at the end of a transaction will be closed by committing or rolling back the transaction.
  */
 

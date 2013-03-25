@@ -9,16 +9,16 @@ package com.geophile.erdo.map.transactionalmap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
-import com.geophile.erdo.map.forestmap.ForestMapScan;
+import com.geophile.erdo.map.MapCursor;
+import com.geophile.erdo.map.forestmap.ForestMapCursor;
 import com.geophile.erdo.map.forestmap.TimestampMerger;
-import com.geophile.erdo.map.mergescan.MergeScan;
+import com.geophile.erdo.map.mergescan.MergeCursor;
 
 import java.io.IOException;
 
-class TransactionalMapScan extends MapScan
+class TransactionalMapCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     public LazyRecord next() throws IOException, InterruptedException
     {
@@ -40,18 +40,18 @@ class TransactionalMapScan extends MapScan
         }
     }
 
-    // TransactionalMapScan interface
+    // TransactionalMapCursor interface
 
-    TransactionalMapScan(TransactionalMap transactionalMap, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    TransactionalMapCursor(TransactionalMap transactionalMap, AbstractKey startKey, MissingKeyAction missingKeyAction)
          throws IOException, InterruptedException
     {
         super(null, null);
-        MapScan snapshotScan = ForestMapScan.newScan(transactionalMap.forestSnapshot, startKey, missingKeyAction);
+        MapCursor snapshotScan = ForestMapCursor.newScan(transactionalMap.forestSnapshot, startKey, missingKeyAction);
         if (transactionalMap.updates == null || // dynamic map was rolled back.
             transactionalMap.updates.recordCount() == 0) {
             scan = snapshotScan;
         } else {
-            MergeScan mergeScan = new MergeScan(TimestampMerger.only());
+            MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
             mergeScan.addInput(snapshotScan);
             mergeScan.addInput(transactionalMap.updates.scan(startKey, missingKeyAction));
             mergeScan.start();
@@ -61,5 +61,5 @@ class TransactionalMapScan extends MapScan
 
     // State
 
-    private MapScan scan;
+    private MapCursor scan;
 }

@@ -17,7 +17,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class ScanTest
+public class CursorTest
 {
     @BeforeClass
     public static void beforeClass()
@@ -41,10 +41,10 @@ public class ScanTest
     @Test
     public void testNoOpenScansAfterCompletingScan() throws IOException, InterruptedException
     {
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
         int expectedKey = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expectedKey, (record.key()).key());
             Assert.assertEquals(value(expectedKey), record.stringValue());
             expectedKey++;
@@ -58,12 +58,12 @@ public class ScanTest
     @Test
     public void testNoOpenScansAfterClosingScanEarly() throws IOException, InterruptedException
     {
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
-        record = (TestRecord) scan.next();
+        record = (TestRecord) cursor.next();
         assertNotNull(record);
         assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
-        scan.close();
+        cursor.close();
         assertEquals(0, FACTORY.transactionManager().currentTransaction().openScans().size());
         db.commitTransaction();
         db.close();
@@ -72,9 +72,9 @@ public class ScanTest
     @Test
     public void testCommitWithOpenScan() throws IOException, InterruptedException
     {
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
-        record = (TestRecord) scan.next();
+        record = (TestRecord) cursor.next();
         assertNotNull(record);
         assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
         db.commitTransaction();
@@ -85,9 +85,9 @@ public class ScanTest
     @Test
     public void testRollbackWithOpenScan() throws IOException, InterruptedException
     {
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
-        record = (TestRecord) scan.next();
+        record = (TestRecord) cursor.next();
         assertNotNull(record);
         assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
         db.rollbackTransaction();

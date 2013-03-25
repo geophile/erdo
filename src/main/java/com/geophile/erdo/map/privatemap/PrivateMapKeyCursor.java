@@ -10,14 +10,14 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.KeyOnlyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.util.Iterator;
 import java.util.SortedMap;
 
-class PrivateMapKeyScan extends MapScan
+class PrivateMapKeyCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     public AbstractRecord next()
     {
@@ -41,11 +41,11 @@ class PrivateMapKeyScan extends MapScan
         closed = true;
     }
 
-    // PrivateMapKeyScan interface
+    // PrivateMapKeyCursor interface
 
-    public PrivateMapKeyScan(SortedMap<AbstractKey, AbstractRecord> contents,
-                             AbstractKey startKey,
-                             MissingKeyAction missingKeyAction)
+    public PrivateMapKeyCursor(SortedMap<AbstractKey, AbstractRecord> contents,
+                               AbstractKey startKey,
+                               MissingKeyAction missingKeyAction)
     {
         super(startKey, missingKeyAction);
         this.iterator =

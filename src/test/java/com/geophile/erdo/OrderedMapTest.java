@@ -46,10 +46,10 @@ public class OrderedMapTest
             Assert.assertEquals(i, ((TestKey) replaced.key()).key());
             Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
         }
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
         int expected = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expected++, record.key().key());
             Assert.assertEquals("second", record.stringValue());
         }
@@ -72,10 +72,10 @@ public class OrderedMapTest
         for (int i = 0; i < N; i++) {
             map.ensurePresent(TestRecord.createRecord(i, "second"));
         }
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
         int expected = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Assert.assertEquals(expected++, ((TestKey) record.key()).key());
             Assert.assertEquals("second", record.stringValue());
         }
@@ -134,7 +134,7 @@ public class OrderedMapTest
         // Based on SealedMapTest.testScan
         Database db = new DisklessTestDatabase(FACTORY);
         OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
-        Scan scan;
+        Cursor cursor;
         int expectedKey;
         int expectedLastKey;
         boolean expectedEmpty;
@@ -145,9 +145,9 @@ public class OrderedMapTest
             map.put(TestRecord.createRecord(i * gap, null));
         }
         // Full scan
-        scan = map.findAll();
+        cursor = map.findAll();
         expectedKey = 0;
-        while ((record = scan.next()) != null) {
+        while ((record = cursor.next()) != null) {
             Assert.assertEquals(expectedKey, key(record));
             expectedKey += gap;
         }
@@ -160,12 +160,12 @@ public class OrderedMapTest
                 for (int end = endBase - 1; end <= endBase + 1; end++) {
                     if (start <= end) {
                         TestKey endKey = new TestKey(end);
-                        scan = map.find(new TestKey(start), MissingKeyAction.FORWARD);
+                        cursor = map.find(new TestKey(start), MissingKeyAction.FORWARD);
                         expectedKey = start <= startBase ? startBase : startBase + gap;
                         expectedLastKey = end >= endBase ? endBase : endBase - gap;
                         expectedEmpty = start > end || start <= end && (end >= startBase || start <= endBase);
                         boolean empty = true;
-                        while ((record = scan.next()) != null && record.key().compareTo(endKey) <= 0) {
+                        while ((record = cursor.next()) != null && record.key().compareTo(endKey) <= 0) {
                             Assert.assertEquals(expectedKey, key(record));
                             expectedKey += gap;
                             empty = false;
@@ -190,9 +190,9 @@ public class OrderedMapTest
     private void dump(String label, OrderedMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         AbstractRecord record;
-        while ((record = scan.next()) != null) {
+        while ((record = cursor.next()) != null) {
             System.out.println(String.format("    %s, deleted: %s", record, record.deleted()));
         }
     }

@@ -8,13 +8,13 @@ package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 
-class DiskMapScan extends MapScan
+class DiskMapCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -44,9 +44,9 @@ class DiskMapScan extends MapScan
         treeLevelScan.goTo(key);
     }
 
-    // DiskMapScan interface
+    // DiskMapCursor interface
 
-    DiskMapScan(MapScan treeLevelScan)
+    DiskMapCursor(MapCursor treeLevelScan)
     {
         super(null, null);
         this.treeLevelScan = treeLevelScan;
@@ -54,5 +54,5 @@ class DiskMapScan extends MapScan
 
     // Object state
 
-    private MapScan treeLevelScan;
+    private MapCursor treeLevelScan;
 }

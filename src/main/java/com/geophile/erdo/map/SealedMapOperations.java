@@ -43,7 +43,7 @@ public interface SealedMapOperations extends Map, TransactionUpdates
      * @throws java.io.IOException
      * @throws InterruptedException
      */
-    void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws UnsupportedOperationException, IOException, InterruptedException;
 
     /**
@@ -62,19 +62,19 @@ public interface SealedMapOperations extends Map, TransactionUpdates
      * Start a key-ordered scan of this map's keys, starting with the given key. If the key is not
      * present, then missingKeyAction determines how to proceed:
      * - {@link MissingKeyAction#FORWARD}: Start the scan with the smallest key present that is larger than key.
-     *   If there is no such key, then the returned {@link MapScan} is closed.
+     *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
-     *   If there is no such key, then the returned {@link MapScan} is closed.
-     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapScan}.
+     *   If there is no such key, then the returned {@link MapCursor} is closed.
+     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapCursor}.
      * If key is null then all keys are visited. In this case, missingKeyAction must not be
      * {@link MissingKeyAction#STOP}.
      * @param key The starting key.
      * @param missingKeyAction Specifies where to start the scan if key is not present.
-     * @return MapScan object representing scan of keys, each contained in a KeyOnlyRecord.
+     * @return MapCursor object representing scan of keys, each contained in a KeyOnlyRecord.
      * @throws IOException
      * @throws InterruptedException
      */
-    MapScan keyScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
+    MapCursor keyScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
 
     /**
      * Return a scan used to consolidate records. The records obtained from the scan may be
@@ -85,5 +85,5 @@ public interface SealedMapOperations extends Map, TransactionUpdates
      *
      * @return a scan that will visit all elements of the map in key order.
      */
-    MapScan consolidationScan() throws IOException, InterruptedException;
+    MapCursor consolidationScan() throws IOException, InterruptedException;
 }

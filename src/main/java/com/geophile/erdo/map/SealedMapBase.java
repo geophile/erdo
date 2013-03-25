@@ -52,14 +52,14 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     // SealedMap interface
 
-    public abstract MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public abstract MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException;
 
     public abstract long recordCount();
 
     public abstract long estimatedSizeBytes();
 
-    public abstract void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    public abstract void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws IOException, InterruptedException;
 
     // Belongs to Consolidation.Element interface too
@@ -68,10 +68,10 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     public abstract boolean keysInMemory();
 
-    public abstract MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public abstract MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException;
 
-    public MapScan consolidationScan() throws IOException, InterruptedException
+    public MapCursor consolidationScan() throws IOException, InterruptedException
     {
         return scan(null, MissingKeyAction.FORWARD);
     }

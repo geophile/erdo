@@ -7,12 +7,11 @@
 package com.geophile.erdo.map.transactionalmap;
 
 import com.geophile.erdo.*;
-import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.OpenMapBase;
-import com.geophile.erdo.map.forestmap.ForestMapScan;
+import com.geophile.erdo.map.forestmap.ForestMapCursor;
 import com.geophile.erdo.map.privatemap.PrivateMap;
 import com.geophile.erdo.transaction.TransactionUpdates;
 
@@ -40,7 +39,7 @@ public class TransactionalMap extends OpenMapBase
         LazyRecord uncommitted = updateMap().put(record, returnReplaced);
         if (returnReplaced && uncommitted == null) {
             AbstractKey key = record.key();
-            MapScan scan = ForestMapScan.newScan(forestSnapshot, key, MissingKeyAction.STOP);
+            MapCursor scan = ForestMapCursor.newScan(forestSnapshot, key, MissingKeyAction.STOP);
             LazyRecord committed = scan.next();
             scan.close();
             replaced = committed;
@@ -59,9 +58,9 @@ public class TransactionalMap extends OpenMapBase
     }
 
     @Override
-    public MapScan scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    public MapCursor scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
     {
-        return new TransactionalMapScan(this, key, missingKeyAction);
+        return new TransactionalMapCursor(this, key, missingKeyAction);
     }
 
     // TransactionalMap interface

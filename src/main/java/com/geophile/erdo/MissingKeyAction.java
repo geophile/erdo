@@ -8,25 +8,25 @@ package com.geophile.erdo;
 
 /**
  * Used in conjunction with {@link OrderedMap#find(AbstractKey, MissingKeyAction)} to specify where the resulting
- * {@link Scan} starts, when the search key is not present in the map.
+ * {@link Cursor} starts, when the search key is not present in the map.
  */
 
 public enum MissingKeyAction
 {
     /**
-     * Find the smallest key larger than the given key. If there is no such key, then the resulting {@link Scan}
+     * Find the smallest key larger than the given key. If there is no such key, then the resulting {@link Cursor}
      * will be closed.
      */
     FORWARD,
 
     /**
-     * Find the largest key smaller than the given key. If there is no such key, then the resulting {@link Scan}
+     * Find the largest key smaller than the given key. If there is no such key, then the resulting {@link Cursor}
      * will be closed.
      */
     BACKWARD,
 
     /**
-     * The resulting {@link Scan} will be closed.
+     * The resulting {@link Cursor} will be closed.
      */
     STOP
 }

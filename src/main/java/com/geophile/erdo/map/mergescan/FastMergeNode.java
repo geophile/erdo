@@ -76,7 +76,7 @@ class FastMergeNode extends FastNode
         right.dump(level + 1);
     }
 
-    public FastMergeNode(MergeScan mergeScan, int position, FastNode left, FastNode right)
+    public FastMergeNode(MergeCursor mergeScan, int position, FastNode left, FastNode right)
     {
         super(position);
         this.mergeScan = mergeScan;
@@ -118,7 +118,7 @@ class FastMergeNode extends FastNode
 
     // Object state
 
-    private MergeScan mergeScan;
+    private MergeCursor mergeScan;
     private FastNode left;
     private FastNode right;
 }

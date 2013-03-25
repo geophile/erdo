@@ -6,7 +6,7 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
-class LevelOneMultiRecordScan extends TreeLevelScan
+class LevelOneMultiRecordCursor extends TreeLevelCursor
 {
     @Override
     boolean atEnd()
@@ -14,7 +14,7 @@ class LevelOneMultiRecordScan extends TreeLevelScan
         return super.atEnd() || position.equals(stopPosition);
     }
 
-    LevelOneMultiRecordScan(TreePosition startPosition, TreePosition stopPosition)
+    LevelOneMultiRecordCursor(TreePosition startPosition, TreePosition stopPosition)
     {
         super(startPosition);
         this.stopPosition = stopPosition;

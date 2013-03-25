@@ -10,7 +10,6 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.DeadlockException;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TransactionRolledBackException;
-import com.geophile.erdo.apiimpl.KeyRange;
 
 import java.io.IOException;
 
@@ -31,17 +30,17 @@ public interface CommonMapOperations extends Map
      * If key is null, then records are scanned from the beginning of the map. If the key is not
      * present, then missingKeyAction determines how to proceed:
      * - {@link MissingKeyAction#FORWARD}: Start the scan with the smallest key present that is larger than key.
-     *   If there is no such key, then the returned {@link MapScan} is closed.
+     *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
-     *   If there is no such key, then the returned {@link MapScan} is closed.
-     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapScan}.
+     *   If there is no such key, then the returned {@link MapCursor} is closed.
+     * - {@link MissingKeyAction#STOP}: Return a closed {@link MapCursor}.
      * @param key The starting key.
      * @param missingKeyAction Specifies where to start the scan if key is not present.
-     * @return A {@link MapScan} that will visit qualifying records in key order.
+     * @return A {@link MapCursor} that will visit qualifying records in key order.
      * @throws IOException
      * @throws InterruptedException
      */
-    MapScan scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
+    MapCursor scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
 
     /**
      * Lock the specified key for writing. This method will block if the key is already locked for

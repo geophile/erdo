@@ -11,7 +11,7 @@ import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.UsageError;
 import com.geophile.erdo.config.ConfigurationKeys;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.map.diskmap.DiskPage;
 import com.geophile.erdo.map.diskmap.IndexRecord;
@@ -35,23 +35,23 @@ public class Tree
 
     // Tree interface
 
-    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         return
             level(0).leafLevelEmpty()
-            ? MapScan.EMPTY
+            ? MapCursor.EMPTY
             : leafScan(startKey, missingKeyAction);
     }
 
-    public MapScan consolidationScan() throws IOException, InterruptedException
+    public MapCursor consolidationScan() throws IOException, InterruptedException
     {
         // If there aren't two levels, do a normal, slow scan. This consolidates small files. Also, fast merge logic
         // is dependent on the existence of level 1, to delimit level 0 files.
         return
             levels.size() <= 1
             ? scan(null, MissingKeyAction.FORWARD)
-            : new LevelOneScanToFindLevelZeroSegments(this);
+            : new LevelOneCursorToFindLevelZeroSegments(this);
     }
 
     public long sizeBytes()
@@ -202,25 +202,25 @@ public class Tree
 
     // For use by this class
 
-    private MapScan leafScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    private MapCursor leafScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        MapScan treeLevelScan;
+        MapCursor treeLevelScan;
         boolean singleKey = missingKeyAction == MissingKeyAction.STOP;
         if (startKey == null) {
             // Scan an entire Map
             // TODO: This does an unnecessary page read if the usage is to create a scan and then position
-            // TODO: it as necessary from ForestMapScan.
+            // TODO: it as necessary from ForestMapCursor.
             TreePosition start = newPosition().level(0).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage();
-            treeLevelScan = TreeLevelScan.startScan(start);
+            treeLevelScan = TreeLevelCursor.startScan(start);
         } else if (singleKey && !level(0).keyPossiblyPresent(startKey)) {
             // Exact match for missing key
-            treeLevelScan = MapScan.EMPTY;
+            treeLevelScan = MapCursor.EMPTY;
         } else {
             // Start scan at startKey
             TreePosition startPosition = newPosition().level(levels.size() - 1).firstSegmentOfLevel().firstPageOfSegment();
             descendToLeaf(startPosition, startKey, missingKeyAction);
-            treeLevelScan = TreeLevelScan.startScan(startPosition);
+            treeLevelScan = TreeLevelCursor.startScan(startPosition);
         }
         return treeLevelScan;
     }

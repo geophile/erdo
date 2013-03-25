@@ -11,7 +11,7 @@ import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.OpenOrSealedMapBase;
 import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.transaction.Transaction;
@@ -55,16 +55,16 @@ public class PrivateMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
-        return new PrivateMapScan(this, startKey, missingKeyAction);
+        return new PrivateMapCursor(this, startKey, missingKeyAction);
     }
 
     @Override
-    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        return new PrivateMapKeyScan(contents, startKey, missingKeyAction);
+        return new PrivateMapKeyCursor(contents, startKey, missingKeyAction);
     }
 
     // SealedMap interface
@@ -82,7 +82,7 @@ public class PrivateMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    public void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         throw new UnsupportedOperationException();

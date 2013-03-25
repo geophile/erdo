@@ -150,10 +150,10 @@ public class DatabaseTest
         db = Database.useDatabase(DB_DIRECTORY);
         map = db.useMap(MAP_NAME);
         LOG.log(Level.SEVERE, "About to start scan of reopened map");
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         TestRecord record;
         int expectedKey = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             assertEquals(expectedKey, record.key().key());
             assertEquals(value(expectedKey), record.stringValue());
             expectedKey++;

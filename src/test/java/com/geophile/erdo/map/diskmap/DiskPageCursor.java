@@ -7,11 +7,11 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 
-class DiskPageScan extends MapScan
+class DiskPageCursor extends MapCursor
 {
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
@@ -31,7 +31,7 @@ class DiskPageScan extends MapScan
         pageAccessBuffers = null;
     }
 
-    DiskPageScan(DiskPage page)
+    DiskPageCursor(DiskPage page)
     {
         super(null, null);
         this.page = page;

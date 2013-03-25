@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -44,9 +44,9 @@ public class TestMultiRecord extends AbstractMultiRecord
         records.add(record);
     }
 
-    public MapScan scan()
+    public MapCursor scan()
     {
-        return new IteratorScan(records.iterator());
+        return new IteratorCursor(records.iterator());
     }
 
     // TestMultiRecord interface

@@ -8,9 +8,8 @@ package com.geophile.erdo.map.emptymap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
-import com.geophile.erdo.apiimpl.KeyRange;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.SealedMapBase;
 import com.geophile.erdo.transaction.TimestampSet;
@@ -36,17 +35,17 @@ public class EmptyMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapScan scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        return new EmptyMapScan();
+        return new EmptyMapCursor();
     }
 
     @Override
-    public MapScan keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        return new EmptyMapScan();
+        return new EmptyMapCursor();
     }
 
     @Override
@@ -62,7 +61,7 @@ public class EmptyMap extends SealedMapBase
     }
 
     @Override
-    public void loadForConsolidation(MapScan recordScan, MapScan keyScan)
+    public void loadForConsolidation(MapCursor recordScan, MapCursor keyScan)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert false;

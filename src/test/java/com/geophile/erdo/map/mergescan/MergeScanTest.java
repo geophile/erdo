@@ -27,7 +27,7 @@ public class MergeScanTest extends MapBehaviorTestBase
     @Test
     public void testNoInputs() throws IOException, InterruptedException
     {
-        MergeScan scan = mergeScan();
+        MergeCursor scan = mergeScan();
         Assert.assertNull(scan.next());
     }
 
@@ -43,7 +43,7 @@ public class MergeScanTest extends MapBehaviorTestBase
             for (int i = 0; i < n; i++) {
                 map.put(newRecord(i, null), false);
             }
-            MergeScan scan = mergeScan(map);
+            MergeCursor scan = mergeScan(map);
             int expected = 0;
             AbstractRecord record;
             LazyRecord lazyRecord;
@@ -84,7 +84,7 @@ public class MergeScanTest extends MapBehaviorTestBase
                 Collections.sort(expected);
                 Iterator<Integer> expectedIterator = expected.iterator();
                 SealedMap oddMap = openMap;
-                MergeScan scan = mergeScan(evenMap, oddMap);
+                MergeCursor scan = mergeScan(evenMap, oddMap);
                 LazyRecord lazyRecord;
                 while ((lazyRecord = scan.next()) != null) {
                     Assert.assertEquals(expectedIterator.next().intValue(), key(lazyRecord.materializeRecord()));
@@ -112,7 +112,7 @@ public class MergeScanTest extends MapBehaviorTestBase
                 int m = random.nextInt(nInputs);
                 maps[m].put(newRecord(k, null), false);
             }
-            MergeScan scan = new MergeScan(TimestampMerger.only());
+            MergeCursor scan = new MergeCursor(TimestampMerger.only());
             for (PrivateMap map : maps) {
                 scan.addInput(map.scan(null, MissingKeyAction.FORWARD));
             }
@@ -126,9 +126,9 @@ public class MergeScanTest extends MapBehaviorTestBase
         }
     }
 
-    private MergeScan mergeScan(SealedMap... inputs) throws IOException, InterruptedException
+    private MergeCursor mergeScan(SealedMap... inputs) throws IOException, InterruptedException
     {
-        MergeScan mergeScan = new MergeScan(TimestampMerger.only());
+        MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
         for (SealedMap input : inputs) {
             mergeScan.addInput(input.scan(null, MissingKeyAction.FORWARD));
         }

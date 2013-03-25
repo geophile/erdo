@@ -63,10 +63,10 @@ public class CommitTest
             }
         }
         // Check contents
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         AbstractRecord record;
         int expected = 0;
-        while ((record = scan.next()) != null) {
+        while ((record = cursor.next()) != null) {
             assertEquals(expected++, key(record));
         }
         db.close();
@@ -133,10 +133,10 @@ public class CommitTest
         System.out.println("Callbacks complete");
 */
         // Check contents
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         AbstractRecord record;
         expected = 0;
-        while ((record = scan.next()) != null) {
+        while ((record = cursor.next()) != null) {
             assertEquals(expected++, key(record));
         }
         db.close();
@@ -150,9 +150,9 @@ public class CommitTest
     private void dump(String label, OrderedMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        Scan scan = map.findAll();
+        Cursor cursor = map.findAll();
         AbstractRecord record;
-        while ((record = scan.next()) != null) {
+        while ((record = cursor.next()) != null) {
             System.out.println(String.format("    %s, deleted: %s", record, record.deleted()));
         }
     }

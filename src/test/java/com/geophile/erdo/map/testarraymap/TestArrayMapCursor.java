@@ -9,13 +9,13 @@ package com.geophile.erdo.map.testarraymap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
 
-public class TestArrayMapScan extends MapScan
+public class TestArrayMapCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     @Override
     public LazyRecord next() throws IOException, InterruptedException
@@ -50,9 +50,9 @@ public class TestArrayMapScan extends MapScan
         }
     }
 
-    // ArrayMapScan interface
+    // ArrayMapCursor interface
 
-    TestArrayMapScan(TestArrayMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    TestArrayMapCursor(TestArrayMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         super(startKey, missingKeyAction);
         this.map = map;

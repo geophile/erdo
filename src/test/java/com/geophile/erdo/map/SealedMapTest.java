@@ -40,7 +40,7 @@ public class SealedMapTest extends MapBehaviorTestBase
 //        print("testScan %s: %s", map, n);
         try {
             FACTORY.reset();
-            MapScan scan;
+            MapCursor scan;
             int expectedKey;
             int expectedLastKey;
             boolean expectedEmpty;

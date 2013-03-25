@@ -10,11 +10,11 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.KeyOnlyRecord;
-import com.geophile.erdo.map.MapScan;
+import com.geophile.erdo.map.MapCursor;
 
-public class KeyArrayScan extends MapScan
+public class KeyArrayCursor extends MapCursor
 {
-    // MapScan interface
+    // MapCursor interface
 
     public AbstractRecord next()
     {
@@ -40,9 +40,9 @@ public class KeyArrayScan extends MapScan
         }
     }
 
-    // KeyArrayScan interface
+    // KeyArrayCursor interface
 
-    KeyArrayScan(KeyArray keys, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    KeyArrayCursor(KeyArray keys, AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         super(startKey, missingKeyAction);
         this.keys = keys;
