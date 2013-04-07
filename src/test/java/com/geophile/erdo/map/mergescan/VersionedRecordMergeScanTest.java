@@ -30,7 +30,7 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
         // Value is key.version
         final int N = 10;
         // Turn off consolidation, so that we end up with N maps that need to be merged.
-        MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
+        MergeCursor mergeScan = new MergeCursor();
         for (int version = 0; version < N; version++) {
             TestArrayMap map = new TestArrayMap(FACTORY, new TimestampSet(version));
             for (int k = 0; k < N - version; k++) {
@@ -38,13 +38,13 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
                 record.key().transactionTimestamp(version);
                 map.put(record, false);
             }
-            mergeScan.addInput(map.scan(null, MissingKeyAction.FORWARD));
+            mergeScan.addInput(map.cursor(null, MissingKeyAction.FORWARD));
         }
         mergeScan.start();
         TestRecord record;
         int expectedKey;
         while ((record = (TestRecord) mergeScan.next()) != null) {
-            expectedKey = ((TestKey)record.key()).key();
+            expectedKey = record.key().key();
             String expectedValue = String.format("%s.%s", expectedKey, N - 1 - expectedKey);
             String actualValue = record.stringValue();
             Assert.assertEquals(expectedValue, actualValue);

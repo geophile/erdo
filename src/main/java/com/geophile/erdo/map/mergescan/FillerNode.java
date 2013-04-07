@@ -23,6 +23,6 @@ class FillerNode extends Node
 
     public FillerNode(int position)
     {
-        super(position);
+        super(position, true);
     }
 }

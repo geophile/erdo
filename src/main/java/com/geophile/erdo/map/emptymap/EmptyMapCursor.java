@@ -24,6 +24,12 @@ public class EmptyMapCursor extends MapCursor
     }
 
     @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return null;
+    }
+
+    @Override
     public void close()
     {}
 

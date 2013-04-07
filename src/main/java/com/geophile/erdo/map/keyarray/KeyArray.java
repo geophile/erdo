@@ -30,7 +30,7 @@ public class KeyArray
         return array.object().size();
     }
 
-    public KeyArrayCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public KeyArrayCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         assert closed;
         return new KeyArrayCursor(this, startKey, missingKeyAction);

@@ -33,7 +33,7 @@ public class ArrayMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         return new ArrayMapCursor(this, startKey, missingKeyAction);
@@ -43,7 +43,7 @@ public class ArrayMap extends SealedMapBase
     public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        return scan(startKey, missingKeyAction);
+        return cursor(startKey, missingKeyAction);
     }
 
     @Override

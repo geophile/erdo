@@ -26,30 +26,36 @@ package com.geophile.erdo.map.mergescan;
  */
 
 import com.geophile.erdo.map.MapCursor;
+import com.geophile.erdo.map.forestmap.TimestampMerger;
 
 public class FastMergeCursor extends MergeCursor
 {
-    // MergeCursor interface
+    // FastMergerCursor interface
 
-    public FastMergeCursor(Merger merger)
+    public FastMergeCursor()
     {
-        super(merger);
+        this(TimestampMerger.only(), true);
     }
 
     // For use by this package
 
-    Node mergeNode(int position, Node left, Node right)
+    Node mergeNode(int position, Node left, Node right, boolean forward)
     {
-        return new FastMergeNode(this, position, (FastNode) left, (FastNode) right);
+        return new FastMergeNode(this, position, (FastNode) left, (FastNode) right, forward);
     }
 
-    Node inputNode(int position, MapCursor input)
+    Node inputNode(int position, MapCursor input, boolean forward)
     {
-        return new FastInputNode(position, input);
+        return new FastInputNode(position, input, forward);
     }
 
     Node fillerNode(int position)
     {
         return new FastFillerNode(position);
+    }
+
+    FastMergeCursor(Merger merger, boolean forward)
+    {
+        super(merger, forward);
     }
 }

@@ -55,8 +55,8 @@ public class OpenMapTest extends MapBehaviorTestBase
                 }
                 expectedKey = 0;
                 expectedValue = "update";
-                MapCursor scan = map.scan(null, MissingKeyAction.FORWARD);
-                while ((lazyRecord = scan.next()) != null) {
+                MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+                while ((lazyRecord = cursor.next()) != null) {
                     record = lazyRecord.materializeRecord();
                     Assert.assertEquals(expectedKey, key(record));
                     Assert.assertEquals(expectedValue, ((TestRecord) record).stringValue());
@@ -78,8 +78,8 @@ public class OpenMapTest extends MapBehaviorTestBase
                     Assert.assertNull(replaced);
                 }
                 expectedKey = 0;
-                MapCursor scan = map.scan(null, MissingKeyAction.FORWARD);
-                while ((lazyRecord = scan.next()) != null) {
+                MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+                while ((lazyRecord = cursor.next()) != null) {
                     record = lazyRecord.materializeRecord();
                     Assert.assertEquals(expectedKey, key(record));
                     if (expectedKey <= key) {

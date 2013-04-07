@@ -20,19 +20,13 @@ public class TestArrayMapCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        if (!done && position < map.recordCount()) {
-            next = map.records.get(position);
-            if (!isOpen(next.key())) {
-                next = null;
-            } else {
-                position++;
-            }
-            if (next == null) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -46,7 +40,7 @@ public class TestArrayMapCursor extends MapCursor
     {
         position = map.keys.binarySearch(key);
         if (position < 0) {
-            position = -position - 1;
+            close();
         }
     }
 
@@ -57,13 +51,38 @@ public class TestArrayMapCursor extends MapCursor
         super(startKey, missingKeyAction);
         this.map = map;
         if (startKey == null) {
-            this.position = 0;
+            this.position =
+                missingKeyAction.forward()
+                ? 0
+                : (int) map.recordCount() - 1;
         } else {
             this.position = map.keys.binarySearch(startKey);
             if (this.position < 0) {
-                this.position = -this.position - 1;
+                this.position =
+                    missingKeyAction.forward()
+                    ? -this.position - 1
+                    : -this.position - 2;
             }
         }
+    }
+
+    // For use by this class
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        if (!done && position >= 0 && position < map.recordCount()) {
+            neighbor = map.records.get(position);
+            if (!isOpen(neighbor.key())) {
+                neighbor = null;
+            } else {
+                position += forward ? 1 : -1;
+            }
+            if (neighbor == null) {
+                close();
+            }
+        }
+        return neighbor;
     }
 
     // Object state

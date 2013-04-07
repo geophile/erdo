@@ -20,19 +20,13 @@ public class ArrayMapCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        if (!done && position < map.recordCount()) {
-            next = map.records.get(position);
-            if (!isOpen(next.key())) {
-                next = null;
-            } else {
-                position++;
-            }
-            if (next == null) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -46,7 +40,8 @@ public class ArrayMapCursor extends MapCursor
     {
         position = binarySearch(key);
         if (position < 0) {
-            position = -position - 1;
+            // goTo is used for exact match only. So if position < 0, indicating a missing key, we're done.
+            close();
         }
     }
 
@@ -58,11 +53,11 @@ public class ArrayMapCursor extends MapCursor
         super(startKey, missingKeyAction);
         this.map = map;
         if (startKey == null) {
-            this.position = 0;
+            this.position = missingKeyAction.forward() ? 0 : (int) map.recordCount() - 1;
         } else {
             this.position = binarySearch(startKey);
             if (this.position < 0) {
-                this.position = -this.position - 1;
+                this.position = missingKeyPosition(this.position, missingKeyAction);
             }
         }
     }
@@ -89,6 +84,33 @@ public class ArrayMapCursor extends MapCursor
             }
         }
         return -(low + 1);  // key not found.
+    }
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        if (!done && position >= 0 && position < map.recordCount()) {
+            neighbor = map.records.get(position);
+            if (!isOpen(neighbor.key())) {
+                neighbor = null;
+            } else {
+                if (forward) {
+                    position++;
+                } else {
+                    position--;
+                }
+            }
+            if (neighbor == null) {
+                close();
+            }
+        }
+        return neighbor;
+    }
+
+    private static int missingKeyPosition(int position, MissingKeyAction missingKeyAction)
+    {
+        assert position < 0;
+        return missingKeyAction.forward() ? -position - 1 : -position - 2;
     }
 
     // Object state

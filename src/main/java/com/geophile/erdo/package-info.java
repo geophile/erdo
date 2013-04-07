@@ -9,7 +9,7 @@
  *
  * An Erdo {@link com.geophile.erdo.Database} contains ordered maps.
  * Each {@link com.geophile.erdo.OrderedMap} contains key/value pairs.
- * Keys are unique within a map. Maps are ordered, so when map contents are scanned,
+ * Keys are unique within a map. Maps are ordered, so when map contents are traversed,
  * records are visited in key order, as defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
  *
  * <h2>Usage</h2>
@@ -91,7 +91,7 @@
  * if there are no more records. A Cursor is considered to be open until next() returns null, closed once next()
  * has returned null. Once a Cursor is closed, all subsequent calls to next() will return null.
  * A Cursor can also be closed explicitly using {@link com.geophile.erdo.Cursor#close()}.
- * Any scans open at the end of a transaction will be closed by committing or rolling back the transaction.
+ * Any cursors open at the end of a transaction will be closed by committing or rolling back the transaction.
  */
 
 package com.geophile.erdo;

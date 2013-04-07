@@ -203,7 +203,7 @@ public class TreePrinter
                     print(3, "%s", leafSegment.leafLastKey());
                 }
             }
-            position.advanceRecord();
+            position.goToNextRecord();
         }
     }
 
@@ -241,7 +241,7 @@ public class TreePrinter
             } else {
                 print(3, "%s", record);
             }
-            position.advanceRecord();
+            position.goToNextRecord();
         }
     }
 

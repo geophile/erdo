@@ -28,5 +28,11 @@ public enum MissingKeyAction
     /**
      * The resulting {@link Cursor} will be closed.
      */
-    CLOSE
+    CLOSE;
+
+    public boolean forward()
+    {
+        // Handle CLOSE the same as FORWARD
+        return this != BACKWARD;
+    }
 }

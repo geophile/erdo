@@ -26,21 +26,21 @@ public interface CommonMapOperations extends Map
     long mapId();
 
     /**
-     * Return a scan that will visit, in key order, the elements of the map starting with key.
+     * Return a new cursor that will visit, in key order, the elements of the map starting with key.
      * If key is null, then records are scanned from the beginning of the map. If the key is not
      * present, then missingKeyAction determines how to proceed:
-     * - {@link MissingKeyAction#FORWARD}: Start the scan with the smallest key present that is larger than key.
+     * - {@link MissingKeyAction#FORWARD}: Start the cursor with the smallest key present that is larger than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
+     * - {@link MissingKeyAction#BACKWARD}: Start the cursor with the largest key present that is smaller than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#CLOSE}: Return a closed {@link MapCursor}.
      * @param key The starting key.
-     * @param missingKeyAction Specifies where to start the scan if key is not present.
+     * @param missingKeyAction Specifies where to start the cursor if key is not present.
      * @return A {@link MapCursor} that will visit qualifying records in key order.
      * @throws IOException
      * @throws InterruptedException
      */
-    MapCursor scan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
+    MapCursor cursor(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
 
     /**
      * Lock the specified key for writing. This method will block if the key is already locked for

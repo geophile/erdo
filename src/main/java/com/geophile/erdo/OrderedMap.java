@@ -107,7 +107,7 @@ public abstract class OrderedMap
      * - {@link MissingKeyAction#CLOSE}: The cursor is closed.
      * @param key The key to search for.
      * @param missingKeyAction Controls initialization of the cursor when the search key is not present in the map.
-     * @return
+     * @return A cursor positioned at the given key
      * @throws IOException
      * @throws InterruptedException
      */
@@ -122,4 +122,11 @@ public abstract class OrderedMap
      */
     public abstract Cursor first() throws IOException, InterruptedException;
 
+    /**
+     * Returns a cursor positioned at the largest key present in the map.
+     * @return A cursor positioned at the largest key present in the map.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public abstract Cursor last() throws IOException, InterruptedException;
 }

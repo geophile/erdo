@@ -43,7 +43,7 @@ class FastMergeNode extends FastNode
                     promote();
                 } else {
                     Node keep = null;
-                    switch (mergeScan.merger.merge(left.key, right.key)) {
+                    switch (mergeCursor.merger.merge(left.key, right.key)) {
                         case LEFT:
                             keep = left;
                             break;
@@ -76,10 +76,10 @@ class FastMergeNode extends FastNode
         right.dump(level + 1);
     }
 
-    public FastMergeNode(MergeCursor mergeScan, int position, FastNode left, FastNode right)
+    public FastMergeNode(MergeCursor mergeCursor, int position, FastNode left, FastNode right, boolean forward)
     {
-        super(position);
-        this.mergeScan = mergeScan;
+        super(position, forward);
+        this.mergeCursor = mergeCursor;
         this.left = left;
         this.right = right;
     }
@@ -102,6 +102,9 @@ class FastMergeNode extends FastNode
             c = rightMultiRecordKey.lo() != null && leftKey.compareTo(rightMultiRecordKey.lo()) < 0 ? -1 :
                 rightMultiRecordKey.hi() != null && leftKey.compareTo(rightMultiRecordKey.hi()) >= 0 ? 1 : 0;
         }
+        if (!forward) {
+            c = -c;
+        }
         boolean leftBeforeRight = c < 0;
         boolean rightBeforeLeft = c > 0;
         return
@@ -118,7 +121,7 @@ class FastMergeNode extends FastNode
 
     // Object state
 
-    private MergeCursor mergeScan;
+    private final MergeCursor mergeCursor;
     private FastNode left;
     private FastNode right;
 }

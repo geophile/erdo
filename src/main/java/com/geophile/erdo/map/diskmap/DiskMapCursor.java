@@ -19,14 +19,13 @@ class DiskMapCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        if (treeLevelScan != null) {
-            next = treeLevelScan.next();
-            if (next == null) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -50,6 +49,20 @@ class DiskMapCursor extends MapCursor
     {
         super(null, null);
         this.treeLevelScan = treeLevelScan;
+    }
+
+    // For use by this class
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        if (treeLevelScan != null) {
+            neighbor = forward ? treeLevelScan.next() : treeLevelScan.previous();
+            if (neighbor == null) {
+                close();
+            }
+        }
+        return neighbor;
     }
 
     // Object state

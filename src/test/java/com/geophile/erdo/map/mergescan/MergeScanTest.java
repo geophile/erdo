@@ -27,8 +27,8 @@ public class MergeScanTest extends MapBehaviorTestBase
     @Test
     public void testNoInputs() throws IOException, InterruptedException
     {
-        MergeCursor scan = mergeScan();
-        Assert.assertNull(scan.next());
+        MergeCursor cursor = mergeScan();
+        Assert.assertNull(cursor.next());
     }
 
     @Test
@@ -43,11 +43,11 @@ public class MergeScanTest extends MapBehaviorTestBase
             for (int i = 0; i < n; i++) {
                 map.put(newRecord(i, null), false);
             }
-            MergeCursor scan = mergeScan(map);
+            MergeCursor cursor = mergeScan(map);
             int expected = 0;
             AbstractRecord record;
             LazyRecord lazyRecord;
-            while ((lazyRecord = scan.next()) != null) {
+            while ((lazyRecord = cursor.next()) != null) {
                 record = lazyRecord.materializeRecord();
                 Assert.assertEquals(expected++, key(record));
             }
@@ -84,9 +84,9 @@ public class MergeScanTest extends MapBehaviorTestBase
                 Collections.sort(expected);
                 Iterator<Integer> expectedIterator = expected.iterator();
                 SealedMap oddMap = openMap;
-                MergeCursor scan = mergeScan(evenMap, oddMap);
+                MergeCursor cursor = mergeScan(evenMap, oddMap);
                 LazyRecord lazyRecord;
-                while ((lazyRecord = scan.next()) != null) {
+                while ((lazyRecord = cursor.next()) != null) {
                     Assert.assertEquals(expectedIterator.next().intValue(), key(lazyRecord.materializeRecord()));
                 }
                 Assert.assertTrue(!expectedIterator.hasNext());
@@ -112,14 +112,14 @@ public class MergeScanTest extends MapBehaviorTestBase
                 int m = random.nextInt(nInputs);
                 maps[m].put(newRecord(k, null), false);
             }
-            MergeCursor scan = new MergeCursor(TimestampMerger.only());
+            MergeCursor cursor = new MergeCursor();
             for (PrivateMap map : maps) {
-                scan.addInput(map.scan(null, MissingKeyAction.FORWARD));
+                cursor.addInput(map.cursor(null, MissingKeyAction.FORWARD));
             }
-            scan.start();
+            cursor.start();
             LazyRecord lazyRecord;
             int expected = 0;
-            while ((lazyRecord = scan.next()) != null) {
+            while ((lazyRecord = cursor.next()) != null) {
                 Assert.assertEquals(expected++, ((TestKey) lazyRecord.key()).key());
             }
             Assert.assertEquals(nRecords, expected);
@@ -128,9 +128,9 @@ public class MergeScanTest extends MapBehaviorTestBase
 
     private MergeCursor mergeScan(SealedMap... inputs) throws IOException, InterruptedException
     {
-        MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
+        MergeCursor mergeScan = new MergeCursor();
         for (SealedMap input : inputs) {
-            mergeScan.addInput(input.scan(null, MissingKeyAction.FORWARD));
+            mergeScan.addInput(input.cursor(null, MissingKeyAction.FORWARD));
         }
         mergeScan.start();
         return mergeScan;

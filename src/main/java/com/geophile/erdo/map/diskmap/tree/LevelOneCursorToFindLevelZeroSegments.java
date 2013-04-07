@@ -24,7 +24,7 @@ class LevelOneCursorToFindLevelZeroSegments extends MapCursor
             IndexRecord lo = hi;
             IndexRecord hiPredecessor;
             do {
-                levelOnePosition.advanceRecord();
+                levelOnePosition.goToNextRecord();
                 hiPredecessor = hi;
                 hi = levelOnePosition.atEnd() ? null : currentLevelOneRecord();
             } while (hi != null && levelZeroSegmentNumber(lo) == levelZeroSegmentNumber(hi));
@@ -32,6 +32,15 @@ class LevelOneCursorToFindLevelZeroSegments extends MapCursor
             levelOnePosition.copyTo(runStart); // Get ready for next level-0 file
         }
         return multiRecord;
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        // LevelOneCursorToFindLevelZeroSegments is used only in a consolidation scan, which doesn't need to
+        // run backward.
+        assert false;
+        return null;
     }
 
     @Override

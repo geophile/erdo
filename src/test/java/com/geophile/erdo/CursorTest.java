@@ -40,7 +40,7 @@ public class CursorTest
             TestRecord record;
             TestKey key;
             int expected;
-            // Complete scan
+            // Complete cursor
             {
                 expected = 0;
                 cursor = map.first();
@@ -48,6 +48,14 @@ public class CursorTest
                     checkRecord(expected++, record);
                 }
                 assertEquals(n, expected);
+/*
+                expected = 0;
+                cursor = map.last();
+                while ((record = (TestRecord) cursor.previous()) != null) {
+                    checkRecord(expected++, record);
+                }
+                assertEquals(n, expected);
+*/
             }
             // Random access
             {

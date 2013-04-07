@@ -17,7 +17,7 @@ import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.transaction.Transaction;
 
 import java.io.IOException;
-import java.util.SortedMap;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 // PrivateMap is an updatable map that stores updates for a single transaction.
@@ -55,7 +55,7 @@ public class PrivateMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         return new PrivateMapCursor(this, startKey, missingKeyAction);
     }
@@ -106,6 +106,6 @@ public class PrivateMap extends OpenOrSealedMapBase
 
     // Object state
 
-    SortedMap<AbstractKey, AbstractRecord> contents = new TreeMap<>();
+    NavigableMap<AbstractKey, AbstractRecord> contents = new TreeMap<>();
     private long estimatedSizeBytes = 0;
 }

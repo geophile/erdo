@@ -144,7 +144,7 @@ public class OrderedMapTest
         for (int i = 0; i < N; i++) {
             map.put(TestRecord.createRecord(i * gap, null));
         }
-        // Full scan
+        // Full cursor
         cursor = map.first();
         expectedKey = 0;
         while ((record = cursor.next()) != null) {

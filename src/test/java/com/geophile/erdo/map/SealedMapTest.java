@@ -40,18 +40,18 @@ public class SealedMapTest extends MapBehaviorTestBase
 //        print("testScan %s: %s", map, n);
         try {
             FACTORY.reset();
-            MapCursor scan;
+            MapCursor cursor;
             int expectedKey;
             int expectedLastKey;
             boolean expectedEmpty;
             LazyRecord lazyRecord;
-            // Full scan
-            scan = map.scan(null, MissingKeyAction.FORWARD);
+            // Full cursor
+            cursor = map.cursor(null, MissingKeyAction.FORWARD);
             expectedKey = 0;
-            while ((lazyRecord = scan.next()) != null) {
+            while ((lazyRecord = cursor.next()) != null) {
                 assertEquals(expectedKey, key(lazyRecord));
                 expectedKey += GAP;
-//                print("scan %s", key(record));
+//                print("cursor %s", key(record));
             }
             assertEquals(n * GAP, expectedKey);
             // Try scans starting at, before, and after each key and ending at, before and after each key.
@@ -65,14 +65,14 @@ public class SealedMapTest extends MapBehaviorTestBase
                                 continue;
                             }
 //                            print("i: %s, start: %s, end: %s", i, start, end);
-                            scan = map.scan(newKey(start), MissingKeyAction.FORWARD);
+                            cursor = map.cursor(newKey(start), MissingKeyAction.FORWARD);
                             TestKey endKey = newKey(end);
                             expectedKey = start <= startBase ? startBase : startBase + GAP;
                             expectedLastKey = end >= endBase ? endBase : endBase - GAP;
                             expectedEmpty = start > end || start <= end && (end >= startBase || start <= endBase);
                             boolean empty = true;
-                            while ((lazyRecord = scan.next()) != null && lazyRecord.key().compareTo(endKey) <= 0) {
-//                                print("scan %s:%s: %s", start, end, key(record));
+                            while ((lazyRecord = cursor.next()) != null && lazyRecord.key().compareTo(endKey) <= 0) {
+//                                print("cursor %s:%s: %s", start, end, key(record));
                                 assertEquals(expectedKey, key(lazyRecord));
                                 expectedKey += GAP;
                                 empty = false;

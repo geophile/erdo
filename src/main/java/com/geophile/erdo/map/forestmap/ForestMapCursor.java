@@ -18,21 +18,21 @@ import java.util.logging.Logger;
  * A Forest has several trees. The keys of a tree are kept in memory except for a few of the
  * biggest trees. These in-memory keys are used to speed up ForestMap scans.
  *
- * A ForestMap scan can be done in two ways:
+ * A ForestMap cursor can be done in two ways:
  * 1) Put all of the forest's trees into a MergeCursor.
  * 2) Merge the keys of the biggest trees (whose keys are not in memory) with the in-memory keys
  * from the smaller trees. This merge yields the newest version of each key. For each key provided
  * by the merge, find the associated record.
  *
- * For a complete scan, #2 might be a little faster, possibly avoiding an occasional big-tree page
+ * For a complete cursor, #2 might be a little faster, possibly avoiding an occasional big-tree page
  * containing nothing but obsolete records.
  *
- * For a narrow scan, #2 should be a lot better. For example, suppose we have a forest with 100
- * trees and a scan that yields 10 records. With #1 we have to probe all 100 trees, just to
- * start each tree scan. With #2 we probe at most 10 trees, because we know exactly which
+ * For a narrow cursor, #2 should be a lot better. For example, suppose we have a forest with 100
+ * trees and a cursor that yields 10 records. With #1 we have to probe all 100 trees, just to
+ * start each tree cursor. With #2 we probe at most 10 trees, because we know exactly which
  * trees have relevant records.
  *
- * A probably important special case is a scan with start = end. There are three possibilities
+ * A probably important special case is a cursor with start = end. There are three possibilities
  * (k = start = end):
  * a) k does not exist in any tree in the forest. The in-memory keys do not contain k so we search
  *    all big tree.

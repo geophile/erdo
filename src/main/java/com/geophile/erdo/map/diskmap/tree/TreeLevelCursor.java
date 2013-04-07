@@ -32,22 +32,13 @@ class TreeLevelCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        TreePosition next = null;
-        if (!closed) {
-            next = position.copy();
-            if (atEnd()) {
-                close();
-            } else {
-                position.advanceRecord();
-                if (position.atEnd()) {
-                    close();
-                }
-            }
-        }
-        if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, "{0} next: {1}", new Object[]{this, next});
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -87,7 +78,7 @@ class TreeLevelCursor extends MapCursor
 
     // TreeLevelCursor interface
 
-    static TreeLevelCursor startScan(TreePosition start)
+    static TreeLevelCursor newCursor(TreePosition start)
     {
         return new TreeLevelCursor(start);
     }
@@ -111,6 +102,33 @@ class TreeLevelCursor extends MapCursor
         if (LOG.isLoggable(Level.INFO)) {
             LOG.log(Level.INFO, "{0} {1}", new Object[]{this, closed ? "closed at start" : "open"});
         }
+    }
+
+    // For use by this class
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        TreePosition neighbor = null;
+        if (!closed) {
+            neighbor = position.copy();
+            if (atEnd()) {
+                close();
+            } else {
+                if (forward) {
+                    position.goToNextRecord();
+                } else {
+                    position.goToPreviousRecord();
+                }
+                if (position.atEnd()) {
+                    close();
+                }
+            }
+        }
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "{0} {1} neighbor: {2}",
+                    new Object[]{this, (forward ? "forward" : "backward"), neighbor});
+        }
+        return neighbor;
     }
 
     // Class state

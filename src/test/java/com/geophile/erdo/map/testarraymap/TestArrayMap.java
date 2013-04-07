@@ -49,7 +49,7 @@ public class TestArrayMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
     {
         return new TestArrayMapCursor(this, startKey, missingKeyAction);
     }
@@ -60,8 +60,8 @@ public class TestArrayMap extends OpenOrSealedMapBase
     {
         return
             keys == null
-            ? scan(startKey, missingKeyAction)
-            : keys.scan(startKey, missingKeyAction);
+            ? cursor(startKey, missingKeyAction)
+            : keys.cursor(startKey, missingKeyAction);
     }
 
     @Override

@@ -102,13 +102,13 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         try {
             recordScan =
                 slowmerge || !inputDurable // If !inputDurable, fast merge has no benefit
-                ? new MergeCursor(TimestampMerger.only())
-                : new FastMergeCursor(TimestampMerger.only());
-            keyScan = new MergeCursor(TimestampMerger.only());
+                ? new MergeCursor()
+                : new FastMergeCursor();
+            keyScan = new MergeCursor();
             List<SealedMap> obsoleteTrees = new ArrayList<>();
             for (Element element : obsolete) {
                 SealedMap map = (SealedMap) element;
-                recordScan.addInput(slowmerge ? map.scan(null, MissingKeyAction.FORWARD) : map.consolidationScan());
+                recordScan.addInput(slowmerge ? map.cursor(null, MissingKeyAction.FORWARD) : map.consolidationScan());
                 if (keyScan != null) {
                     if (map.keysInMemory()) {
                         keyScan.addInput(map.keyScan(null, MissingKeyAction.FORWARD));

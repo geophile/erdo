@@ -39,7 +39,7 @@ public abstract class AbstractMultiRecord extends AbstractRecord
 
     public abstract void append(AbstractRecord record);
 
-    public abstract MapCursor scan();
+    public abstract MapCursor cursor();
 
     // For use by subclasses
 

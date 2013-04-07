@@ -26,6 +26,9 @@ class MergeNode extends Node
     {
         if (left.key != null && right.key != null) {
             int c = left.key.compareTo(right.key);
+            if (!forward) {
+                c = -c;
+            }
             if (c < 0) {
                 key = left.key;
                 record = left.record;
@@ -36,7 +39,7 @@ class MergeNode extends Node
                 right.promote();
             } else {
                 Node keep = null;
-                switch (mergeScan.merger.merge(left.key, right.key)) {
+                switch (mergeCursor.merger.merge(left.key, right.key)) {
                     case LEFT:
                         keep = left;
                         break;
@@ -68,17 +71,17 @@ class MergeNode extends Node
         right.dump(level + 1);
     }
 
-    public MergeNode(MergeCursor mergeScan, int position, Node left, Node right)
+    public MergeNode(MergeCursor mergeCursor, int position, Node left, Node right, boolean forward)
     {
-        super(position);
-        this.mergeScan = mergeScan;
+        super(position, forward);
+        this.mergeCursor = mergeCursor;
         this.left = left;
         this.right = right;
     }
 
     // Object state
 
-    private MergeCursor mergeScan;
+    private final MergeCursor mergeCursor;
     private final Node left;
     private final Node right;
 }

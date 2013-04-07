@@ -35,7 +35,7 @@ public class EmptyMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         return new EmptyMapCursor();

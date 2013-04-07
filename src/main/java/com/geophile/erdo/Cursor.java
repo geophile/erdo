@@ -19,11 +19,21 @@ public abstract class Cursor
      * If this cursor is positioned on a record, then the current record is returned, and the cursor is
      * moved to the record with the next larger key. If the cursor is closed (i.e., not positioned on a record),
      * then null is returned.
-     * @return The current record of the scan, or null if the cursor is closed.
+     * @return The current record of the cursor, or null if the cursor is closed.
      * @throws IOException
      * @throws InterruptedException
      */
     public abstract AbstractRecord next() throws IOException, InterruptedException;
+
+    /**
+     * If this cursor is positioned on a record, then the current record is returned, and the cursor is
+     * moved to the record with the next smaller key. If the cursor is closed (i.e., not positioned on a record),
+     * then null is returned.
+     * @return The current record of the cursor, or null if the cursor is closed.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public abstract AbstractRecord previous() throws IOException, InterruptedException;
 
     /**
      * Closes the cursor. After close() returns, the cursor is not positioned on any record, and subsequent

@@ -44,7 +44,7 @@ public class TestMultiRecord extends AbstractMultiRecord
         records.add(record);
     }
 
-    public MapCursor scan()
+    public MapCursor cursor()
     {
         return new IteratorCursor(records.iterator());
     }

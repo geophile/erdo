@@ -40,11 +40,11 @@ public class DiskMap extends SealedMapBase
     // SealedMapBase interface
 
     @Override
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapCursor(tree.scan(startKey, missingKeyAction));
+        return new DiskMapCursor(tree.cursor(startKey, missingKeyAction));
     }
 
     @Override
@@ -59,8 +59,8 @@ public class DiskMap extends SealedMapBase
         }
         return
             keys == null
-            ? scan(startKey, missingKeyAction)
-            : keys.scan(startKey, missingKeyAction);
+            ? cursor(startKey, missingKeyAction)
+            : keys.cursor(startKey, missingKeyAction);
     }
 
     @Override
@@ -112,8 +112,8 @@ public class DiskMap extends SealedMapBase
                 }
                 record.destroyRecordReference();
             }
-            if (keys == null && // Couldn't build keys during record scan
-                keyScan != null && // We have a key scan
+            if (keys == null && // Couldn't build keys during record cursor
+                keyScan != null && // We have a key cursor
                 recordCount <= inMemoryKeysLimit) { // Size is OK
                 keys = new KeyArray(factory, (int) recordCount);
                 while ((record = keyScan.next()) != null) {
@@ -241,9 +241,9 @@ public class DiskMap extends SealedMapBase
         if (recordCount <= inMemoryMapLimit) {
             this.keys = new KeyArray(factory, (int) recordCount);
             try {
-                MapCursor scan = scan(null, MissingKeyAction.FORWARD);
+                MapCursor cursor = cursor(null, MissingKeyAction.FORWARD);
                 LazyRecord record;
-                while ((record = scan.next()) != null) {
+                while ((record = cursor.next()) != null) {
                     this.keys.append(record.key());
                     record.destroyRecordReference();
                 }
@@ -257,7 +257,7 @@ public class DiskMap extends SealedMapBase
     }
 
     // Used only by DiskMapFastMergeTest
-    void loadWithKeys(MapCursor scan, long recordCount)
+    void loadWithKeys(MapCursor cursor, long recordCount)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -265,7 +265,7 @@ public class DiskMap extends SealedMapBase
         LazyRecord record;
         long count = 0;
         try {
-            while ((record = scan.next()) != null) {
+            while ((record = cursor.next()) != null) {
                 writeableTree.append(record);
                 keys.append(record.key());
                 if ((++count % INTERRUPT_CHECK_INTERVAL) == 0) {
@@ -286,7 +286,7 @@ public class DiskMap extends SealedMapBase
     }
 
     // Used only by DiskMapFastMergeTest
-    void loadWithoutKeys(MapCursor scan)
+    void loadWithoutKeys(MapCursor cursor)
         throws UnsupportedOperationException, IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -294,7 +294,7 @@ public class DiskMap extends SealedMapBase
         LazyRecord record;
         long count = 0;
         try {
-            while ((record = scan.next()) != null) {
+            while ((record = cursor.next()) != null) {
                 recordCount += writeableTree.append(record);
                 if ((++count % INTERRUPT_CHECK_INTERVAL) == 0) {
                     if (Thread.interrupted()) {

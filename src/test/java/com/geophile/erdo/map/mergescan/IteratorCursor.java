@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
@@ -20,6 +21,12 @@ public class IteratorCursor extends MapCursor
     public AbstractRecord next() throws IOException, InterruptedException
     {
         return iterator.hasNext() ? (AbstractRecord) iterator.next() : null;
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        throw new UnsupportedOperationException();
     }
 
     @Override

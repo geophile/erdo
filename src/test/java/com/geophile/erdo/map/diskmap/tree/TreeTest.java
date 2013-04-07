@@ -57,8 +57,8 @@ public class TreeTest
         WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
         Tree tree = writeableTree.close();
         startTransaction();
-        MapCursor scan = tree.scan(null, MissingKeyAction.FORWARD);
-        assertNull(scan.next());
+        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
+        assertNull(cursor.next());
     }
 
     // This tests tree scanning. Tree random access is tested indirectly, in SealedMapTest,
@@ -77,10 +77,10 @@ public class TreeTest
         }
         Tree tree = writeableTree.close();
         startTransaction();
-        MapCursor scan = tree.scan(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
         int expected = 0;
         LazyRecord lazyRecord;
-        while ((lazyRecord = scan.next()) != null) {
+        while ((lazyRecord = cursor.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
             int key = record.key().key();
             assertEquals(expected, key);

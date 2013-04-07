@@ -35,7 +35,7 @@ public class Tree
 
     // Tree interface
 
-    public MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
         return
@@ -46,11 +46,11 @@ public class Tree
 
     public MapCursor consolidationScan() throws IOException, InterruptedException
     {
-        // If there aren't two levels, do a normal, slow scan. This consolidates small files. Also, fast merge logic
+        // If there aren't two levels, do a normal, slow cursor. This consolidates small files. Also, fast merge logic
         // is dependent on the existence of level 1, to delimit level 0 files.
         return
             levels.size() <= 1
-            ? scan(null, MissingKeyAction.FORWARD)
+            ? cursor(null, MissingKeyAction.FORWARD)
             : new LevelOneCursorToFindLevelZeroSegments(this);
     }
 
@@ -205,24 +205,26 @@ public class Tree
     private MapCursor leafScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException
     {
-        MapCursor treeLevelScan;
-        boolean singleKey = missingKeyAction == MissingKeyAction.CLOSE;
+        MapCursor treeLevelCursor;
         if (startKey == null) {
             // Scan an entire Map
-            // TODO: This does an unnecessary page read if the usage is to create a scan and then position
+            // TODO: This does an unnecessary page read if the usage is to create a cursor and then position
             // TODO: it as necessary from ForestMapCursor.
-            TreePosition start = newPosition().level(0).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage();
-            treeLevelScan = TreeLevelCursor.startScan(start);
-        } else if (singleKey && !level(0).keyPossiblyPresent(startKey)) {
+            TreePosition startPosition =
+                missingKeyAction.forward()
+                ? newPosition().level(0).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage()
+                : newPosition().level(0).lastSegmentOfLevel().lastPageOfSegment().lastRecordOfPage();
+            treeLevelCursor = TreeLevelCursor.newCursor(startPosition);
+        } else if (missingKeyAction == MissingKeyAction.CLOSE && !level(0).keyPossiblyPresent(startKey)) {
             // Exact match for missing key
-            treeLevelScan = MapCursor.EMPTY;
+            treeLevelCursor = MapCursor.EMPTY;
         } else {
-            // Start scan at startKey
+            // Start cursor at startKey
             TreePosition startPosition = newPosition().level(levels.size() - 1).firstSegmentOfLevel().firstPageOfSegment();
             descendToLeaf(startPosition, startKey, missingKeyAction);
-            treeLevelScan = TreeLevelCursor.startScan(startPosition);
+            treeLevelCursor = TreeLevelCursor.newCursor(startPosition);
         }
-        return treeLevelScan;
+        return treeLevelCursor;
     }
 
     // For use by subclasses

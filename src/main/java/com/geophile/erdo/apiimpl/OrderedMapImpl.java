@@ -81,7 +81,7 @@ public class OrderedMapImpl extends OrderedMap
     {
         checkNotNull(key);
         key.erdoId(erdoId);
-        return newScan(key, MissingKeyAction.CLOSE).next();
+        return newCursor(key, MissingKeyAction.CLOSE).next();
     }
 
     @Override
@@ -90,13 +90,19 @@ public class OrderedMapImpl extends OrderedMap
         if (startKey != null) {
             startKey.erdoId(erdoId);
         }
-        return newScan(startKey, missingKeyAction);
+        return newCursor(startKey, missingKeyAction);
     }
 
     @Override
     public Cursor first() throws IOException, InterruptedException
     {
-        return newScan(erdoIdKey, MissingKeyAction.FORWARD);
+        return newCursor(erdoIdKey, MissingKeyAction.FORWARD);
+    }
+
+    @Override
+    public Cursor last() throws IOException, InterruptedException
+    {
+        return newCursor(nextErdoIdKey, MissingKeyAction.BACKWARD);
     }
 
     // OrderedMapImpl interface
@@ -112,6 +118,7 @@ public class OrderedMapImpl extends OrderedMap
         this.transactionManager = transactionManager;
         this.erdoId = erdoId;
         this.erdoIdKey = new ErdoId(erdoId);
+        this.nextErdoIdKey = new ErdoId(erdoId + 1);
     }
 
     public int erdoId()
@@ -121,9 +128,10 @@ public class OrderedMapImpl extends OrderedMap
 
     // For use by this class
 
-    private Cursor newScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    private Cursor newCursor(AbstractKey key, MissingKeyAction missingKeyAction)
+        throws IOException, InterruptedException
     {
-        return new CursorImpl(transactionManager, transactionalMap().scan(key, missingKeyAction));
+        return new CursorImpl(transactionManager, transactionalMap().cursor(key, missingKeyAction));
     }
 
     private TransactionalMap transactionalMap()
@@ -147,4 +155,5 @@ public class OrderedMapImpl extends OrderedMap
     private final TransactionManager transactionManager;
     private final int erdoId;
     private final ErdoId erdoIdKey;
+    private final ErdoId nextErdoIdKey; // For positioning by last()
 }

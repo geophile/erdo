@@ -21,19 +21,15 @@ class PrivateMapCursor extends MapCursor
     @Override
     public AbstractRecord next()
     {
-        AbstractRecord next = null;
-        if (!closed) {
-            if (iterator.hasNext()) {
-                next = iterator.next();
-                if (!isOpen(next.key())) {
-                    next = null;
-                    close();
-                }
-            } else {
-                close();
-            }
-        }
-        return next;
+        assert forward;
+        return neighbor();
+    }
+
+    @Override
+    public AbstractRecord previous()
+    {
+        assert !forward;
+        return neighbor();
     }
 
     @Override
@@ -54,15 +50,46 @@ class PrivateMapCursor extends MapCursor
     {
         super(startKey, missingKeyAction);
         this.map = map;
-        this.iterator =
-            startKey == null
-            ? map.contents.values().iterator()
-            : map.contents.tailMap(startKey).values().iterator();
+        if (missingKeyAction == MissingKeyAction.BACKWARD) {
+            this.forward = false;
+            if (startKey == null) {
+                this.iterator = map.contents.descendingMap().values().iterator();
+            } else {
+                this.iterator = map.contents.headMap(startKey, true).descendingMap().values().iterator();
+            }
+        } else {
+            this.forward = true;
+            if (startKey == null) {
+                this.iterator = map.contents.values().iterator();
+            } else {
+                this.iterator = map.contents.tailMap(startKey, true).values().iterator();
+            }
+        }
+    }
+
+    // For use by this class
+
+    private AbstractRecord neighbor()
+    {
+        AbstractRecord neighbor = null;
+        if (!closed) {
+            if (iterator.hasNext()) {
+                neighbor = iterator.next();
+                if (!isOpen(neighbor.key())) {
+                    neighbor = null;
+                    close();
+                }
+            } else {
+                close();
+            }
+        }
+        return neighbor;
     }
 
     // State
 
     private final PrivateMap map;
+    private final boolean forward;
     private Iterator<AbstractRecord> iterator;
     private boolean closed = false;
 }

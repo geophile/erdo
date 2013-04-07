@@ -30,15 +30,15 @@ abstract class FastNode extends Node
 
     public abstract void fastPromote() throws IOException, InterruptedException;
 
-    FastNode(int position)
+    FastNode(int position, boolean forward)
     {
-        super(position);
+        super(position, forward);
     }
 
     protected final void goSlow() throws IOException, InterruptedException
     {
         if (record instanceof AbstractMultiRecord) {
-            multiRecordScan = ((AbstractMultiRecord) record).scan();
+            multiRecordScan = ((AbstractMultiRecord) record).cursor();
             record = multiRecordScan.next();
             if (record != null) {
                 key = record.key();

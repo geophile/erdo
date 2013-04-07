@@ -41,8 +41,8 @@ public class KeyArrayTest
         TestKey1 key = new TestKey1();
         // size
         assertEquals(0, a.size());
-        // scan
-        assertNull(a.scan(null, MissingKeyAction.FORWARD).next());
+        // cursor
+        assertNull(a.cursor(null, MissingKeyAction.FORWARD).next());
         // binary search
         assertEquals(-1, a.binarySearch(key));
         // subscript
@@ -68,11 +68,11 @@ public class KeyArrayTest
             a.close();
             // size
             assertEquals(n, a.size());
-            // scan
-            KeyArrayCursor scan = a.scan(null, MissingKeyAction.FORWARD);
+            // cursor
+            KeyArrayCursor cursor = a.cursor(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 10;
-            while ((record = scan.next()) != null) {
+            while ((record = cursor.next()) != null) {
                 assertEquals(expected, ((TestKey1)record.key()).key());
                 expected += 10;
             }
@@ -112,11 +112,11 @@ public class KeyArrayTest
             a.close();
             // size
             assertEquals(N, a.size());
-            // scan
-            KeyArrayCursor scan = a.scan(null, MissingKeyAction.FORWARD);
+            // cursor
+            KeyArrayCursor cursor = a.cursor(null, MissingKeyAction.FORWARD);
             AbstractRecord record;
             int expected = 0;
-            while ((record = scan.next()) != null) {
+            while ((record = cursor.next()) != null) {
                 if (expected < n1) {
                     assertEquals(expected, ((TestKey)record.key()).key());
                 } else {

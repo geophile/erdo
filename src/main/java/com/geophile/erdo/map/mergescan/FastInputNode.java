@@ -24,13 +24,13 @@ class FastInputNode extends FastNode
 
     public void fastPromote() throws IOException, InterruptedException
     {
-        record = input.next();
+        record = forward ? input.next() : input.previous();
         key = record == null ? null : record.key();
     }
 
-    public FastInputNode(int position, MapCursor input)
+    public FastInputNode(int position, MapCursor input, boolean forward)
     {
-        super(position);
+        super(position, forward);
         this.input = input;
     }
 

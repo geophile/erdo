@@ -149,7 +149,7 @@ public class DatabaseTest
         FACTORY.reset();
         db = Database.useDatabase(DB_DIRECTORY);
         map = db.useMap(MAP_NAME);
-        LOG.log(Level.SEVERE, "About to start scan of reopened map");
+        LOG.log(Level.SEVERE, "About to start cursor of reopened map");
         Cursor cursor = map.first();
         TestRecord record;
         int expectedKey = 0;

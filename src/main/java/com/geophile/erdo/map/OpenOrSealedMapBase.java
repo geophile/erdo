@@ -16,7 +16,7 @@ public abstract class OpenOrSealedMapBase extends SealedMapBase implements OpenO
 
     public abstract LazyRecord put(AbstractRecord record, boolean returnReplaced);
 
-    public abstract MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction);
+    public abstract MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction);
 
     public abstract long recordCount();
 

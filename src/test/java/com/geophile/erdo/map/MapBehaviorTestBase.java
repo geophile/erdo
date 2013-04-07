@@ -54,7 +54,7 @@ public class MapBehaviorTestBase
     {
         SealedMap privateMap = privateMap(testRecords);
         ArrayMap arrayMap = new ArrayMap(FACTORY, new TimestampSet(1L));
-        arrayMap.loadForConsolidation(privateMap.scan(null, MissingKeyAction.FORWARD), null);
+        arrayMap.loadForConsolidation(privateMap.cursor(null, MissingKeyAction.FORWARD), null);
         return arrayMap;
     }
 
@@ -77,7 +77,7 @@ public class MapBehaviorTestBase
         }
         DiskMap diskMap = DiskMap.create(db, new TimestampSet(1L), null);
         SealedMap privateMap = privateMap(testRecords);
-        diskMap.loadForConsolidation(privateMap.scan(null, MissingKeyAction.FORWARD),
+        diskMap.loadForConsolidation(privateMap.cursor(null, MissingKeyAction.FORWARD),
                                      privateMap.keyScan(null, MissingKeyAction.FORWARD));
         return diskMap;
     }

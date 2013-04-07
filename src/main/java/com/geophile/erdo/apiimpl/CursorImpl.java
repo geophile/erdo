@@ -14,6 +14,7 @@ import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
+import org.omg.PortableInterceptor.LOCATION_FORWARD;
 
 import java.io.IOException;
 
@@ -24,37 +25,13 @@ public class CursorImpl extends Cursor
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
     {
-        AbstractRecord record = null;
-        if (mapScan != null) {
-            LazyRecord next;
-            boolean deleted = false;
-            checkTransaction();
-            do {
-                next = mapScan.next();
-                if (next != null) {
-                    deleted = next.key().deleted();
-                    if (deleted) {
-                        next.destroyRecordReference();
-                    }
-                }
-            } while (next != null && deleted);
-            if (next != null) {
-                record = next.materializeRecord();
-                next.destroyRecordReference();
-                if (!next.prefersSerialized()) {
-                    // LazyRecord stores an actual record that is part of the database. Copy it so that any
-                    // changes by the application don't modify database state.
-                    record = record.copy();
-                }
-                // Give application a records without a timestamp set, which will allow it to update
-                // the record, setting the transaction.
-                record.key().clearTransactionState();
-            } else {
-                record = null;
-                close();
-            }
-        }
-        return record;
+        return neighbor(true);
+    }
+
+    @Override
+    public AbstractRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -80,6 +57,41 @@ public class CursorImpl extends Cursor
     }
 
     // For use by this class
+
+    private AbstractRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        AbstractRecord record = null;
+        if (mapScan != null) {
+            LazyRecord neighbor;
+            boolean deleted = false;
+            checkTransaction();
+            do {
+                neighbor = forward ? mapScan.next() : mapScan.previous();
+                if (neighbor != null) {
+                    deleted = neighbor.key().deleted();
+                    if (deleted) {
+                        neighbor.destroyRecordReference();
+                    }
+                }
+            } while (neighbor != null && deleted);
+            if (neighbor != null) {
+                record = neighbor.materializeRecord();
+                neighbor.destroyRecordReference();
+                if (!neighbor.prefersSerialized()) {
+                    // LazyRecord stores an actual record that is part of the database. Copy it so that any
+                    // changes by the application don't modify database state.
+                    record = record.copy();
+                }
+                // Give application a records without a timestamp set, which will allow it to update
+                // the record, setting the transaction.
+                record.key().clearTransactionState();
+            } else {
+                record = null;
+                close();
+            }
+        }
+        return record;
+    }
 
     private void checkTransaction()
     {

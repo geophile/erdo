@@ -23,7 +23,7 @@ import java.io.IOException;
 import static junit.framework.Assert.assertEquals;
 
 // Test logic around closing files and finalizing right edge. This is done by creating trees with N records,
-// 0 <= N <= max, close, scan.
+// 0 <= N <= max, close, cursor.
 
 public class TreeCloseTest
 {
@@ -71,10 +71,10 @@ public class TreeCloseTest
         }
         Tree tree = writeableTree.close();
         startTransaction();
-        MapCursor scan = tree.scan(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
         int expected = 0;
         LazyRecord lazyRecord;
-        while ((lazyRecord = scan.next()) != null) {
+        while ((lazyRecord = cursor.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
             int key = ((TestKey) record.key()).key();
             assertEquals(expected, key);

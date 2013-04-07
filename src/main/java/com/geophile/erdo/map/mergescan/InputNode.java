@@ -24,13 +24,13 @@ class InputNode extends Node
 
     public void promote() throws IOException, InterruptedException
     {
-        record = input.next();
+        record = forward ? input.next() : input.previous();
         key = record == null ? null : record.key();
     }
 
-    public InputNode(int position, MapCursor input)
+    public InputNode(int position, MapCursor input, boolean forward)
     {
-        super(position);
+        super(position, forward);
         this.input = input;
     }
 

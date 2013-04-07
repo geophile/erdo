@@ -146,7 +146,7 @@ public class ConsolidationSet
             }
             try {
                 assert newMap != null;
-                MapCursor mapScan = newMap.scan(null, MissingKeyAction.FORWARD);
+                MapCursor mapScan = newMap.cursor(null, MissingKeyAction.FORWARD);
                 while (mapScan.next() == null);
             } catch (IOException | InterruptedException e) {
                 assert false : e;

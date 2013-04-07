@@ -37,7 +37,7 @@ public interface SealedMapOperations extends Map, TransactionUpdates
      * @param keyScan    keys corresponding to the records, for use in constructing a key cache.
      *                   May be null, in which case a key cache cannot be constructed.
      *                   (Keys cannot be obtained from recordScan in general, because
-     *                   consolidation does a fast merge scan, processing multi-records
+     *                   consolidation does a fast merge cursor, processing multi-records
      *                   in some cases.)
      * @throws UnsupportedOperationException thrown by SealedMaps that do not support loading.
      * @throws java.io.IOException
@@ -59,31 +59,31 @@ public interface SealedMapOperations extends Map, TransactionUpdates
     boolean keysInMemory();
 
     /**
-     * Start a key-ordered scan of this map's keys, starting with the given key. If the key is not
+     * Start a key-ordered cursor of this map's keys, starting with the given key. If the key is not
      * present, then missingKeyAction determines how to proceed:
-     * - {@link MissingKeyAction#FORWARD}: Start the scan with the smallest key present that is larger than key.
+     * - {@link MissingKeyAction#FORWARD}: Start the cursor with the smallest key present that is larger than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#BACKWARD}: Start the scan with the largest key present that is smaller than key.
+     * - {@link MissingKeyAction#BACKWARD}: Start the cursor with the largest key present that is smaller than key.
      *   If there is no such key, then the returned {@link MapCursor} is closed.
      * - {@link MissingKeyAction#CLOSE}: Return a closed {@link MapCursor}.
      * If key is null then all keys are visited. In this case, missingKeyAction must not be
      * {@link MissingKeyAction#CLOSE}.
      * @param key The starting key.
-     * @param missingKeyAction Specifies where to start the scan if key is not present.
-     * @return MapCursor object representing scan of keys, each contained in a KeyOnlyRecord.
+     * @param missingKeyAction Specifies where to start the cursor if key is not present.
+     * @return MapCursor object representing cursor of keys, each contained in a KeyOnlyRecord.
      * @throws IOException
      * @throws InterruptedException
      */
     MapCursor keyScan(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
 
     /**
-     * Return a scan used to consolidate records. The records obtained from the scan may be
+     * Return a cursor used to consolidate records. The records obtained from the cursor may be
      * AbstractRecords or MultiRecords. The keys from two consecutive records are disjoint and
      * in ascending order. Some implementations may not take advantage of this optimization
-     * and return an ordinary scan, which does not yield MultiRecords. (For more information,
+     * and return an ordinary cursor, which does not yield MultiRecords. (For more information,
      * see FastMergeScan.)
      *
-     * @return a scan that will visit all elements of the map in key order.
+     * @return a cursor that will visit all elements of the map in key order.
      */
     MapCursor consolidationScan() throws IOException, InterruptedException;
 }

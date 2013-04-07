@@ -10,7 +10,10 @@ import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.KeyOnlyRecord;
+import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
+
+import java.io.IOException;
 
 public class KeyArrayCursor extends MapCursor
 {
@@ -18,18 +21,13 @@ public class KeyArrayCursor extends MapCursor
 
     public AbstractRecord next()
     {
-        AbstractKey next = null;
-        if (current < keys.size()) {
-            // Why null is passed to keys.key: We could have currentKey be a field, and then reuse the
-            // key. But we're returning a KeyOnlyRecord containing a key. If multiple KeyOnlyRecords
-            // wrap the same AbstractKey object, that's bad. null forces allocation of a new key.
-            AbstractKey currentKey = keys.key(current, null);
-            if (isOpen(currentKey)) {
-                next = currentKey;
-                current++;
-            }
-        }
-        return next == null ? null : new KeyOnlyRecord(next);
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     public void close()
@@ -51,10 +49,32 @@ public class KeyArrayCursor extends MapCursor
         } else {
             this.current = keys.binarySearch(startKey);
             if (this.current < 0) {
-                assert missingKeyAction == MissingKeyAction.FORWARD;
+                assert missingKeyAction.forward();
                 this.current = -this.current - 1;
             }
         }
+    }
+
+    // For use by this class
+
+    private AbstractRecord neighbor(boolean forward)
+    {
+        AbstractKey next = null;
+        if (current >= 0 && current < keys.size()) {
+            // Why null is passed to keys.key: We could have currentKey be a field, and then reuse the
+            // key. But we're returning a KeyOnlyRecord containing a key. If multiple KeyOnlyRecords
+            // wrap the same AbstractKey object, that's bad. null forces allocation of a new key.
+            AbstractKey currentKey = keys.key(current, null);
+            if (isOpen(currentKey)) {
+                next = currentKey;
+                if (forward) {
+                    current++;
+                } else {
+                    current--;
+                }
+            }
+        }
+        return next == null ? null : new KeyOnlyRecord(next);
     }
 
     // Object state

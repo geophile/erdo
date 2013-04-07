@@ -15,6 +15,8 @@ public abstract class MapCursor
 {
     public abstract LazyRecord next() throws IOException, InterruptedException;
 
+    public abstract LazyRecord previous() throws IOException, InterruptedException;
+
     public abstract void close();
 
     public void goTo(AbstractKey key) throws IOException, InterruptedException
@@ -24,12 +26,13 @@ public abstract class MapCursor
 
     protected boolean isOpen(AbstractKey key)
     {
+        assert canCheckIsOpen : this;
         if (key == null) {
-            // scan is over because we've run off the end
+            // cursor is over because we've run off the end
             return false;
         }
         if (startKey == null) {
-            // scanning the entire map, regardless of erdoId, so any non-null key is part of the scan
+            // scanning the entire map, regardless of erdoId, so any non-null key is part of the cursor
             return true;
         }
         if (key.erdoId() == startKey.erdoId()) {
@@ -53,7 +56,7 @@ public abstract class MapCursor
     // - Complete scan of map, across all erdoIds: startKey == null, exactMatch == false. Used in consolidation.
     // - Exact match: startKey != null, exactMatch = true
     // - Start at key, limited to one erdoId: startKey != null, exactMatch = false
-    // - Other: canCheckIsOpen is false, meaning the actual class will check loop termination.
+    // - Other: canCheckIsOpen is false, meaning the subclass will check loop termination.
     private final AbstractKey startKey;
     private final boolean exactMatch;
     private final boolean canCheckIsOpen;
@@ -64,6 +67,12 @@ public abstract class MapCursor
     {
         @Override
         public LazyRecord next() throws IOException, InterruptedException
+        {
+            return null;
+        }
+
+        @Override
+        public LazyRecord previous() throws IOException, InterruptedException
         {
             return null;
         }

@@ -28,14 +28,13 @@ class ForestMapRangeCursor extends ForestMapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        if (!done) {
-            next = scan.next();
-            if (next == null || !isOpen(next.key())) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -43,7 +42,7 @@ class ForestMapRangeCursor extends ForestMapCursor
     {
         if (!done) {
             done = true;
-            scan.close();
+            cursor.close();
             for (MapCursor smallMapScan : smallMapScans.values()) {
                 smallMapScan.close();
             }
@@ -56,13 +55,11 @@ class ForestMapRangeCursor extends ForestMapCursor
         throws IOException, InterruptedException
     {
         super(forestSnapshot, startKey, missingKeyAction);
-        MapCursor smallTreeKeyScan = merge(forestSnapshot.smallTrees());
-        MapCursor bigTreeRecordScan = merge(forestSnapshot.bigTrees());
-        MergeCursor combinedScan = new MergeCursor(TimestampMerger.only());
-        combinedScan.addInput(new KeyToUpdatedRecordCursor(smallTreeKeyScan));
-        combinedScan.addInput(bigTreeRecordScan);
+        MergeCursor combinedScan = new MergeCursor(missingKeyAction.forward());
+        combinedScan.addInput(new KeyToUpdatedRecordCursor(merge(forestSnapshot.smallTrees())));
+        combinedScan.addInput(merge(forestSnapshot.bigTrees()));
         combinedScan.start();
-        scan = combinedScan;
+        cursor = combinedScan;
     }
 
     // For use by this class
@@ -74,17 +71,17 @@ class ForestMapRangeCursor extends ForestMapCursor
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapCursor scan = mapScan(map, key);
-        LazyRecord updateRecord = scan.next();
+        MapCursor cursor = keyFinder(map, key);
+        LazyRecord updateRecord = cursor.next();
         assert updateRecord != null : key;
         return updateRecord;
     }
 
-    private MapCursor mapScan(SealedMap map, AbstractKey key) throws IOException, InterruptedException
+    private MapCursor keyFinder(SealedMap map, AbstractKey key) throws IOException, InterruptedException
     {
         MapCursor smallMapScan = smallMapScans.get(map.mapId());
         if (smallMapScan == null) {
-            smallMapScan = map.scan(null, MissingKeyAction.FORWARD);
+            smallMapScan = map.cursor(null, MissingKeyAction.CLOSE);
             smallMapScans.put(map.mapId(), smallMapScan);
         }
         smallMapScan.goTo(key);
@@ -93,26 +90,38 @@ class ForestMapRangeCursor extends ForestMapCursor
 
     private MapCursor merge(List<SealedMap> maps) throws IOException, InterruptedException
     {
-        MapCursor scan;
+        MapCursor cursor;
         int mapSize = maps.size();
         if (mapSize == 0) {
-            scan = new EmptyMapCursor();
+            cursor = new EmptyMapCursor();
         } else if (mapSize == 1) {
-            scan = maps.get(0).scan(startKey, missingKeyAction);
+            cursor = maps.get(0).cursor(startKey, missingKeyAction);
         } else {
-            MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
+            MergeCursor mergeScan = new MergeCursor();
             for (SealedMap map : maps) {
                 mergeScan.addInput(map.keyScan(startKey, missingKeyAction));
             }
             mergeScan.start();
-            scan = mergeScan;
+            cursor = mergeScan;
         }
-        return scan;
+        return cursor;
+    }
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        if (!done) {
+            neighbor = forward ? cursor.next() : cursor.previous();
+            if (neighbor == null || !isOpen(neighbor.key())) {
+                close();
+            }
+        }
+        return neighbor;
     }
 
     // Object state
 
-    private final MapCursor scan;
+    private final MapCursor cursor;
     private final Map<Long, MapCursor> smallMapScans = new HashMap<>(); // mapId -> MapCursor
 
     // Inner classes
@@ -124,37 +133,50 @@ class ForestMapRangeCursor extends ForestMapCursor
         @Override
         public LazyRecord next() throws IOException, InterruptedException
         {
-            LazyRecord next = null;
-            LazyRecord record = scan.next();
-            if (record == null) {
-                close();
-            } else {
-                AbstractKey key = record.key();
-                record.destroyRecordReference();
-                next = updateRecord(key);
-            }
-            return next;
+            return neighbor(true);
+        }
+
+        @Override
+        public LazyRecord previous() throws IOException, InterruptedException
+        {
+            return neighbor(false);
         }
 
         @Override
         public void close()
         {
-            if (scan != null) {
-                scan.close();
-                scan = null;
+            if (cursor != null) {
+                cursor.close();
+                cursor = null;
             }
         }
 
         // KeyToUpdatedRecordCursor interface
 
-        public KeyToUpdatedRecordCursor(MapCursor scan)
+        public KeyToUpdatedRecordCursor(MapCursor cursor)
         {
             super(null, null);
-            this.scan = scan;
+            this.cursor = cursor;
+        }
+
+        // For use by this class
+
+        private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+        {
+            LazyRecord neighbor = null;
+            LazyRecord record = forward ? cursor.next() : cursor.previous();
+            if (record == null) {
+                close();
+            } else {
+                AbstractKey key = record.key();
+                record.destroyRecordReference();
+                neighbor = updateRecord(key);
+            }
+            return neighbor;
         }
 
         // Object state
 
-        private MapCursor scan;
+        private MapCursor cursor;
     }
 }

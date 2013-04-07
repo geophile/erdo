@@ -12,7 +12,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-// Used to specify the lower bound of an unrestricted OrderedMap scan. Will never be serialized.
+// Used to specify the lower bound of an unrestricted OrderedMap cursor. Will never be serialized.
 
 public class ErdoId extends AbstractKey
 {

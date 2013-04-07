@@ -22,9 +22,10 @@ abstract class Node
         dump(0);
     }
 
-    Node(int position)
+    Node(int position, boolean forward)
     {
         this.position = position;
+        this.forward = forward;
     }
 
     protected void dump(int level)
@@ -38,6 +39,7 @@ abstract class Node
     // Object state
 
     protected final int position;
+    protected final boolean forward;
     protected AbstractKey key = null;
     protected LazyRecord record = null;
 }

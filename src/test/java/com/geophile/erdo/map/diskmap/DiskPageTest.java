@@ -96,10 +96,10 @@ public class DiskPageTest
 */
         page = readable(erdoIdBuffer, timestampBuffer, keyBuffer, recordBuffer);
         startTransaction();
-        DiskPageCursor scan = new DiskPageCursor(page);
+        DiskPageCursor cursor = new DiskPageCursor(page);
         TestRecord record;
         i = 0;
-        while ((record = (TestRecord) scan.next()) != null) {
+        while ((record = (TestRecord) cursor.next()) != null) {
             Arrays.fill(bytes, (byte) (i % 256));
             assertEquals(i, ((TestKey) record.key()).key());
             compare(bytes, record.bytesValue());

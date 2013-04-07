@@ -13,7 +13,7 @@ import com.geophile.erdo.map.KeyOnlyRecord;
 import com.geophile.erdo.map.MapCursor;
 
 import java.util.Iterator;
-import java.util.SortedMap;
+import java.util.NavigableMap;
 
 class PrivateMapKeyCursor extends MapCursor
 {
@@ -21,19 +21,14 @@ class PrivateMapKeyCursor extends MapCursor
 
     public AbstractRecord next()
     {
-        AbstractKey next = null;
-        if (!closed) {
-            if (iterator.hasNext()) {
-                next = iterator.next();
-                if (!isOpen(next)) {
-                    next = null;
-                    close();
-                }
-            } else {
-                close();
-            }
-        }
-        return next == null ? null : new KeyOnlyRecord(next);
+        assert forward;
+        return neighbor();
+    }
+
+    public AbstractRecord previous()
+    {
+        assert !forward;
+        return neighbor();
     }
 
     public void close()
@@ -43,19 +38,51 @@ class PrivateMapKeyCursor extends MapCursor
 
     // PrivateMapKeyCursor interface
 
-    public PrivateMapKeyCursor(SortedMap<AbstractKey, AbstractRecord> contents,
+    public PrivateMapKeyCursor(NavigableMap<AbstractKey, AbstractRecord> contents,
                                AbstractKey startKey,
                                MissingKeyAction missingKeyAction)
     {
         super(startKey, missingKeyAction);
-        this.iterator =
-            startKey == null
-            ? contents.keySet().iterator()
-            : contents.tailMap(startKey).keySet().iterator();
+
+        if (missingKeyAction == MissingKeyAction.BACKWARD) {
+            this.forward = false;
+            if (startKey == null) {
+                this.iterator = contents.descendingMap().keySet().iterator();
+            } else {
+                this.iterator = contents.headMap(startKey, true).descendingMap().keySet().iterator();
+            }
+        } else {
+            this.forward = true;
+            if (startKey == null) {
+                this.iterator = contents.keySet().iterator();
+            } else {
+                this.iterator = contents.tailMap(startKey, true).keySet().iterator();
+            }
+        }
+    }
+
+    // FOr use by this class
+
+    private AbstractRecord neighbor()
+    {
+        AbstractKey neighbor = null;
+        if (!closed) {
+            if (iterator.hasNext()) {
+                neighbor = iterator.next();
+                if (!isOpen(neighbor)) {
+                    neighbor = null;
+                    close();
+                }
+            } else {
+                close();
+            }
+        }
+        return neighbor == null ? null : new KeyOnlyRecord(neighbor);
     }
 
     // Object state
 
+    private final boolean forward;
     private final Iterator<AbstractKey> iterator;
     private boolean closed = false;
 }

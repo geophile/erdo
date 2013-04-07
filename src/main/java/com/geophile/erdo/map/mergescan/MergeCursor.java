@@ -8,6 +8,7 @@ package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
+import com.geophile.erdo.map.forestmap.TimestampMerger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class MergeCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
+        assert forward;
         LazyRecord next = null;
         if (root != null) {
             next = root.record;
@@ -29,6 +31,21 @@ public class MergeCursor extends MapCursor
             close();
         }
         return next;
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        assert !forward;
+        LazyRecord previous = null;
+        if (root != null) {
+            previous = root.record;
+            root.promote();
+        }
+        if (previous == null) {
+            close();
+        }
+        return previous;
     }
 
     @Override
@@ -65,27 +82,38 @@ public class MergeCursor extends MapCursor
         root.prime();
     }
 
-    public MergeCursor(Merger merger)
+    public MergeCursor()
     {
-        super(null, null);
-        this.merger = merger;
+        this(TimestampMerger.only(), true);
+    }
+
+    public MergeCursor(boolean forward)
+    {
+        this(TimestampMerger.only(), forward);
     }
 
     // For use by this package
 
-    Node mergeNode(int position, Node left, Node right)
+    Node mergeNode(int position, Node left, Node right, boolean forward)
     {
-        return new MergeNode(this, position, left, right);
+        return new MergeNode(this, position, left, right, forward);
     }
 
-    Node inputNode(int position, MapCursor input)
+    Node inputNode(int position, MapCursor input, boolean forward)
     {
-        return new InputNode(position, input);
+        return new InputNode(position, input, forward);
     }
 
     Node fillerNode(int position)
     {
         return new FillerNode(position);
+    }
+
+    MergeCursor(Merger merger, boolean forward)
+    {
+        super(null, null);
+        this.merger = merger;
+        this.forward = forward;
     }
 
     // For use by this class
@@ -95,15 +123,16 @@ public class MergeCursor extends MapCursor
         // positionInFile: Refers to positionInFile in a breadth-first traversal of the tree.
         return
             position < firstLeaf
-            ? mergeNode(position, createNode(2 * position + 1), createNode(2 * position + 2))
+            ? mergeNode(position, createNode(2 * position + 1), createNode(2 * position + 2), forward)
             : position < firstLeaf + inputs.size()
-              ? inputNode(position, inputs.get(position - firstLeaf))
+              ? inputNode(position, inputs.get(position - firstLeaf), forward)
               : fillerNode(position);
     }
 
-    // State
+    // Object state
 
     final Merger merger;
+    private final boolean forward;
     private List<MapCursor> inputs = new ArrayList<>();
     private int firstLeaf;
     private Node root;

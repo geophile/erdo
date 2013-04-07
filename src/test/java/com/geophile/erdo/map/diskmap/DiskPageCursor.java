@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
@@ -16,12 +17,13 @@ class DiskPageCursor extends MapCursor
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
     {
-        AbstractRecord next = null;
-        if (page != null && recordNumber < page.nRecords()) {
-            next = page.readRecord(recordNumber, pageAccessBuffers);
-            recordNumber++;
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
@@ -37,6 +39,20 @@ class DiskPageCursor extends MapCursor
         this.page = page;
         this.pageAccessBuffers = page.accessBuffers();
         this.recordNumber = 0;
+    }
+
+    private AbstractRecord neighbor(boolean forward)
+    {
+        AbstractRecord neighbor = null;
+        if (page != null && recordNumber >= 0 && recordNumber < page.nRecords()) {
+            neighbor = page.readRecord(recordNumber, pageAccessBuffers);
+            if (forward) {
+                recordNumber++;
+            } else {
+                recordNumber--;
+            }
+        }
+        return neighbor;
     }
 
     private DiskPage page;

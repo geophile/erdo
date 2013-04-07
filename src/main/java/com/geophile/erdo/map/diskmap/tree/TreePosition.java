@@ -219,6 +219,13 @@ public class TreePosition
         return this;
     }
 
+    public TreePosition lastSegmentOfLevel()
+    {
+        checkResolvedToLevel();
+        segment = level.segment(level.segments() - 1);
+        return this;
+    }
+
     public TreePosition firstPageOfSegment()
     {
         checkResolvedToSegment();
@@ -280,7 +287,7 @@ public class TreePosition
 
     // TreePosition interface - setting relative position
 
-    public TreePosition advanceSegment()
+    public TreePosition goToNextSegment()
     {
         checkResolvedToSegment();
         if (segment.segmentNumber() == level.segments() - 1) {
@@ -297,7 +304,24 @@ public class TreePosition
         return this;
     }
 
-    public TreePosition advancePage()
+    public TreePosition goToPreviousSegment()
+    {
+        checkResolvedToSegment();
+        if (segment.segmentNumber() == 0) {
+            atEnd = true;
+            segment = null;
+        } else {
+            segment = level.segment(segment.segmentNumber() - 1);
+        }
+        pageNumber = UNDEFINED;
+        page(null);
+        randomRead = true;
+        recordNumber = UNDEFINED;
+        clearCachedRecord();
+        return this;
+    }
+
+    public TreePosition goToNextPage()
     {
         checkResolvedToPage();
         if (++pageNumber < segment.pages()) {
@@ -305,20 +329,47 @@ public class TreePosition
             randomRead = false;
             recordNumber = UNDEFINED;
         } else {
-            advanceSegment();
-            pageNumber = 0;
+            goToNextSegment();
+            pageNumber = segment == null ? UNDEFINED : 0;
         }
         clearCachedRecord();
         return this;
     }
 
-    public TreePosition advanceRecord() throws IOException, InterruptedException
+    public TreePosition goToPreviousPage()
+    {
+        checkResolvedToPage();
+        if (pageNumber-- >= 0) {
+            page(null);
+            randomRead = false;
+            recordNumber = UNDEFINED;
+        } else {
+            goToPreviousSegment();
+            pageNumber = segment == null ? UNDEFINED : segment.pages() - 1;
+        }
+        clearCachedRecord();
+        return this;
+    }
+
+    public TreePosition goToNextRecord() throws IOException, InterruptedException
     {
         checkResolvedToRecord();
         ensurePage();
         if (++recordNumber == page.nRecords()) {
-            advancePage();
+            goToNextPage();
             recordNumber = 0;
+        }
+        clearCachedRecord();
+        return this;
+    }
+
+    public TreePosition goToPreviousRecord() throws IOException, InterruptedException
+    {
+        checkResolvedToRecord();
+        ensurePage();
+        if (recordNumber-- == 0) {
+            goToPreviousPage();
+            recordNumber = LAST_RECORD_ON_PAGE;
         }
         clearCachedRecord();
         return this;

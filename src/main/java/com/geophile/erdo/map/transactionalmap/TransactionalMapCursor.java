@@ -11,7 +11,6 @@ import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.forestmap.ForestMapCursor;
-import com.geophile.erdo.map.forestmap.TimestampMerger;
 import com.geophile.erdo.map.mergescan.MergeCursor;
 
 import java.io.IOException;
@@ -22,21 +21,19 @@ class TransactionalMapCursor extends MapCursor
 
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        if (scan != null) {
-            next = scan.next();
-            if (next == null) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     public void close()
     {
-        if (scan != null) {
-            scan.close();
-            scan = null;
+        if (cursor != null) {
+            cursor.close();
+            cursor = null;
         }
     }
 
@@ -49,17 +46,31 @@ class TransactionalMapCursor extends MapCursor
         MapCursor snapshotScan = ForestMapCursor.newScan(transactionalMap.forestSnapshot, startKey, missingKeyAction);
         if (transactionalMap.updates == null || // dynamic map was rolled back.
             transactionalMap.updates.recordCount() == 0) {
-            scan = snapshotScan;
+            cursor = snapshotScan;
         } else {
-            MergeCursor mergeScan = new MergeCursor(TimestampMerger.only());
+            MergeCursor mergeScan = new MergeCursor(missingKeyAction.forward());
             mergeScan.addInput(snapshotScan);
-            mergeScan.addInput(transactionalMap.updates.scan(startKey, missingKeyAction));
+            mergeScan.addInput(transactionalMap.updates.cursor(startKey, missingKeyAction));
             mergeScan.start();
-            scan = mergeScan;
+            cursor = mergeScan;
         }
     }
 
-    // State
+    // For use by this class
 
-    private MapCursor scan;
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        if (cursor != null) {
+            neighbor = forward ? cursor.next() : cursor.previous();
+            if (neighbor == null) {
+                close();
+            }
+        }
+        return neighbor;
+    }
+
+    // Object state
+
+    private MapCursor cursor;
 }

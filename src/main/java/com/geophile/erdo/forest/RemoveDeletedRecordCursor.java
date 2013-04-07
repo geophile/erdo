@@ -20,45 +20,56 @@ class RemoveDeletedRecordCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        LazyRecord next = null;
-        AbstractKey key;
-        if (scan != null) {
-            boolean removeDeletedRecord;
-            do {
-                next = scan.next();
-                if (next != null &&
-                    (key = next.key()).deleted() &&
-                    checkSingleRecord(next) &&
-                    key.transactionTimestamp() <= maxDeletionTimestamp) {
-                    next.destroyRecordReference();
-                    removeDeletedRecord = true;
-                } else {
-                    removeDeletedRecord = false;
-                }
-            } while (removeDeletedRecord);
-            if (next == null) {
-                close();
-            }
-        }
-        return next;
+        return neighbor(true);
+    }
+
+    @Override
+    public LazyRecord previous() throws IOException, InterruptedException
+    {
+        return neighbor(false);
     }
 
     @Override
     public void close()
     {
-        scan = null;
+        cursor = null;
     }
 
     // RemoveDeletedRecordCursor interface
 
-    public RemoveDeletedRecordCursor(MapCursor scan, long maxDeletionTimestamp)
+    public RemoveDeletedRecordCursor(MapCursor cursor, long maxDeletionTimestamp)
     {
         super(null, null);
-        this.scan = scan;
+        this.cursor = cursor;
         this.maxDeletionTimestamp = maxDeletionTimestamp;
     }
 
     // For use by this class
+
+    private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        AbstractKey key;
+        if (cursor != null) {
+            boolean removeDeletedRecord;
+            do {
+                neighbor = forward ? cursor.next() : cursor.previous();
+                if (neighbor != null &&
+                    (key = neighbor.key()).deleted() &&
+                    checkSingleRecord(neighbor) &&
+                    key.transactionTimestamp() <= maxDeletionTimestamp) {
+                    neighbor.destroyRecordReference();
+                    removeDeletedRecord = true;
+                } else {
+                    removeDeletedRecord = false;
+                }
+            } while (removeDeletedRecord);
+            if (neighbor == null) {
+                close();
+            }
+        }
+        return neighbor;
+    }
 
     private boolean checkSingleRecord(LazyRecord record)
     {
@@ -70,6 +81,6 @@ class RemoveDeletedRecordCursor extends MapCursor
 
     // Object state
 
-    private MapCursor scan;
+    private MapCursor cursor;
     private final long maxDeletionTimestamp;
 }

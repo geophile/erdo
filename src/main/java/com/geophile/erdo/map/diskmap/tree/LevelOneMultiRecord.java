@@ -51,10 +51,10 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     }
 
     @Override
-    public MapCursor scan()
+    public MapCursor cursor()
     {
         LOG.log(Level.INFO,
-                "{0}: Record scan: {1} - {2}",
+                "{0}: Record cursor: {1} - {2}",
                 new Object[]{this, loZeroPosition, hiZeroPosition});
         return new LevelOneMultiRecordCursor(loZeroPosition, hiZeroPosition);
     }
@@ -99,7 +99,7 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     public MapCursor levelOneScan() throws IOException, InterruptedException
     {
         LOG.log(Level.INFO,
-                "{0}: Level one scan: {1} - {2}",
+                "{0}: Level one cursor: {1} - {2}",
                 new Object[]{this, loOnePosition, hiOnePosition});
         return new LevelOneMultiRecordCursor(loOnePosition, hiOnePosition);
     }

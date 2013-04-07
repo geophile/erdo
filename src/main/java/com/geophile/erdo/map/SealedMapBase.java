@@ -52,7 +52,7 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     // SealedMap interface
 
-    public abstract MapCursor scan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public abstract MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
         throws IOException, InterruptedException;
 
     public abstract long recordCount();
@@ -73,7 +73,7 @@ public abstract class SealedMapBase extends MapBase implements SealedMap
 
     public MapCursor consolidationScan() throws IOException, InterruptedException
     {
-        return scan(null, MissingKeyAction.FORWARD);
+        return cursor(null, MissingKeyAction.FORWARD);
     }
 
     // Consolidation.Element interface

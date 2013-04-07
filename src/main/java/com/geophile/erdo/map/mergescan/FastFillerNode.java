@@ -23,6 +23,6 @@ class FastFillerNode extends FastNode
 
     public FastFillerNode(int position)
     {
-        super(position);
+        super(position, true);
     }
 }

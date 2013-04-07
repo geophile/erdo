@@ -48,9 +48,9 @@ public class FastMergeTest
         for (int t = 0; t < TRIALS; t++) {
             TestArrayMap a = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 0);
             TestArrayMap b = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 1);
-            FastMergeCursor merge = new FastMergeCursor(MERGER);
-            merge.addInput(a.scan(null, MissingKeyAction.FORWARD));
-            merge.addInput(b.scan(null, MissingKeyAction.FORWARD));
+            FastMergeCursor merge = new FastMergeCursor(MERGER, true);
+            merge.addInput(a.cursor(null, MissingKeyAction.FORWARD));
+            merge.addInput(b.cursor(null, MissingKeyAction.FORWARD));
             merge.start();
             // Should see 0 .. 2 * KEYS - 1
             int expected = 0;
@@ -59,9 +59,9 @@ public class FastMergeTest
                 AbstractRecord record = lazyRecord.materializeRecord();
                 if (record instanceof TestMultiRecord) {
                     TestMultiRecord multiRecord = (TestMultiRecord) record;
-                    MapCursor scan = multiRecord.scan();
+                    MapCursor cursor = multiRecord.cursor();
                     LazyRecord lazyScanRecord;
-                    while ((lazyScanRecord = scan.next()) != null) {
+                    while ((lazyScanRecord = cursor.next()) != null) {
                         assertEquals(expected++, ((TestKey) lazyScanRecord.key()).key());
                     }
                 } else if (record instanceof TestRecord) {
@@ -77,9 +77,9 @@ public class FastMergeTest
     private void dump(String label, TestArrayMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        MapCursor scan = map.scan(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
         LazyRecord lazyRecord;
-        while ((lazyRecord = scan.next()) != null) {
+        while ((lazyRecord = cursor.next()) != null) {
             System.out.println(String.format("    %s", lazyRecord.materializeRecord()));
         }
     }
@@ -124,9 +124,9 @@ public class FastMergeTest
                 arrayMaps[a].put(record, false);
             }
             // Start a merge of the ArrayMaps
-            FastMergeCursor merge = new FastMergeCursor(MERGER);
+            FastMergeCursor merge = new FastMergeCursor(MERGER, true);
             for (TestArrayMap arrayMap : arrayMaps) {
-                merge.addInput(arrayMap.scan(null, MissingKeyAction.FORWARD));
+                merge.addInput(arrayMap.cursor(null, MissingKeyAction.FORWARD));
             }
             merge.start();
             // Check contents
