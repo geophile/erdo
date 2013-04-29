@@ -8,7 +8,6 @@ package com.geophile.erdo.map.privatemap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -55,16 +54,16 @@ public class PrivateMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, boolean singleKey)
     {
-        return new PrivateMapCursor(this, startKey, missingKeyAction);
+        return new PrivateMapCursor(this, startKey, singleKey);
     }
 
     @Override
-    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
-        return new PrivateMapKeyCursor(contents, startKey, missingKeyAction);
+        return new PrivateMapKeyCursor(this, startKey, singleKey);
     }
 
     // SealedMap interface

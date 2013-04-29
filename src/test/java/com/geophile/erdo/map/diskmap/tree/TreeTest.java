@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.TestFactory;
+import com.geophile.erdo.TestKey;
+import com.geophile.erdo.TestRecord;
+import com.geophile.erdo.TransactionCallback;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.RecordFactory;
@@ -57,38 +60,62 @@ public class TreeTest
         WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
         Tree tree = writeableTree.close();
         startTransaction();
-        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = tree.cursor(null);
         assertNull(cursor.next());
     }
 
-    // This tests tree scanning. Tree random access is tested indirectly, in SealedMapTest,
+    // This test checks tree scanning. Tree random access is tested indirectly, in SealedMapTest,
     // operating on a DiskMap.
+
     @Test
     public void testScanRecords() throws Exception
     {
         final int N = 1000;
-        WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
-        for (int i = 0; i < N; i++) {
+        // Load tree
+        Tree tree;
+        {
+            WriteableTree writeableTree = Tree.create(FACTORY, DB_STRUCTURE, TREE_ID);
+            for (int i = 0; i < N; i++) {
+                startTransaction();
+                TestRecord record = TestRecord.createRecord(i, VALUES[i % 10]);
+                record.key().transaction(FACTORY.transactionManager().currentTransaction());
+                commitTransaction();
+                writeableTree.append(record);
+            }
+            tree = writeableTree.close();
+        }
+        // Scan forward
+        {
             startTransaction();
-            TestRecord record = TestRecord.createRecord(i, VALUES[i % 10]);
-            record.key().transaction(FACTORY.transactionManager().currentTransaction());
+            MapCursor cursor = tree.cursor(null);
+            int expected = 0;
+            LazyRecord lazyRecord;
+            while ((lazyRecord = cursor.next()) != null) {
+                TestRecord record = (TestRecord) lazyRecord.materializeRecord();
+                int key = record.key().key();
+                assertEquals(expected, key);
+                assertEquals(VALUES[key % 10], record.stringValue());
+                expected++;
+            }
             commitTransaction();
-            writeableTree.append(record);
+            assertEquals(N, expected);
         }
-        Tree tree = writeableTree.close();
-        startTransaction();
-        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
-        int expected = 0;
-        LazyRecord lazyRecord;
-        while ((lazyRecord = cursor.next()) != null) {
-            TestRecord record = (TestRecord) lazyRecord.materializeRecord();
-            int key = record.key().key();
-            assertEquals(expected, key);
-            assertEquals(VALUES[key % 10], record.stringValue());
-            expected++;
+        // Scan backward
+        {
+            startTransaction();
+            MapCursor cursor = tree.cursor(null);
+            int expected = N;
+            LazyRecord lazyRecord;
+            while ((lazyRecord = cursor.previous()) != null) {
+                expected--;
+                TestRecord record = (TestRecord) lazyRecord.materializeRecord();
+                int key = record.key().key();
+                assertEquals(expected, key);
+                assertEquals(VALUES[key % 10], record.stringValue());
+            }
+            commitTransaction();
+            assertEquals(0, expected);
         }
-        commitTransaction();
-        assertEquals(N, expected);
     }
     
     private void startTransaction()

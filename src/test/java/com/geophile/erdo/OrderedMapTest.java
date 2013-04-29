@@ -160,7 +160,7 @@ public class OrderedMapTest
                 for (int end = endBase - 1; end <= endBase + 1; end++) {
                     if (start <= end) {
                         TestKey endKey = new TestKey(end);
-                        cursor = map.find(new TestKey(start), MissingKeyAction.FORWARD);
+                        cursor = map.cursor(new TestKey(start));
                         expectedKey = start <= startBase ? startBase : startBase + gap;
                         expectedLastKey = end >= endBase ? endBase : endBase - gap;
                         expectedEmpty = start > end || start <= end && (end >= startBase || start <= endBase);

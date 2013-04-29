@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.diskmap.CompressibleLongArray;
 import com.geophile.erdo.memorymonitor.MemoryMonitor;
@@ -30,10 +29,10 @@ public class KeyArray
         return array.object().size();
     }
 
-    public KeyArrayCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public KeyArrayCursor cursor(AbstractKey startKey)
     {
         assert closed;
-        return new KeyArrayCursor(this, startKey, missingKeyAction);
+        return new KeyArrayCursor(this, startKey);
     }
 
     public void close()
@@ -47,6 +46,7 @@ public class KeyArray
         array.object(null);
     }
 
+    // public only for use by tests
     // Adapted from java.util.Arrays.binarySearch0
     public int binarySearch(AbstractKey key)
     {

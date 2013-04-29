@@ -83,7 +83,7 @@
  *
  * <p> {@link Cursor} objects are used to access the contents of a map.
  * {@link com.geophile.erdo.OrderedMap#first()} returns a Cursor object that visits all records in key order.
- * {@link com.geophile.erdo.OrderedMap#find(AbstractKey, MissingKeyAction)} returns a {@link Cursor} object positioned
+ * {@link com.geophile.erdo.OrderedMap#cursor(AbstractKey)} returns a {@link Cursor} object positioned
  * at a given key, and that can visit neighboring records. (The {@link MissingKeyAction} argument specifies how
  * to position the cursor when the specified key is not present.)
  *

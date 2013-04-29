@@ -174,9 +174,9 @@ public class TreePrinter
         Tree tree = level.tree();
         TreePosition position =
             tree.newPosition().level(level.levelNumber())
-                .firstSegmentOfLevel()
-                .firstPageOfSegment()
-                .firstRecordOfPage();
+                .goToFirstSegmentOfLevel()
+                .goToFirstPageOfSegment()
+                .goToFirstRecordOfPage();
         print(0, "%s", level);
         TreeSegment lastSegment = null;
         int lastPageAddress = -1;
@@ -212,9 +212,9 @@ public class TreePrinter
         Tree tree = level.tree();
         TreePosition position =
             tree.newPosition().level(0)
-                .firstSegmentOfLevel()
-                .firstPageOfSegment()
-                .firstRecordOfPage();
+                .goToFirstSegmentOfLevel()
+                .goToFirstPageOfSegment()
+                .goToFirstRecordOfPage();
         print(0, "%s", level);
         TreeSegment lastSegment = null;
         int lastPageAddress = -1;

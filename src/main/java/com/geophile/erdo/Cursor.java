@@ -16,20 +16,36 @@ import java.io.IOException;
 public abstract class Cursor
 {
     /**
-     * If this cursor is positioned on a record, then the current record is returned, and the cursor is
-     * moved to the record with the next larger key. If the cursor is closed (i.e., not positioned on a record),
-     * then null is returned.
-     * @return The current record of the cursor, or null if the cursor is closed.
+     * Move to and return the next record of the sequence of records represented by this Cursor, where "next"
+     * is defined as follows:
+     * - null if the Cursor has been explicitly closed, by calling {@link Cursor#close()}.
+     * - If the Cursor has just been created by calling {@link OrderedMap#first()}, then the next record
+     *   is the record with the smallest key, or null if the map is empty.
+     * - If the Cursor has just been created by calling {@link OrderedMap#last()}, then the next record is the
+     *   record with the largest key, or null if the map is empty.
+     * - If the Cursor has just been created by calling {@link OrderedMap#cursor(AbstractKey)}, then the next
+     *   record is the one with the given key; or if there is no such record, the record with the next larger key;
+     *   or null if there is no such record.
+     * - Otherwise, the next record is the one with the smallest key larger than that of the previously returned
+     *   record, (obtained by calling either next() or previous()); or null if there is no such record.
      * @throws IOException
      * @throws InterruptedException
      */
     public abstract AbstractRecord next() throws IOException, InterruptedException;
 
     /**
-     * If this cursor is positioned on a record, then the current record is returned, and the cursor is
-     * moved to the record with the next smaller key. If the cursor is closed (i.e., not positioned on a record),
-     * then null is returned.
-     * @return The current record of the cursor, or null if the cursor is closed.
+     * Move to and return the previous record of the sequence of records represented by this Cursor, where "previous"
+     * is defined as follows:
+     * - null if the Cursor has been explicitly closed, by calling {@link Cursor#close()}.
+     * - If the Cursor has just been created by calling {@link OrderedMap#first()}, then the previous record
+     *   is the record with the smallest key, or null if the map is empty.
+     * - If the Cursor has just been created by calling {@link OrderedMap#last()}, then the previous record is the
+     *   record with the largest key, or null if the map is empty.
+     * - If the Cursor has just been created by calling {@link OrderedMap#cursor(AbstractKey)}, then the previous
+     *   record is the one with the given key; or if there is no such record, the record with the next smaller key;
+     *   or null if there is no such record.
+     * - Otherwise, the previous record is the one with the largest key smaller than that of the previously returned
+     *   record, (obtained by calling either next() or previous()); or null if there is no such record.
      * @throws IOException
      * @throws InterruptedException
      */

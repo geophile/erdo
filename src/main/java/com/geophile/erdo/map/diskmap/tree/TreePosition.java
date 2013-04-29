@@ -20,18 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-/*
- * A TreePosition represents a position in a tree, at all levels of resolution between tree and record.
- *
- * TreePosition implements DiskPageReference, participating in page reference counting, and mediating the
- * eviction of pages from the PageMemoryManager.
- *
- * TreePosition also extends LazyRecord, so that a record in a page can be referenced, delaying
- * materialization of the record, possibly forever.
- *
- * Implementing both of these interfaces on the same object means that a page containing a record that may
- * potentially be retrieved is guaranteed not to be evicted.
- */
+// A TreePosition represents a position in a tree, at all levels of resolution between tree and record.
 
 public class TreePosition
     extends LazyRecord
@@ -106,6 +95,7 @@ public class TreePosition
     public AbstractKey key() throws IOException, InterruptedException
     {
         checkResolvedToRecord();
+        // TODO: Don't call readKey unnecessarily, use key if it has the correct value.
         key = ensurePage().readKey(recordNumber, pageAccessBuffers);
         return key;
     }
@@ -153,6 +143,7 @@ public class TreePosition
     @Override
     public DiskPage getItemForCache(PageId id) throws IOException, InterruptedException
     {
+        checkResolvedToPage();
         File file = tree.dbStructure().segmentFile(segment.segmentId());
         long offset = ((long) pageNumber) * tree.pageSizeBytes();
         ByteBuffer pageBuffer = factory.pageMemoryManager().takePageBuffer();
@@ -212,21 +203,21 @@ public class TreePosition
         return this;
     }
 
-    public TreePosition firstSegmentOfLevel()
+    public TreePosition goToFirstSegmentOfLevel()
     {
         checkResolvedToLevel();
         segment = level.segment(0);
         return this;
     }
 
-    public TreePosition lastSegmentOfLevel()
+    public TreePosition goToLastSegmentOfLevel()
     {
         checkResolvedToLevel();
         segment = level.segment(level.segments() - 1);
         return this;
     }
 
-    public TreePosition firstPageOfSegment()
+    public TreePosition goToFirstPageOfSegment()
     {
         checkResolvedToSegment();
         pageNumber = 0;
@@ -235,7 +226,7 @@ public class TreePosition
         return this;
     }
 
-    public TreePosition lastPageOfSegment()
+    public TreePosition goToLastPageOfSegment()
     {
         checkResolvedToSegment();
         pageNumber = segment.pages() - 1;
@@ -244,7 +235,7 @@ public class TreePosition
         return this;
     }
 
-    public TreePosition firstRecordOfPage() throws IOException, InterruptedException
+    public TreePosition goToFirstRecordOfPage() throws IOException, InterruptedException
     {
         checkResolvedToPage();
         ensurePage();
@@ -254,7 +245,7 @@ public class TreePosition
         return this;
     }
 
-    public TreePosition lastRecordOfPage() throws IOException, InterruptedException
+    public TreePosition goToLastRecordOfPage() throws IOException, InterruptedException
     {
         checkResolvedToPage();
         ensurePage();
@@ -280,12 +271,26 @@ public class TreePosition
     {
         checkResolvedToPage();
         assert page != null : this;
+        assert newRecordNumber >= 0 : newRecordNumber;
+        assert newRecordNumber < page.nRecords() : newRecordNumber;
         recordNumber = newRecordNumber;
         clearCachedRecord();
         return this;
     }
 
     // TreePosition interface - setting relative position
+
+    public TreePosition goToEnd()
+    {
+        atEnd = true;
+        segment = null;
+        pageNumber = UNDEFINED;
+        page(null);
+        randomRead = true;
+        recordNumber = UNDEFINED;
+        clearCachedRecord();
+        return this;
+    }
 
     public TreePosition goToNextSegment()
     {
@@ -339,7 +344,7 @@ public class TreePosition
     public TreePosition goToPreviousPage()
     {
         checkResolvedToPage();
-        if (pageNumber-- >= 0) {
+        if (--pageNumber >= 0) {
             page(null);
             randomRead = false;
             recordNumber = UNDEFINED;

@@ -8,7 +8,6 @@ package com.geophile.erdo.map;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.DeadlockException;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TransactionRolledBackException;
 
 import java.io.IOException;
@@ -26,21 +25,16 @@ public interface CommonMapOperations extends Map
     long mapId();
 
     /**
-     * Return a new cursor that will visit, in key order, the elements of the map starting with key.
-     * If key is null, then records are scanned from the beginning of the map. If the key is not
-     * present, then missingKeyAction determines how to proceed:
-     * - {@link MissingKeyAction#FORWARD}: Start the cursor with the smallest key present that is larger than key.
-     *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#BACKWARD}: Start the cursor with the largest key present that is smaller than key.
-     *   If there is no such key, then the returned {@link MapCursor} is closed.
-     * - {@link MissingKeyAction#CLOSE}: Return a closed {@link MapCursor}.
+     * If singleKey is true, then return a Cursor that will provide access to the record with the given key,
+     * or null if there is no such record. If singleKey is false, then the Cursor will provide access to the
+     * entire map, starting with the given key.
      * @param key The starting key.
-     * @param missingKeyAction Specifies where to start the cursor if key is not present.
+     * @param singleKey true iff the returned cursor will be used to access just the record with the given key.
      * @return A {@link MapCursor} that will visit qualifying records in key order.
      * @throws IOException
      * @throws InterruptedException
      */
-    MapCursor cursor(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException;
+    MapCursor cursor(AbstractKey key, boolean singleKey) throws IOException, InterruptedException;
 
     /**
      * Lock the specified key for writing. This method will block if the key is already locked for
@@ -49,10 +43,4 @@ public interface CommonMapOperations extends Map
      */
     void lock(AbstractKey key)
         throws InterruptedException, DeadlockException, TransactionRolledBackException;
-
-    // For testing
-
-    boolean isWriteable();
-
-    boolean isSealed();
 }

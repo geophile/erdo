@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -40,15 +39,15 @@ public class DiskMap extends SealedMapBase
     // SealedMapBase interface
 
     @Override
-    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapCursor(tree.cursor(startKey, missingKeyAction));
+        return new DiskMapCursor(tree, tree.cursor(startKey), singleKey);
     }
 
     @Override
-    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
@@ -59,8 +58,8 @@ public class DiskMap extends SealedMapBase
         }
         return
             keys == null
-            ? cursor(startKey, missingKeyAction)
-            : keys.cursor(startKey, missingKeyAction);
+            ? cursor(startKey, singleKey)
+            : keys.cursor(startKey);
     }
 
     @Override
@@ -170,7 +169,7 @@ public class DiskMap extends SealedMapBase
     public MapCursor consolidationScan() throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapCursor(tree.consolidationScan());
+        return new DiskMapCursor(tree, tree.consolidationScan(), false);
     }
 
     // DiskMap interface
@@ -241,7 +240,7 @@ public class DiskMap extends SealedMapBase
         if (recordCount <= inMemoryMapLimit) {
             this.keys = new KeyArray(factory, (int) recordCount);
             try {
-                MapCursor cursor = cursor(null, MissingKeyAction.FORWARD);
+                MapCursor cursor = cursor(null, false);
                 LazyRecord record;
                 while ((record = cursor.next()) != null) {
                     this.keys.append(record.key());

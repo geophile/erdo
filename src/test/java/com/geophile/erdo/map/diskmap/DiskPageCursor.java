@@ -35,7 +35,7 @@ class DiskPageCursor extends MapCursor
 
     DiskPageCursor(DiskPage page)
     {
-        super(null, null);
+        super(null, false);
         this.page = page;
         this.pageAccessBuffers = page.accessBuffers();
         this.recordNumber = 0;

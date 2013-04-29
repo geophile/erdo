@@ -9,6 +9,7 @@ package com.geophile.erdo.map.diskmap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
+import com.geophile.erdo.map.diskmap.tree.Tree;
 
 import java.io.IOException;
 
@@ -31,24 +32,40 @@ class DiskMapCursor extends MapCursor
     @Override
     public void close()
     {
-        if (treeLevelScan != null) {
-            treeLevelScan.close();
-            treeLevelScan = null;
+        if (treeLevelCursor != null) {
+            treeLevelCursor.close();
+            treeLevelCursor = null;
         }
+    }
+
+    @Override
+    public void goToFirst() throws IOException, InterruptedException
+    {
+        super.goToFirst();
+        treeLevelCursor(null).goToFirst();
+    }
+
+    @Override
+    public void goToLast() throws IOException, InterruptedException
+    {
+        super.goToLast();
+        treeLevelCursor(null).goToLast();
     }
 
     @Override
     public void goTo(AbstractKey key) throws IOException, InterruptedException
     {
-        treeLevelScan.goTo(key);
+        super.goTo(key);
+        treeLevelCursor(key).goTo(key);
     }
 
     // DiskMapCursor interface
 
-    DiskMapCursor(MapCursor treeLevelScan)
+    DiskMapCursor(Tree tree, MapCursor treeLevelCursor, boolean singleKey)
     {
-        super(null, null);
-        this.treeLevelScan = treeLevelScan;
+        super(null, singleKey);
+        this.tree = tree;
+        this.treeLevelCursor = treeLevelCursor;
     }
 
     // For use by this class
@@ -56,8 +73,8 @@ class DiskMapCursor extends MapCursor
     private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
     {
         LazyRecord neighbor = null;
-        if (treeLevelScan != null) {
-            neighbor = forward ? treeLevelScan.next() : treeLevelScan.previous();
+        if (treeLevelCursor != null) {
+            neighbor = forward ? treeLevelCursor.next() : treeLevelCursor.previous();
             if (neighbor == null) {
                 close();
             }
@@ -65,7 +82,16 @@ class DiskMapCursor extends MapCursor
         return neighbor;
     }
 
+    private MapCursor treeLevelCursor(AbstractKey key) throws IOException, InterruptedException
+    {
+        if (treeLevelCursor == null) {
+            treeLevelCursor = tree.cursor(key);
+        }
+        return treeLevelCursor;
+    }
+
     // Object state
 
-    private MapCursor treeLevelScan;
+    private final Tree tree;
+    private MapCursor treeLevelCursor;
 }

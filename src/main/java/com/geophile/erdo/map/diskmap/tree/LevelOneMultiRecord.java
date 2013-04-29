@@ -126,9 +126,9 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
         this.loOnePosition = loOnePosition.copy();
         this.hiOnePosition = hiOnePosition.copy();
         this.loZeroPosition =
-            tree.newPosition().level(0).pageAddress(loIndexRecord.childPageAddress()).firstRecordOfPage();
+            tree.newPosition().level(0).pageAddress(loIndexRecord.childPageAddress()).goToFirstRecordOfPage();
         this.hiZeroPosition =
-            this.loZeroPosition.copy().lastPageOfSegment().lastRecordOfPage();
+            this.loZeroPosition.copy().goToLastPageOfSegment().goToLastRecordOfPage();
         LOG.log(Level.INFO,
                 "Creating multirecord {0}. File bounds {1} : {2}, index bounds {3} : {4}",
                 new Object[]{this,

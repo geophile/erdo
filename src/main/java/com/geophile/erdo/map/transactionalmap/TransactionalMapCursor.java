@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.transactionalmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.forestmap.ForestMapCursor;
@@ -39,20 +38,20 @@ class TransactionalMapCursor extends MapCursor
 
     // TransactionalMapCursor interface
 
-    TransactionalMapCursor(TransactionalMap transactionalMap, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    TransactionalMapCursor(TransactionalMap transactionalMap, AbstractKey startKey, boolean singleKey)
          throws IOException, InterruptedException
     {
-        super(null, null);
-        MapCursor snapshotScan = ForestMapCursor.newScan(transactionalMap.forestSnapshot, startKey, missingKeyAction);
+        super(null, singleKey);
+        MapCursor snapshotCursor = ForestMapCursor.newCursor(transactionalMap.forestSnapshot, startKey, singleKey);
         if (transactionalMap.updates == null || // dynamic map was rolled back.
             transactionalMap.updates.recordCount() == 0) {
-            cursor = snapshotScan;
+            cursor = snapshotCursor;
         } else {
-            MergeCursor mergeScan = new MergeCursor(missingKeyAction.forward());
-            mergeScan.addInput(snapshotScan);
-            mergeScan.addInput(transactionalMap.updates.cursor(startKey, missingKeyAction));
-            mergeScan.start();
-            cursor = mergeScan;
+            MergeCursor mergeCursor = new MergeCursor(true);
+            mergeCursor.addInput(snapshotCursor);
+            mergeCursor.addInput(transactionalMap.updates.cursor(startKey, singleKey));
+            mergeCursor.start();
+            cursor = mergeCursor;
         }
     }
 

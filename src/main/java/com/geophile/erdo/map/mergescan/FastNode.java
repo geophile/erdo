@@ -33,6 +33,7 @@ abstract class FastNode extends Node
     FastNode(int position, boolean forward)
     {
         super(position, forward);
+        assert forward;
     }
 
     protected final void goSlow() throws IOException, InterruptedException

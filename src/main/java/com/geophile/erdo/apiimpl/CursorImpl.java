@@ -14,7 +14,6 @@ import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
-import org.omg.PortableInterceptor.LOCATION_FORWARD;
 
 import java.io.IOException;
 
@@ -37,20 +36,20 @@ public class CursorImpl extends Cursor
     @Override
     public void close()
     {
-        if (mapScan != null) {
+        if (mapCursor != null) {
             checkTransaction();
             transaction.unregisterScan(this);
-            mapScan.close();
-            mapScan = null;
+            mapCursor.close();
+            mapCursor = null;
             DiskPageCache.destroyRemainingTreePositions();
         }
     }
 
     // CursorImpl interface
 
-    CursorImpl(TransactionManager transactionManager, MapCursor mapScan)
+    CursorImpl(TransactionManager transactionManager, MapCursor mapCursor)
     {
-        this.mapScan = mapScan;
+        this.mapCursor = mapCursor;
         this.transactionManager = transactionManager;
         this.transaction = transactionManager.currentTransaction();
         this.transaction.registerScan(this);
@@ -61,12 +60,12 @@ public class CursorImpl extends Cursor
     private AbstractRecord neighbor(boolean forward) throws IOException, InterruptedException
     {
         AbstractRecord record = null;
-        if (mapScan != null) {
+        if (mapCursor != null) {
             LazyRecord neighbor;
             boolean deleted = false;
             checkTransaction();
             do {
-                neighbor = forward ? mapScan.next() : mapScan.previous();
+                neighbor = forward ? mapCursor.next() : mapCursor.previous();
                 if (neighbor != null) {
                     deleted = neighbor.key().deleted();
                     if (deleted) {
@@ -104,5 +103,5 @@ public class CursorImpl extends Cursor
 
     private TransactionManager transactionManager;
     private Transaction transaction;
-    private MapCursor mapScan;
+    private MapCursor mapCursor;
 }

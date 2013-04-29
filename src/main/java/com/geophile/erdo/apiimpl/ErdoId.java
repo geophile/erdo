@@ -44,8 +44,30 @@ public class ErdoId extends AbstractKey
 
     // ErdoId interface
 
-    public ErdoId(int erdoId)
+    public boolean lowest()
+    {
+        return lowest;
+    }
+
+    public static ErdoId lowest(int erdoId)
+    {
+        return new ErdoId(erdoId, true);
+    }
+
+    public static ErdoId highest(int erdoId)
+    {
+        return new ErdoId(erdoId, false);
+    }
+
+    // For use by this class
+
+    private ErdoId(int erdoId, boolean lowest)
     {
         erdoId(erdoId);
+        this.lowest = lowest;
     }
+
+    // Object state
+
+    private final boolean lowest; // false: lower than all keys. true: higher than all keys
 }

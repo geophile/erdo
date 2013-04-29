@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.systemtest.lockmanagement;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.Database;
+import com.geophile.erdo.OrderedMap;
+import com.geophile.erdo.TransactionCallback;
+import com.geophile.erdo.TransactionRolledBackException;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.transaction.Transaction;
 

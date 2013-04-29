@@ -58,16 +58,6 @@ public abstract class MapBase implements Comparable<MapBase>, CommonMapOperation
         return mapId;
     }
 
-    public boolean isWriteable()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public boolean isSealed()
-    {
-        throw new UnsupportedOperationException();
-    }
-
     // MapBase interface
 
     protected MapBase(Factory factory)

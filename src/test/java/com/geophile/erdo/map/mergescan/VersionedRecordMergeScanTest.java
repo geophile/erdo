@@ -6,11 +6,8 @@
 
 package com.geophile.erdo.map.mergescan;
 
-import com.geophile.erdo.MissingKeyAction;
-import com.geophile.erdo.TestKey;
 import com.geophile.erdo.TestRecord;
 import com.geophile.erdo.map.MapBehaviorTestBase;
-import com.geophile.erdo.map.forestmap.TimestampMerger;
 import com.geophile.erdo.map.testarraymap.TestArrayMap;
 import com.geophile.erdo.transaction.TimestampSet;
 import junit.framework.Assert;
@@ -30,7 +27,7 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
         // Value is key.version
         final int N = 10;
         // Turn off consolidation, so that we end up with N maps that need to be merged.
-        MergeCursor mergeScan = new MergeCursor();
+        MergeCursor mergeScan = new MergeCursor(true);
         for (int version = 0; version < N; version++) {
             TestArrayMap map = new TestArrayMap(FACTORY, new TimestampSet(version));
             for (int k = 0; k < N - version; k++) {
@@ -38,7 +35,7 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
                 record.key().transactionTimestamp(version);
                 map.put(record, false);
             }
-            mergeScan.addInput(map.cursor(null, MissingKeyAction.FORWARD));
+            mergeScan.addInput(map.cursor(null, false));
         }
         mergeScan.start();
         TestRecord record;

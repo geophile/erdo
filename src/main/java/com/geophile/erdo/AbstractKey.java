@@ -63,11 +63,11 @@ public abstract class AbstractKey implements Comparable<AbstractKey>, Transferra
     public int compareTo(AbstractKey that)
     {
         int c = (this.erdoId & ~ERDO_ID_DELETED_MASK) - (that.erdoId & ~ERDO_ID_DELETED_MASK);
-        if (c == 0) {
+        if (c == 0 && this != that) {
             if (this instanceof ErdoId) {
-                c = -1;
+                c = ((ErdoId) this).lowest() ? -1 : 1;
             } else if (that instanceof ErdoId) {
-                c = 1;
+                c = ((ErdoId) that).lowest() ? 1 : -1;
             }
         }
         return c;

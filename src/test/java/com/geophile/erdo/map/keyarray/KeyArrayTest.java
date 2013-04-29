@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.TestKey;
 import com.geophile.erdo.map.RecordFactory;
@@ -41,8 +40,10 @@ public class KeyArrayTest
         TestKey1 key = new TestKey1();
         // size
         assertEquals(0, a.size());
-        // cursor
-        assertNull(a.cursor(null, MissingKeyAction.FORWARD).next());
+        // scan forward
+        assertNull(a.cursor(null).next());
+        // scan backward
+        assertNull(a.cursor(null).next());
         // binary search
         assertEquals(-1, a.binarySearch(key));
         // subscript
@@ -59,39 +60,88 @@ public class KeyArrayTest
     {
         final int MAX_N = 100;
         for (int n = 1; n <= MAX_N; n++) {
-            KeyArray a = new KeyArray(FACTORY, 1000);
-            TestKey1 key = null;
-            for (int i = 1; i <= n; i++) {
-                key = key1(i * 10);
-                a.append(key);
-            }
-            a.close();
-            // size
-            assertEquals(n, a.size());
-            // cursor
-            KeyArrayCursor cursor = a.cursor(null, MissingKeyAction.FORWARD);
+            // debug("n: %s", n);
+            KeyArray a;
+            KeyArrayCursor cursor;
             AbstractRecord record;
-            int expected = 10;
-            while ((record = cursor.next()) != null) {
-                assertEquals(expected, ((TestKey1)record.key()).key());
-                expected += 10;
+            int expected;
+            TestKey1 key;
+            // load
+            {
+                a = new KeyArray(FACTORY, 1000);
+                for (int i = 1; i <= n; i++) {
+                    key = key1(i * 10);
+                    a.append(key);
+                    // debug("    %s", key);
+                }
+                a.close();
+                // check size
+                assertEquals(n, a.size());
             }
-            // binary search
-            assertEquals(-1, a.binarySearch(key1(5)));
-            expected = 0;
-            for (int k = 10; k <= n; k += 10) {
-                assertEquals(expected++, a.binarySearch(key1(k)));
+            // scan forward
+            {
+                cursor = a.cursor(null);
+                expected = 0;
+                while ((record = cursor.next()) != null) {
+                    expected += 10;
+                    assertEquals(expected, ((TestKey1)record.key()).key());
+                }
+                assertEquals(n * 10, expected);
             }
-            expected = -2;
-            for (int k = 15; k <= n + 5; k += 10) {
-                assertEquals(expected--, a.binarySearch(key1(k)));
+            // scan backward
+            {
+                cursor = a.cursor(null);
+                expected = n * 10;
+                while ((record = cursor.previous()) != null) {
+                    assertEquals(expected, ((TestKey1)record.key()).key());
+                    expected -= 10;
+                }
+                assertEquals(0, expected);
             }
-            // subscript
-            expected = 10;
-            for (int i = 0; i < a.size(); i++) {
-                a.key(i, key);
-                assertEquals(expected, key.key());
-                expected += 10;
+            // binary search - search key present
+            {
+                for (int i = 1; i <= n; i++) {
+                    key = key1(i * 10);
+                    // forward
+                    cursor = a.cursor(key);
+                    record = cursor.next();
+                    assertNotNull(record);
+                    assertEquals(i * 10, ((TestKey1)record.key()).key());
+                    // backward
+                    cursor = a.cursor(key);
+                    record = cursor.previous();
+                    assertNotNull(record);
+                    assertEquals(i * 10, ((TestKey1)record.key()).key());
+                }
+            }
+            // binary search - search key missing
+            {
+                for (int i = 1; i <= n + 1; i++) {
+                    key = key1(i * 10 - 5);
+                    // debug("binary search - missing key: %s", key);
+                    TestKey1 above = i <= n ? key1(i * 10) : null;
+                    TestKey1 below = i > 1 ? key1((i - 1) * 10) : null;
+                    // debug("    above: %s", above);
+                    // debug("    below: %s", below);
+                    // forward
+                    cursor = a.cursor(key);
+                    record = cursor.next();
+                    if (above == null) {
+                        assertNull(record);
+                    } else {
+                        assertNotNull(record);
+                        assertEquals(above, record.key());
+                    }
+                    // backward
+                    cursor = a.cursor(key);
+                    record = cursor.previous();
+                    if (below == null) {
+                         assertNull(record);
+                    } else {
+                        assertNotNull(record);
+                        assertEquals(below, record.key());
+                    }
+                }
             }
         }
     }
@@ -112,8 +162,8 @@ public class KeyArrayTest
             a.close();
             // size
             assertEquals(N, a.size());
-            // cursor
-            KeyArrayCursor cursor = a.cursor(null, MissingKeyAction.FORWARD);
+            // scan forward
+            KeyArrayCursor cursor = a.cursor(null);
             AbstractRecord record;
             int expected = 0;
             while ((record = cursor.next()) != null) {
@@ -166,6 +216,11 @@ public class KeyArrayTest
         key.erdoId(2);
         key.transactionTimestamp(200);
         return key;
+    }
+
+    private void debug(String template, Object ... args)
+    {
+        System.out.println(String.format(template, args));
     }
 
     private static TestFactory FACTORY;

@@ -7,11 +7,13 @@
 package com.geophile.erdo.map.emptymap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 
 import java.io.IOException;
+
+// EmptyMap has a specific purpose, to carry the timestamps of maps resulting from readonly transactions. This is
+// the corresponding cursor class. It is also used in various places when a cursor over any empty map is needed.
 
 public class EmptyMapCursor extends MapCursor
 {
@@ -30,7 +32,11 @@ public class EmptyMapCursor extends MapCursor
     }
 
     @Override
-    public void close()
+    public void goToFirst() throws IOException, InterruptedException
+    {}
+
+    @Override
+    public void goToLast() throws IOException, InterruptedException
     {}
 
     @Override
@@ -41,6 +47,6 @@ public class EmptyMapCursor extends MapCursor
 
     public EmptyMapCursor()
     {
-        super(null, MissingKeyAction.FORWARD);
+        super(null, false);
     }
 }

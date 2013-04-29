@@ -39,7 +39,7 @@ public class TransactionalMap extends OpenMapBase
         LazyRecord uncommitted = updateMap().put(record, returnReplaced);
         if (returnReplaced && uncommitted == null) {
             AbstractKey key = record.key();
-            MapCursor cursor = ForestMapCursor.newScan(forestSnapshot, key, MissingKeyAction.CLOSE);
+            MapCursor cursor = ForestMapCursor.newCursor(forestSnapshot, key, true);
             LazyRecord committed = cursor.next();
             cursor.close();
             replaced = committed;
@@ -58,9 +58,9 @@ public class TransactionalMap extends OpenMapBase
     }
 
     @Override
-    public MapCursor cursor(AbstractKey key, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    public MapCursor cursor(AbstractKey key, boolean singleKey) throws IOException, InterruptedException
     {
-        return new TransactionalMapCursor(this, key, missingKeyAction);
+        return new TransactionalMapCursor(this, key, singleKey);
     }
 
     // TransactionalMap interface

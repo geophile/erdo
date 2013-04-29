@@ -48,20 +48,12 @@ public class CursorTest
                     checkRecord(expected++, record);
                 }
                 assertEquals(n, expected);
-/*
-                expected = 0;
-                cursor = map.last();
-                while ((record = (TestRecord) cursor.previous()) != null) {
-                    checkRecord(expected++, record);
-                }
-                assertEquals(n, expected);
-*/
             }
             // Random access
             {
                 // Test:
                 // -    k * GAP - GAP/2 (missing)
-                // -    k * GAP (present)
+                // -    k * GAP (present if k < n, missing if k = n)
                 for (int k = 0; k <= n; k++) {
                     // Test missing
                     {
@@ -71,25 +63,95 @@ public class CursorTest
                         record = (TestRecord) map.find(key);
                         assertNull(record);
                         // test find -> cursor
-                        cursor = map.find(key, MissingKeyAction.FORWARD);
+                        cursor = map.cursor(key);
                         expected = k;
                         while ((record = (TestRecord) cursor.next()) != null) {
                             checkRecord(expected++, record);
                         }
+                        assertEquals(n, expected);
                     }
                     // Test present
+                    int presentKey = k * GAP;
+                    expected = k;
+                    key = new TestKey(presentKey);
+                    // test find -> record
+                    record = (TestRecord) map.find(key);
                     if (k < n) {
-                        int presentKey = k * GAP;
-                        expected = k;
-                        key = new TestKey(presentKey);
+                        checkRecord(expected, record);
+                    } else {
+                        assertEquals(n, k);
+                        assertNull(record);
+                    }
+                    // test find -> cursor
+                    cursor = map.cursor(key);
+                    while ((record = (TestRecord) cursor.next()) != null) {
+                        checkRecord(expected++, record);
+                    }
+                    assertEquals(n, expected);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFindAndPrevious()
+        throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
+    {
+        for (int n = 0; n < 100; n++) {
+            // debug("n: %s", n);
+            loadDatabase(n);
+            Cursor cursor;
+            TestRecord record;
+            TestKey key;
+            int expected;
+            // Complete cursor
+            {
+                expected = n;
+                cursor = map.last();
+                while ((record = (TestRecord) cursor.previous()) != null) {
+                    // debug("expected: %s, actual: %s", (expected - 1) * GAP, record.key());
+                    checkRecord(--expected, record);
+                }
+                assertEquals(0, expected);
+            }
+            // Random access
+            {
+                // Test:
+                // -    k * GAP - GAP/2 (missing)
+                // -    k * GAP (present if k < n, missing if k = n)
+                for (int k = 0; k <= n; k++) {
+                    // Test missing
+                    {
+                        int missingKey = k * GAP - GAP / 2;
+                        key = new TestKey(missingKey);
                         // test find -> record
                         record = (TestRecord) map.find(key);
+                        assertNull(record);
+                        // test find -> cursor
+                        cursor = map.cursor(key);
+                        expected = k;
+                        while ((record = (TestRecord) cursor.previous()) != null) {
+                            checkRecord(--expected, record);
+                        }
+                        assertEquals(0, expected);
+                    }
+                    // Test present
+                    int presentKey = k * GAP;
+                    expected = k;
+                    key = new TestKey(presentKey);
+                    // test find -> record
+                    record = (TestRecord) map.find(key);
+                    if (k < n) {
                         checkRecord(expected, record);
                         // test find -> cursor
-                        cursor = map.find(key, MissingKeyAction.FORWARD);
-                        while ((record = (TestRecord) cursor.next()) != null) {
-                            checkRecord(expected++, record);
+                        cursor = map.cursor(key);
+                        while ((record = (TestRecord) cursor.previous()) != null) {
+                            checkRecord(expected--, record);
                         }
+                        assertEquals(n == 0 ? 0 : -1, expected);
+                    } else {
+                        assertEquals(n, k);
+                        assertNull(record);
                     }
                 }
             }
@@ -106,7 +168,7 @@ public class CursorTest
             assertNull(cursor.next());
             cursor.close();
             assertNull(cursor.next());
-            cursor.close();
+             cursor.close();
             assertNull(cursor.next());
         }
         // Test repeated close of cursor that wasn't closed to start
@@ -122,16 +184,65 @@ public class CursorTest
         }
     }
 
+    @Test
+    public void testNextAlternatingWithPrevious()
+        throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
+    {
+        final int N = 10;
+        loadDatabase(N);
+        Cursor cursor = map.first();
+        TestRecord record;
+        int expected = -1;
+        for (int i = 0; i < N; i++) {
+            record = (TestRecord) cursor.next();
+            checkRecord(++expected, record);
+            if (i < N - 1) {
+                record = (TestRecord) cursor.next();
+                checkRecord(++expected, record);
+                record = (TestRecord) cursor.previous();
+                checkRecord(--expected, record);
+            } else {
+                assertNull(cursor.next());
+            }
+        }
+        assertEquals(N - 1, expected);
+    }
+
+    @Test
+    public void testPreviousAlternatingWithNext()
+        throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
+    {
+        final int N = 10;
+        loadDatabase(N);
+        Cursor cursor = map.last();
+        TestRecord record;
+        int expected = N;
+        for (int i = 0; i < N; i++) {
+            record = (TestRecord) cursor.previous();
+            checkRecord(--expected, record);
+            if (i < N - 1) {
+                record = (TestRecord) cursor.previous();
+                checkRecord(--expected, record);
+                record = (TestRecord) cursor.next();
+                checkRecord(++expected, record);
+            } else {
+                assertNull(cursor.previous());
+            }
+        }
+        assertEquals(0, expected);
+    }
+
     private void loadDatabase(int n)
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         // map is loaded with (x * GAP, "r.x"), 0 <= x < n
-        db = new DisklessTestDatabase(FACTORY);
+        Database db = new DisklessTestDatabase(FACTORY);
         map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
         for (int key = 0; key < n; key++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(testKey(key), testValue(key)));
             Assert.assertNull(replaced);
         }
+        db.commitTransaction();
     }
 
     private void checkRecord(int expected, TestRecord record)
@@ -151,10 +262,14 @@ public class CursorTest
         return String.format("r.%s", x);
     }
 
+    private void debug(String template, Object ... args)
+    {
+        System.out.println(String.format(template, args));
+    }
+
     private static TestFactory FACTORY;
     private static final String MAP_NAME = "map";
     private static final int GAP = 10;
 
-    private Database db;
     private OrderedMap map;
 }

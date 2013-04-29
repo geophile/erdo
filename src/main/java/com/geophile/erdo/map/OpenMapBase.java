@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.DeadlockException;
+import com.geophile.erdo.TransactionRolledBackException;
 
 import java.io.IOException;
 
@@ -20,7 +23,7 @@ public abstract class OpenMapBase extends MapBase implements OpenMap
     public abstract LazyRecord put(AbstractRecord record, boolean returnReplaced)
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException;
 
-    public abstract MapCursor cursor(AbstractKey key, MissingKeyAction missingKeyAction)
+    public abstract MapCursor cursor(AbstractKey key, boolean singleKey)
         throws IOException, InterruptedException;
 
     // For use by subclasses

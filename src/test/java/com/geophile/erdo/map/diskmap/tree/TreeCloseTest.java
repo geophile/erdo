@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.TestFactory;
+import com.geophile.erdo.TestKey;
+import com.geophile.erdo.TestRecord;
+import com.geophile.erdo.TransactionCallback;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.RecordFactory;
@@ -71,12 +74,12 @@ public class TreeCloseTest
         }
         Tree tree = writeableTree.close();
         startTransaction();
-        MapCursor cursor = tree.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = tree.cursor(null);
         int expected = 0;
         LazyRecord lazyRecord;
         while ((lazyRecord = cursor.next()) != null) {
             TestRecord record = (TestRecord) lazyRecord.materializeRecord();
-            int key = ((TestKey) record.key()).key();
+            int key = record.key().key();
             assertEquals(expected, key);
             assertEquals(FILLER, record.stringValue());
             expected++;

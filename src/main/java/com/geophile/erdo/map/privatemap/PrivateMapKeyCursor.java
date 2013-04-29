@@ -8,12 +8,10 @@ package com.geophile.erdo.map.privatemap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.KeyOnlyRecord;
 import com.geophile.erdo.map.MapCursor;
 
 import java.util.Iterator;
-import java.util.NavigableMap;
 
 class PrivateMapKeyCursor extends MapCursor
 {
@@ -21,68 +19,73 @@ class PrivateMapKeyCursor extends MapCursor
 
     public AbstractRecord next()
     {
-        assert forward;
-        return neighbor();
+        return neighbor(true);
     }
 
     public AbstractRecord previous()
     {
-        assert !forward;
-        return neighbor();
+        return neighbor(false);
     }
 
     public void close()
     {
-        closed = true;
+        state = State.DONE;
     }
 
     // PrivateMapKeyCursor interface
 
-    public PrivateMapKeyCursor(NavigableMap<AbstractKey, AbstractRecord> contents,
+    public PrivateMapKeyCursor(PrivateMap map,
                                AbstractKey startKey,
-                               MissingKeyAction missingKeyAction)
+                               boolean singleKey)
     {
-        super(startKey, missingKeyAction);
-
-        if (missingKeyAction == MissingKeyAction.BACKWARD) {
-            this.forward = false;
-            if (startKey == null) {
-                this.iterator = contents.descendingMap().keySet().iterator();
-            } else {
-                this.iterator = contents.headMap(startKey, true).descendingMap().keySet().iterator();
-            }
-        } else {
-            this.forward = true;
-            if (startKey == null) {
-                this.iterator = contents.keySet().iterator();
-            } else {
-                this.iterator = contents.tailMap(startKey, true).keySet().iterator();
-            }
-        }
+        super(startKey, singleKey);
+        this.map = map;
     }
 
-    // FOr use by this class
+    // For use by this class
 
-    private AbstractRecord neighbor()
+    private AbstractRecord neighbor(boolean forwardMove)
     {
-        AbstractKey neighbor = null;
-        if (!closed) {
-            if (iterator.hasNext()) {
-                neighbor = iterator.next();
-                if (!isOpen(neighbor)) {
-                    neighbor = null;
-                    close();
+        AbstractRecord neighbor = null;
+        AbstractKey neighborKey = null;
+        if (state != State.DONE) {
+            if (state == State.NEVER_USED || forwardIterator != forwardMove) {
+                // Second arg to tailMap/headMap indicates whether the submap is inclusive. If state is IN_USE
+                // then we've already visited the restartKey and don't want to do so again.
+                if (forwardMove) {
+                    iterator =
+                        startKey == null
+                        ? map.contents.keySet().iterator()
+                        : map.contents.tailMap(startKey, state == State.NEVER_USED).keySet().iterator();
+                } else {
+                    iterator =
+                        startKey == null
+                        ? map.contents.descendingMap().keySet().iterator()
+                        : map.contents.headMap(startKey, state == State.NEVER_USED).descendingMap().keySet().iterator();
                 }
-            } else {
-                close();
+                forwardIterator = forwardMove;
+                state = State.IN_USE;
             }
         }
-        return neighbor == null ? null : new KeyOnlyRecord(neighbor);
+        if (iterator.hasNext()) {
+            neighborKey = iterator.next();
+            if (!isOpen(neighborKey)) {
+                neighborKey = null;
+                close();
+            }
+        } else {
+            close();
+        }
+        if (neighborKey != null) {
+            neighbor = new KeyOnlyRecord(neighborKey);
+            startKey = neighborKey;
+        }
+        return neighbor;
     }
 
     // Object state
 
-    private final boolean forward;
-    private final Iterator<AbstractKey> iterator;
-    private boolean closed = false;
+    private final PrivateMap map;
+    private Iterator<AbstractKey> iterator;
+    private boolean forwardIterator;
 }

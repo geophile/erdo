@@ -29,16 +29,11 @@ public class IteratorCursor extends MapCursor
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public void close()
-    {
-    }
-
     // IteratorCursor interface
 
     public IteratorCursor(Iterator iterator)
     {
-        super(null, null);
+        super(null, false);
         this.iterator = iterator;
     }
 

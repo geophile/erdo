@@ -7,7 +7,7 @@
 package com.geophile.erdo.map;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
+import com.geophile.erdo.map.emptymap.EmptyMapCursor;
 
 import java.io.IOException;
 
@@ -17,18 +17,36 @@ public abstract class MapCursor
 
     public abstract LazyRecord previous() throws IOException, InterruptedException;
 
-    public abstract void close();
+    public void close()
+    {
+        state = State.DONE;
+    }
+
+    public void goToFirst() throws IOException, InterruptedException
+    {
+        startKey = null;
+        state = State.NEVER_USED;
+        unboundStartAtFirstKey = true;
+    }
+
+    public void goToLast() throws IOException, InterruptedException
+    {
+        startKey = null;
+        state = State.NEVER_USED;
+        unboundStartAtFirstKey = false;
+    }
 
     public void goTo(AbstractKey key) throws IOException, InterruptedException
     {
-        throw new UnsupportedOperationException();
+        assert key != null;
+        startKey = key;
+        state = State.NEVER_USED;
     }
 
     protected boolean isOpen(AbstractKey key)
     {
-        assert canCheckIsOpen : this;
         if (key == null) {
-            // cursor is over because we've run off the end
+            // cursor is closed because we've run off the end
             return false;
         }
         if (startKey == null) {
@@ -37,49 +55,49 @@ public abstract class MapCursor
         }
         if (key.erdoId() == startKey.erdoId()) {
             // In the same OrderedMap as startKey
-            return !exactMatch || key.equals(startKey);
+            return !singleKey || key.equals(startKey);
         } else {
             return false;
         }
     }
 
-    protected MapCursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    protected MapCursor(AbstractKey startKey, boolean singleKey)
     {
         this.startKey = startKey;
-        this.exactMatch = missingKeyAction == MissingKeyAction.CLOSE;
-        this.canCheckIsOpen = !(startKey == null && missingKeyAction == null);
+        this.singleKey = singleKey;
+        this.state = State.NEVER_USED;
     }
 
     // Object state
 
     // Kinds of scans:
-    // - Complete scan of map, across all erdoIds: startKey == null, exactMatch == false. Used in consolidation.
-    // - Exact match: startKey != null, exactMatch = true
-    // - Start at key, limited to one erdoId: startKey != null, exactMatch = false
+    // - Complete scan of map, across all erdoIds: startKey == null, singleKey == false. Used in consolidation.
+    // - Exact match: startKey != null, singleKey = true
+    // - Start at key, limited to one erdoId: startKey != null, singleKey = false
     // - Other: canCheckIsOpen is false, meaning the subclass will check loop termination.
-    private final AbstractKey startKey;
-    private final boolean exactMatch;
-    private final boolean canCheckIsOpen;
+    protected AbstractKey startKey;
+    protected State state;
+    private final boolean singleKey;
+    // unboundStartAtFirstKey is used to indicate where to position the cursor while in the NEVER_USED state,
+    // with startKey = null. true means start at the first key, false means start at the last key.
+    protected boolean unboundStartAtFirstKey;
 
     // Inner classes
 
-    public static final MapCursor EMPTY = new MapCursor(null, MissingKeyAction.FORWARD)
+    public static final MapCursor EMPTY = new EmptyMapCursor();
+
+    protected enum State
     {
-        @Override
-        public LazyRecord next() throws IOException, InterruptedException
-        {
-            return null;
-        }
+        // The cursor has been created, but has never been used to retrieve a record. If the key used to create
+        // the cursor is present, then both next() and previous() will retrieve the associated record. This state
+        // is also used when a cursor is repositioned using goTo().
+        NEVER_USED,
 
-        @Override
-        public LazyRecord previous() throws IOException, InterruptedException
-        {
-            return null;
-        }
+        // The cursor has been created and used to retrieve at least one record. next() and previous() move the
+        // cursor before retrieving a record.
+        IN_USE,
 
-        @Override
-        public void close()
-        {
-        }
-    };
+        // The cursor has run off one end. A call to next() or previous() will return null.
+        DONE
+    }
 }

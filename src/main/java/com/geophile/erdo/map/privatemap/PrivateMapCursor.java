@@ -8,10 +8,8 @@ package com.geophile.erdo.map.privatemap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.MapCursor;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 class PrivateMapCursor extends MapCursor
@@ -21,58 +19,48 @@ class PrivateMapCursor extends MapCursor
     @Override
     public AbstractRecord next()
     {
-        assert forward;
-        return neighbor();
+        return neighbor(true);
     }
 
     @Override
     public AbstractRecord previous()
     {
-        assert !forward;
-        return neighbor();
-    }
-
-    @Override
-    public void close()
-    {
-        closed = true;
-    }
-
-    @Override
-    public void goTo(AbstractKey key) throws IOException, InterruptedException
-    {
-        iterator = map.contents.tailMap(key).values().iterator();
+        return neighbor(false);
     }
 
     // PrivateMapCursor interface
 
-    PrivateMapCursor(PrivateMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    PrivateMapCursor(PrivateMap map, AbstractKey startKey, boolean singleKey)
     {
-        super(startKey, missingKeyAction);
+        super(startKey, singleKey);
         this.map = map;
-        if (missingKeyAction == MissingKeyAction.BACKWARD) {
-            this.forward = false;
-            if (startKey == null) {
-                this.iterator = map.contents.descendingMap().values().iterator();
-            } else {
-                this.iterator = map.contents.headMap(startKey, true).descendingMap().values().iterator();
-            }
-        } else {
-            this.forward = true;
-            if (startKey == null) {
-                this.iterator = map.contents.values().iterator();
-            } else {
-                this.iterator = map.contents.tailMap(startKey, true).values().iterator();
-            }
-        }
     }
 
     // For use by this class
 
-    private AbstractRecord neighbor()
+    private AbstractRecord neighbor(boolean forwardMove)
     {
         AbstractRecord neighbor = null;
-        if (!closed) {
+        if (state != State.DONE) {
+            if (state == State.NEVER_USED || forwardIterator != forwardMove) {
+                // Second arg to tailMap/headMap indicates whether the submap is inclusive. If state is IN_USE
+                // or REPOSITIONED, (i.e. not NEVER_USED or DONE), then we've already visited the startKey and don't
+                // want to do so again. (I.e., the state is either IN_USE or REPOSITIONED. In either case we've
+                // visited the startKey.)
+                if (forwardMove) {
+                    iterator =
+                        startKey == null
+                        ? map.contents.values().iterator()
+                        : map.contents.tailMap(startKey, state == State.NEVER_USED).values().iterator();
+                } else {
+                    iterator =
+                        startKey == null
+                        ? map.contents.descendingMap().values().iterator()
+                        : map.contents.headMap(startKey, state == State.NEVER_USED).descendingMap().values() .iterator();
+                }
+                forwardIterator = forwardMove;
+                state = State.IN_USE;
+            }
             if (iterator.hasNext()) {
                 neighbor = iterator.next();
                 if (!isOpen(neighbor.key())) {
@@ -82,6 +70,9 @@ class PrivateMapCursor extends MapCursor
             } else {
                 close();
             }
+            if (neighbor != null) {
+                startKey = neighbor.key();
+            }
         }
         return neighbor;
     }
@@ -89,7 +80,6 @@ class PrivateMapCursor extends MapCursor
     // State
 
     private final PrivateMap map;
-    private final boolean forward;
     private Iterator<AbstractRecord> iterator;
-    private boolean closed = false;
+    private boolean forwardIterator;
 }

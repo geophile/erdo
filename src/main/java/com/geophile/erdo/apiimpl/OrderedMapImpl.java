@@ -81,28 +81,28 @@ public class OrderedMapImpl extends OrderedMap
     {
         checkNotNull(key);
         key.erdoId(erdoId);
-        return newCursor(key, MissingKeyAction.CLOSE).next();
+        return newCursor(key, true).next();
     }
 
     @Override
-    public Cursor find(AbstractKey startKey, MissingKeyAction missingKeyAction) throws IOException, InterruptedException
+    public Cursor cursor(AbstractKey startKey) throws IOException, InterruptedException
     {
         if (startKey != null) {
             startKey.erdoId(erdoId);
         }
-        return newCursor(startKey, missingKeyAction);
+        return newCursor(startKey, false);
     }
 
     @Override
     public Cursor first() throws IOException, InterruptedException
     {
-        return newCursor(erdoIdKey, MissingKeyAction.FORWARD);
+        return newCursor(lowestKey, false);
     }
 
     @Override
     public Cursor last() throws IOException, InterruptedException
     {
-        return newCursor(nextErdoIdKey, MissingKeyAction.BACKWARD);
+        return newCursor(highestKey, false);
     }
 
     // OrderedMapImpl interface
@@ -117,8 +117,8 @@ public class OrderedMapImpl extends OrderedMap
         assert transactionManager != null;
         this.transactionManager = transactionManager;
         this.erdoId = erdoId;
-        this.erdoIdKey = new ErdoId(erdoId);
-        this.nextErdoIdKey = new ErdoId(erdoId + 1);
+        this.lowestKey = ErdoId.lowest(erdoId);
+        this.highestKey = ErdoId.highest(erdoId);
     }
 
     public int erdoId()
@@ -128,15 +128,16 @@ public class OrderedMapImpl extends OrderedMap
 
     // For use by this class
 
-    private Cursor newCursor(AbstractKey key, MissingKeyAction missingKeyAction)
+    private Cursor newCursor(AbstractKey key, boolean singleKey)
         throws IOException, InterruptedException
     {
-        return new CursorImpl(transactionManager, transactionalMap().cursor(key, missingKeyAction));
+        return new CursorImpl(transactionManager, transactionalMap().cursor(key, singleKey));
     }
 
     private TransactionalMap transactionalMap()
     {
-        return transactionManager.currentTransaction().transactionalMap();
+        transactionalMap = transactionManager.currentTransaction().transactionalMap();
+        return transactionalMap;
     }
 
     private void checkNotNull(AbstractKey key)
@@ -154,6 +155,7 @@ public class OrderedMapImpl extends OrderedMap
 
     private final TransactionManager transactionManager;
     private final int erdoId;
-    private final ErdoId erdoIdKey;
-    private final ErdoId nextErdoIdKey; // For positioning by last()
+    private final ErdoId lowestKey;
+    private final ErdoId highestKey; // For positioning by last()
+    private TransactionalMap transactionalMap; // For visibility in debugger
 }

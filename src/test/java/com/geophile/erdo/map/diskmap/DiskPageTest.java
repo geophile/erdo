@@ -101,7 +101,7 @@ public class DiskPageTest
         i = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
             Arrays.fill(bytes, (byte) (i % 256));
-            assertEquals(i, ((TestKey) record.key()).key());
+            assertEquals(i, record.key().key());
             compare(bytes, record.bytesValue());
             i++;
         }

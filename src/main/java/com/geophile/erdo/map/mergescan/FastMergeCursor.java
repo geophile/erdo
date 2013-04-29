@@ -34,7 +34,7 @@ public class FastMergeCursor extends MergeCursor
 
     public FastMergeCursor()
     {
-        this(TimestampMerger.only(), true);
+        this(TimestampMerger.only());
     }
 
     // For use by this package
@@ -54,8 +54,8 @@ public class FastMergeCursor extends MergeCursor
         return new FastFillerNode(position);
     }
 
-    FastMergeCursor(Merger merger, boolean forward)
+    FastMergeCursor(Merger merger)
     {
-        super(merger, forward);
+        super(merger, true);
     }
 }

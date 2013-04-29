@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.arraymap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -33,17 +32,17 @@ public class ArrayMap extends SealedMapBase
     // OpenOrSealedMapBase interface
 
     @Override
-    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
-        return new ArrayMapCursor(this, startKey, missingKeyAction);
+        return new ArrayMapCursor(this, startKey);
     }
 
     @Override
-    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
-        return cursor(startKey, missingKeyAction);
+        return cursor(startKey, singleKey);
     }
 
     @Override

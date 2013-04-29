@@ -8,7 +8,6 @@ package com.geophile.erdo.map.testarraymap;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -49,19 +48,19 @@ public class TestArrayMap extends OpenOrSealedMapBase
     }
 
     @Override
-    public MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor cursor(AbstractKey startKey, boolean singleKey)
     {
-        return new TestArrayMapCursor(this, startKey, missingKeyAction);
+        return new TestArrayMapCursor(this, startKey, singleKey);
     }
 
     @Override
-    public MapCursor keyScan(AbstractKey startKey, MissingKeyAction missingKeyAction)
+    public MapCursor keyScan(AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
         return
             keys == null
-            ? cursor(startKey, missingKeyAction)
-            : keys.cursor(startKey, missingKeyAction);
+            ? cursor(startKey, singleKey)
+            : keys.cursor(startKey);
     }
 
     @Override

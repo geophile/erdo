@@ -57,10 +57,10 @@ class LevelOneCursorToFindLevelZeroSegments extends MapCursor
 
     LevelOneCursorToFindLevelZeroSegments(Tree tree) throws IOException, InterruptedException
     {
-        super(null, null);
+        super(null, false);
         this.tree = tree;
         this.levelOnePosition =
-            tree.newPosition().level(1).firstSegmentOfLevel().firstPageOfSegment().firstRecordOfPage();
+            tree.newPosition().level(1).goToFirstSegmentOfLevel().goToFirstPageOfSegment().goToFirstRecordOfPage();
         this.runStart = this.levelOnePosition.copy();
         this.hi = currentLevelOneRecord();
         assert this.hi != null : tree;

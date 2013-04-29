@@ -7,7 +7,6 @@
 package com.geophile.erdo.forest;
 
 import com.geophile.erdo.Configuration;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.consolidate.Consolidation;
 import com.geophile.erdo.consolidate.ConsolidationSet;
@@ -15,7 +14,6 @@ import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
-import com.geophile.erdo.map.forestmap.TimestampMerger;
 import com.geophile.erdo.map.mergescan.FastMergeCursor;
 import com.geophile.erdo.map.mergescan.MergeCursor;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
@@ -102,16 +100,16 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         try {
             recordScan =
                 slowmerge || !inputDurable // If !inputDurable, fast merge has no benefit
-                ? new MergeCursor()
+                ? new MergeCursor(true)
                 : new FastMergeCursor();
-            keyScan = new MergeCursor();
+            keyScan = new MergeCursor(true);
             List<SealedMap> obsoleteTrees = new ArrayList<>();
             for (Element element : obsolete) {
                 SealedMap map = (SealedMap) element;
-                recordScan.addInput(slowmerge ? map.cursor(null, MissingKeyAction.FORWARD) : map.consolidationScan());
+                recordScan.addInput(slowmerge ? map.cursor(null, false) : map.consolidationScan());
                 if (keyScan != null) {
                     if (map.keysInMemory()) {
-                        keyScan.addInput(map.keyScan(null, MissingKeyAction.FORWARD));
+                        keyScan.addInput(map.keyScan(null, false));
                     } else {
                         keyScan.close();
                         keyScan = null;

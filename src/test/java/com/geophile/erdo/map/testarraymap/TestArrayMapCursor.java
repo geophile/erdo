@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.testarraymap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 
@@ -29,39 +28,18 @@ public class TestArrayMapCursor extends MapCursor
         return neighbor(false);
     }
 
-    @Override
-    public void close()
-    {
-        done = true;
-    }
-
-    @Override
-    public void goTo(AbstractKey key) throws IOException, InterruptedException
-    {
-        position = map.keys.binarySearch(key);
-        if (position < 0) {
-            close();
-        }
-    }
-
     // ArrayMapCursor interface
 
-    TestArrayMapCursor(TestArrayMap map, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    TestArrayMapCursor(TestArrayMap map, AbstractKey startKey, boolean singleKey)
     {
-        super(startKey, missingKeyAction);
+        super(startKey, singleKey);
         this.map = map;
         if (startKey == null) {
-            this.position =
-                missingKeyAction.forward()
-                ? 0
-                : (int) map.recordCount() - 1;
+            this.position = 0;
         } else {
             this.position = map.keys.binarySearch(startKey);
             if (this.position < 0) {
-                this.position =
-                    missingKeyAction.forward()
-                    ? -this.position - 1
-                    : -this.position - 2;
+                this.position = -this.position - 1;
             }
         }
     }
@@ -71,23 +49,59 @@ public class TestArrayMapCursor extends MapCursor
     private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
     {
         LazyRecord neighbor = null;
-        if (!done && position >= 0 && position < map.recordCount()) {
+        switch (state) {
+            case NEVER_USED:
+                if (startKey == null) {
+                    position = forward ? 0 : (int) map.recordCount() - 1;
+                } else {
+                    position = binarySearch(startKey);
+                    if (position < 0) {
+                        position = forward ? -position - 1 : -position - 2;
+                    }
+                }
+                state = State.IN_USE;
+                break;
+            case IN_USE:
+                position += forward ? 1 : -1;
+                break;
+            case DONE:
+                return null;
+        }
+        if (position >= 0 && position < map.recordCount()) {
             neighbor = map.records.get(position);
             if (!isOpen(neighbor.key())) {
                 neighbor = null;
-            } else {
-                position += forward ? 1 : -1;
-            }
-            if (neighbor == null) {
-                close();
             }
         }
+        if (neighbor == null) {
+            close();
+        }
         return neighbor;
+    }
+
+    // Adapted from java.util.Arrays.binarySearch0
+    private int binarySearch(AbstractKey key) throws IOException, InterruptedException
+    {
+        int low = 0;
+        int high = map.records.size() - 1;
+        AbstractKey midKey;
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            midKey = map.records.get(mid).key();
+            int c = midKey.compareTo(key);
+            if (c < 0) {
+                low = mid + 1;
+            } else if (c > 0) {
+                high = mid - 1;
+            } else {
+                return mid; // key found
+            }
+        }
+        return -(low + 1);  // key not found.
     }
 
     // Object state
 
     private final TestArrayMap map;
     private int position;
-    private boolean done = false;
 }

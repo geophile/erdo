@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.forestmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.MapCursor;
 
@@ -48,26 +47,24 @@ public abstract class ForestMapCursor extends MapCursor
 {
     // ForestMapCursor interface
 
-    public static ForestMapCursor newScan(ForestSnapshot forestSnapshot,
-                                        AbstractKey startKey,
-                                        MissingKeyAction missingKeyAction)
+    public static ForestMapCursor newCursor(ForestSnapshot forestSnapshot,
+                                            AbstractKey startKey,
+                                            boolean singleKey)
         throws IOException, InterruptedException
     {
-        assert !(startKey == null && missingKeyAction == MissingKeyAction.CLOSE);
+        assert !(startKey == null && singleKey);
         return
-            missingKeyAction == MissingKeyAction.CLOSE
+            singleKey
             ? new ForestMapMatchCursor(forestSnapshot, startKey)
-            : new ForestMapRangeCursor(forestSnapshot, startKey, missingKeyAction);
+            : new ForestMapRangeCursor(forestSnapshot, startKey);
     }
 
     // For use by subclasses
 
-    protected ForestMapCursor(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    protected ForestMapCursor(ForestSnapshot forestSnapshot, AbstractKey startKey, boolean singleKey)
         throws IOException, InterruptedException
     {
-        super(startKey, missingKeyAction);
-        this.startKey = startKey;
-        this.missingKeyAction = missingKeyAction;
+        super(startKey, singleKey);
         this.forestSnapshot = forestSnapshot;
     }
 
@@ -78,7 +75,4 @@ public abstract class ForestMapCursor extends MapCursor
     // Object state
 
     protected final ForestSnapshot forestSnapshot;
-    protected final AbstractKey startKey;
-    protected final MissingKeyAction missingKeyAction;
-    protected boolean done = false;
 }

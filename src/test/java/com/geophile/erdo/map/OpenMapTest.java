@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.DeadlockException;
+import com.geophile.erdo.TestRecord;
+import com.geophile.erdo.TransactionRolledBackException;
 import com.geophile.erdo.map.privatemap.PrivateMap;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -55,7 +58,7 @@ public class OpenMapTest extends MapBehaviorTestBase
                 }
                 expectedKey = 0;
                 expectedValue = "update";
-                MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+                MapCursor cursor = map.cursor(null, false);
                 while ((lazyRecord = cursor.next()) != null) {
                     record = lazyRecord.materializeRecord();
                     Assert.assertEquals(expectedKey, key(record));
@@ -78,7 +81,7 @@ public class OpenMapTest extends MapBehaviorTestBase
                     Assert.assertNull(replaced);
                 }
                 expectedKey = 0;
-                MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+                MapCursor cursor = map.cursor(null, false);
                 while ((lazyRecord = cursor.next()) != null) {
                     record = lazyRecord.materializeRecord();
                     Assert.assertEquals(expectedKey, key(record));

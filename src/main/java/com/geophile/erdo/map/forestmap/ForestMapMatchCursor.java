@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.forestmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.bloomfilter.BloomFilter;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
@@ -35,17 +34,12 @@ class ForestMapMatchCursor extends ForestMapCursor
         return neighbor(false);
     }
 
-    @Override
-    public void close()
-    {
-    }
-
     // ForestMapMatchCursor interface
 
     ForestMapMatchCursor(ForestSnapshot forestSnapshot, AbstractKey key)
         throws IOException, InterruptedException
     {
-        super(forestSnapshot, key, MissingKeyAction.CLOSE);
+        super(forestSnapshot, key, true);
     }
 
     // For use by this class
@@ -57,7 +51,7 @@ class ForestMapMatchCursor extends ForestMapCursor
             LOG.log(Level.FINE, "Getting record of {0} from {1}", new Object[]{key, map});
         }
         assert map != null : key;
-        MapCursor cursor = map.cursor(key, MissingKeyAction.CLOSE);
+        MapCursor cursor = map.cursor(key, true);
         LazyRecord updateRecord = cursor.next();
         cursor.close();
         assert updateRecord != null : key;
@@ -71,7 +65,7 @@ class ForestMapMatchCursor extends ForestMapCursor
         LazyRecord neighbor = null;
         List<SealedMap> smallTrees = null;
         try {
-            if (!done) {
+            if (state != State.DONE) {
                 // cursor vs. keyScan:
                 // - cursor merges after getting records, but uses bloom filter to avoid getting
                 //   record unnecessarily.
@@ -85,8 +79,8 @@ class ForestMapMatchCursor extends ForestMapCursor
                 }
                 for (SealedMap smallTree : smallTrees) {
                     smallTreeRecordScan.addInput(BloomFilter.USE_BLOOM_FILTER
-                                                 ? smallTree.cursor(startKey, MissingKeyAction.CLOSE)
-                                                 : smallTree.keyScan(startKey, MissingKeyAction.CLOSE));
+                                                 ? smallTree.cursor(startKey, true)
+                                                 : smallTree.keyScan(startKey, true));
                 }
                 smallTreeRecordScan.start();
                 // If smallTreeKeyScan.next()/previous() returns a key, it is the one and only key that
@@ -100,16 +94,16 @@ class ForestMapMatchCursor extends ForestMapCursor
                         neighbor = updateRecord(key);
                     }
                 } else {
-                    bigTreeRecordScan = new MergeCursor();
+                    bigTreeRecordScan = new MergeCursor(forward);
                     for (SealedMap bigTree : forestSnapshot.bigTrees()) {
-                        bigTreeRecordScan.addInput(bigTree.cursor(startKey, MissingKeyAction.CLOSE));
+                        bigTreeRecordScan.addInput(bigTree.cursor(startKey, true));
                     }
                     bigTreeRecordScan.start();
                     neighbor = forward ? bigTreeRecordScan.next() : bigTreeRecordScan.previous();
                 }
                 // Because this is an exact-match cursor, at most one record will be returned.
                 // So whether we found one or not, we're done.
-                done = true;
+                close();
             }
         } finally {
             if (smallTreeRecordScan != null) {

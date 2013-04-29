@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.forestmap;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.forest.ForestSnapshot;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -40,8 +39,8 @@ class ForestMapRangeCursor extends ForestMapCursor
     @Override
     public void close()
     {
-        if (!done) {
-            done = true;
+        if (state != State.DONE) {
+            super.close();
             cursor.close();
             for (MapCursor smallMapScan : smallMapScans.values()) {
                 smallMapScan.close();
@@ -51,15 +50,10 @@ class ForestMapRangeCursor extends ForestMapCursor
 
     // ForestMapRangeCursor interface
 
-    ForestMapRangeCursor(ForestSnapshot forestSnapshot, AbstractKey startKey, MissingKeyAction missingKeyAction)
+    ForestMapRangeCursor(ForestSnapshot forestSnapshot, AbstractKey startKey)
         throws IOException, InterruptedException
     {
-        super(forestSnapshot, startKey, missingKeyAction);
-        MergeCursor combinedScan = new MergeCursor(missingKeyAction.forward());
-        combinedScan.addInput(new KeyToUpdatedRecordCursor(merge(forestSnapshot.smallTrees())));
-        combinedScan.addInput(merge(forestSnapshot.bigTrees()));
-        combinedScan.start();
-        cursor = combinedScan;
+        super(forestSnapshot, startKey, false);
     }
 
     // For use by this class
@@ -81,25 +75,26 @@ class ForestMapRangeCursor extends ForestMapCursor
     {
         MapCursor smallMapScan = smallMapScans.get(map.mapId());
         if (smallMapScan == null) {
-            smallMapScan = map.cursor(null, MissingKeyAction.CLOSE);
+            smallMapScan = map.cursor(key, true);
             smallMapScans.put(map.mapId(), smallMapScan);
         }
         smallMapScan.goTo(key);
         return smallMapScan;
     }
 
-    private MapCursor merge(List<SealedMap> maps) throws IOException, InterruptedException
+    private static MapCursor merge(List<SealedMap> maps, AbstractKey startKey, boolean forward)
+        throws IOException, InterruptedException
     {
         MapCursor cursor;
         int mapSize = maps.size();
         if (mapSize == 0) {
             cursor = new EmptyMapCursor();
         } else if (mapSize == 1) {
-            cursor = maps.get(0).cursor(startKey, missingKeyAction);
+            cursor = maps.get(0).cursor(startKey, false);
         } else {
-            MergeCursor mergeScan = new MergeCursor();
+            MergeCursor mergeScan = new MergeCursor(forward);
             for (SealedMap map : maps) {
-                mergeScan.addInput(map.keyScan(startKey, missingKeyAction));
+                mergeScan.addInput(map.keyScan(startKey, false));
             }
             mergeScan.start();
             cursor = mergeScan;
@@ -110,7 +105,15 @@ class ForestMapRangeCursor extends ForestMapCursor
     private LazyRecord neighbor(boolean forward) throws IOException, InterruptedException
     {
         LazyRecord neighbor = null;
-        if (!done) {
+        if (state != State.DONE) {
+            if (state == State.NEVER_USED) {
+                MergeCursor combinedScan = new MergeCursor(forward);
+                combinedScan.addInput(new KeyToUpdatedRecordCursor(merge(forestSnapshot.smallTrees(), startKey, forward)));
+                combinedScan.addInput(merge(forestSnapshot.bigTrees(), startKey, forward));
+                combinedScan.start();
+                cursor = combinedScan;
+                state = State.IN_USE;
+            }
             neighbor = forward ? cursor.next() : cursor.previous();
             if (neighbor == null || !isOpen(neighbor.key())) {
                 close();
@@ -121,7 +124,7 @@ class ForestMapRangeCursor extends ForestMapCursor
 
     // Object state
 
-    private final MapCursor cursor;
+    private MapCursor cursor;
     private final Map<Long, MapCursor> smallMapScans = new HashMap<>(); // mapId -> MapCursor
 
     // Inner classes
@@ -143,19 +146,34 @@ class ForestMapRangeCursor extends ForestMapCursor
         }
 
         @Override
+        public void goToFirst() throws IOException, InterruptedException
+        {
+            cursor.goToFirst();
+        }
+
+        @Override
+        public void goToLast() throws IOException, InterruptedException
+        {
+            cursor.goToLast();
+        }
+
+        @Override
+        public void goTo(AbstractKey key) throws IOException, InterruptedException
+        {
+            cursor.goTo(key);
+        }
+
+        @Override
         public void close()
         {
-            if (cursor != null) {
-                cursor.close();
-                cursor = null;
-            }
+            cursor.close();
         }
 
         // KeyToUpdatedRecordCursor interface
 
         public KeyToUpdatedRecordCursor(MapCursor cursor)
         {
-            super(null, null);
+            super(null, false);
             this.cursor = cursor;
         }
 

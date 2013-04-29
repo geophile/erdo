@@ -8,7 +8,6 @@ package com.geophile.erdo.map;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 
 public abstract class OpenOrSealedMapBase extends SealedMapBase implements OpenOrSealedMap
 {
@@ -16,7 +15,7 @@ public abstract class OpenOrSealedMapBase extends SealedMapBase implements OpenO
 
     public abstract LazyRecord put(AbstractRecord record, boolean returnReplaced);
 
-    public abstract MapCursor cursor(AbstractKey startKey, MissingKeyAction missingKeyAction);
+    public abstract MapCursor cursor(AbstractKey startKey, boolean singleKey);
 
     public abstract long recordCount();
 

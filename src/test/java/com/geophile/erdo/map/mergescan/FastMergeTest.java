@@ -8,7 +8,6 @@ package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
-import com.geophile.erdo.MissingKeyAction;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -48,9 +47,9 @@ public class FastMergeTest
         for (int t = 0; t < TRIALS; t++) {
             TestArrayMap a = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 0);
             TestArrayMap b = arrayMap(KEYS, MAX_MULTI_RECORD_SIZE, random, 2, 1);
-            FastMergeCursor merge = new FastMergeCursor(MERGER, true);
-            merge.addInput(a.cursor(null, MissingKeyAction.FORWARD));
-            merge.addInput(b.cursor(null, MissingKeyAction.FORWARD));
+            FastMergeCursor merge = new FastMergeCursor(MERGER);
+            merge.addInput(a.cursor(null, false));
+            merge.addInput(b.cursor(null, false));
             merge.start();
             // Should see 0 .. 2 * KEYS - 1
             int expected = 0;
@@ -77,7 +76,7 @@ public class FastMergeTest
     private void dump(String label, TestArrayMap map) throws IOException, InterruptedException
     {
         System.out.println(label);
-        MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = map.cursor(null, false);
         LazyRecord lazyRecord;
         while ((lazyRecord = cursor.next()) != null) {
             System.out.println(String.format("    %s", lazyRecord.materializeRecord()));
@@ -124,9 +123,9 @@ public class FastMergeTest
                 arrayMaps[a].put(record, false);
             }
             // Start a merge of the ArrayMaps
-            FastMergeCursor merge = new FastMergeCursor(MERGER, true);
+            FastMergeCursor merge = new FastMergeCursor(MERGER);
             for (TestArrayMap arrayMap : arrayMaps) {
-                merge.addInput(arrayMap.cursor(null, MissingKeyAction.FORWARD));
+                merge.addInput(arrayMap.cursor(null, false));
             }
             merge.start();
             // Check contents

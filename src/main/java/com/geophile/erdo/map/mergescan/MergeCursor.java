@@ -6,6 +6,7 @@
 
 package com.geophile.erdo.map.mergescan;
 
+import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.forestmap.TimestampMerger;
@@ -21,14 +22,12 @@ public class MergeCursor extends MapCursor
     @Override
     public LazyRecord next() throws IOException, InterruptedException
     {
-        assert forward;
         LazyRecord next = null;
-        if (root != null) {
-            next = root.record;
-            root.promote();
-        }
-        if (next == null) {
-            close();
+        if (state != State.DONE) {
+            if (!forward) {
+                restartAtStartKey(true);
+            }
+            next = neighbor();
         }
         return next;
     }
@@ -36,27 +35,64 @@ public class MergeCursor extends MapCursor
     @Override
     public LazyRecord previous() throws IOException, InterruptedException
     {
-        assert !forward;
         LazyRecord previous = null;
-        if (root != null) {
-            previous = root.record;
-            root.promote();
-        }
-        if (previous == null) {
-            close();
+        if (state != State.DONE) {
+            if (forward) {
+                restartAtStartKey(false);
+            }
+            previous = neighbor();
         }
         return previous;
     }
 
     @Override
+    public void goToFirst() throws IOException, InterruptedException
+    {
+        super.goToFirst();
+        for (MapCursor input : inputs) {
+            input.goToFirst();
+        }
+        start();
+    }
+
+    @Override
+    public void goToLast() throws IOException, InterruptedException
+    {
+        super.goToLast();
+        for (MapCursor input : inputs) {
+            input.goToLast();
+        }
+        start();
+    }
+
+    @Override
+    public void goTo(AbstractKey key) throws IOException, InterruptedException
+    {
+        super.goTo(key);
+        for (MapCursor input : inputs) {
+            input.goTo(key);
+        }
+        start();
+    }
+
+    @Override
+    protected boolean isOpen(AbstractKey key)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void close()
     {
-        if (inputs != null) {
-            for (MapCursor input : inputs) {
-                input.close();
+        if (state != State.DONE) {
+            super.close();
+            if (inputs != null) {
+                for (MapCursor input : inputs) {
+                    input.close();
+                }
+                inputs = null;
+                root = null;
             }
-            inputs = null;
-            root = null;
         }
     }
 
@@ -80,11 +116,6 @@ public class MergeCursor extends MapCursor
         root = createNode(0);
         // Move records up the tree
         root.prime();
-    }
-
-    public MergeCursor()
-    {
-        this(TimestampMerger.only(), true);
     }
 
     public MergeCursor(boolean forward)
@@ -111,7 +142,7 @@ public class MergeCursor extends MapCursor
 
     MergeCursor(Merger merger, boolean forward)
     {
-        super(null, null);
+        super(null, false);
         this.merger = merger;
         this.forward = forward;
     }
@@ -120,7 +151,6 @@ public class MergeCursor extends MapCursor
 
     private Node createNode(int position)
     {
-        // positionInFile: Refers to positionInFile in a breadth-first traversal of the tree.
         return
             position < firstLeaf
             ? mergeNode(position, createNode(2 * position + 1), createNode(2 * position + 2), forward)
@@ -129,10 +159,50 @@ public class MergeCursor extends MapCursor
               : fillerNode(position);
     }
 
+    private void restartAtStartKey(boolean forward) throws IOException, InterruptedException
+    {
+        if (startKey == null) {
+            if (unboundStartAtFirstKey) {
+                goToFirst();
+            } else {
+                goToLast();
+            }
+        } else {
+            this.forward = forward;
+            goTo(startKey);
+            neighbor(); // Get past the startKey, which has already been visited.
+        }
+    }
+
+    private LazyRecord neighbor() throws IOException, InterruptedException
+    {
+        LazyRecord neighbor = null;
+        switch (state) {
+            case NEVER_USED:
+                state = State.IN_USE;
+                break;
+            case IN_USE:
+                root.promote();
+                break;
+            case DONE:
+                assert false; // next/previous handled this case
+                break;
+        }
+        if (root != null) {
+            neighbor = root.record;
+        }
+        if (neighbor == null) {
+            close();
+        } else {
+            startKey = neighbor.key();
+        }
+        return neighbor;
+    }
+
     // Object state
 
     final Merger merger;
-    private final boolean forward;
+    private boolean forward;
     private List<MapCursor> inputs = new ArrayList<>();
     private int firstLeaf;
     private Node root;

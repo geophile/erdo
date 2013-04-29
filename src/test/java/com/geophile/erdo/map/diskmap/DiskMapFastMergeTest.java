@@ -74,10 +74,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.cursor(null, MissingKeyAction.FORWARD),
-                                      a.keyScan(null, MissingKeyAction.FORWARD));
-        diskMapB.loadForConsolidation(b.cursor(null, MissingKeyAction.FORWARD),
-                                      b.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapA.loadForConsolidation(a.cursor(null, false),
+                                      a.keyScan(null, false));
+        diskMapB.loadForConsolidation(b.cursor(null, false),
+                                      b.keyScan(null, false));
         // Merge
         FastMergeCursor merge = new FastMergeCursor();
         merge.addInput(diskMapA.consolidationScan());
@@ -86,7 +86,7 @@ public class DiskMapFastMergeTest
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithKeys(merge, 1000);
         // Check merged map
-        MapCursor cursor = mergedMap.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = mergedMap.cursor(null, false);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = cursor.next()) != null) {
@@ -127,10 +127,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.cursor(null, MissingKeyAction.FORWARD),
-                                      a.keyScan(null, MissingKeyAction.FORWARD));
-        diskMapB.loadForConsolidation(b.cursor(null, MissingKeyAction.FORWARD),
-                                      b.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapA.loadForConsolidation(a.cursor(null, false),
+                                      a.keyScan(null, false));
+        diskMapB.loadForConsolidation(b.cursor(null, false),
+                                      b.keyScan(null, false));
         // Merge
         FastMergeCursor merge = new FastMergeCursor();
         merge.addInput(diskMapA.consolidationScan());
@@ -183,10 +183,10 @@ public class DiskMapFastMergeTest
         // Load DiskMaps
         DiskMap diskMapA = newDiskMap(111);
         DiskMap diskMapB = newDiskMap(222);
-        diskMapA.loadForConsolidation(a.cursor(null, MissingKeyAction.FORWARD),
-                                      a.keyScan(null, MissingKeyAction.FORWARD));
-        diskMapB.loadForConsolidation(b.cursor(null, MissingKeyAction.FORWARD),
-                                      b.keyScan(null, MissingKeyAction.FORWARD));
+        diskMapA.loadForConsolidation(a.cursor(null, false),
+                                      a.keyScan(null, false));
+        diskMapB.loadForConsolidation(b.cursor(null, false),
+                                      b.keyScan(null, false));
         // Merge
         FastMergeCursor merge = new FastMergeCursor();
         merge.addInput(diskMapA.consolidationScan());
@@ -195,7 +195,7 @@ public class DiskMapFastMergeTest
         DiskMap mergedMap = newDiskMap(333);
         mergedMap.loadWithoutKeys(merge);
         // Check merged map
-        MapCursor scan = mergedMap.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor scan = mergedMap.cursor(null, false);
         LazyRecord lazyRecord;
         int expected = 0;
         while ((lazyRecord = scan.next()) != null) {
@@ -234,7 +234,7 @@ public class DiskMapFastMergeTest
 
     private void dump(String label, DiskMap map) throws IOException, InterruptedException
     {
-        MapCursor cursor = map.cursor(null, MissingKeyAction.FORWARD);
+        MapCursor cursor = map.cursor(null, false);
         LazyRecord lazyRecord;
         int count = 0;
         while ((lazyRecord = cursor.next()) != null) {

@@ -39,7 +39,7 @@ class RemoveDeletedRecordCursor extends MapCursor
 
     public RemoveDeletedRecordCursor(MapCursor cursor, long maxDeletionTimestamp)
     {
-        super(null, null);
+        super(null, false);
         this.cursor = cursor;
         this.maxDeletionTimestamp = maxDeletionTimestamp;
     }

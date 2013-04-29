@@ -6,7 +6,10 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.*;
+import com.geophile.erdo.Configuration;
+import com.geophile.erdo.TestFactory;
+import com.geophile.erdo.TestKey;
+import com.geophile.erdo.TestRecord;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.apiimpl.DeletedRecord;
 import com.geophile.erdo.map.arraymap.ArrayMap;
@@ -54,7 +57,7 @@ public class MapBehaviorTestBase
     {
         SealedMap privateMap = privateMap(testRecords);
         ArrayMap arrayMap = new ArrayMap(FACTORY, new TimestampSet(1L));
-        arrayMap.loadForConsolidation(privateMap.cursor(null, MissingKeyAction.FORWARD), null);
+        arrayMap.loadForConsolidation(privateMap.cursor(null, false), null);
         return arrayMap;
     }
 
@@ -77,8 +80,8 @@ public class MapBehaviorTestBase
         }
         DiskMap diskMap = DiskMap.create(db, new TimestampSet(1L), null);
         SealedMap privateMap = privateMap(testRecords);
-        diskMap.loadForConsolidation(privateMap.cursor(null, MissingKeyAction.FORWARD),
-                                     privateMap.keyScan(null, MissingKeyAction.FORWARD));
+        diskMap.loadForConsolidation(privateMap.cursor(null, false),
+                                     privateMap.keyScan(null, false));
         return diskMap;
     }
 
@@ -134,14 +137,14 @@ public class MapBehaviorTestBase
         return new DeletedRecord(new TestKey(key));
     }
 
-    protected TestKey newKey(int key)
+    protected TestKey key(int key)
     {
         return new TestKey(key);
     }
 
     protected int key(LazyRecord lazyRecord) throws IOException, InterruptedException
     {
-        return ((TestKey) lazyRecord.key()).key();
+        return ((TestKey) lazyRecord.materializeRecord().key()).key();
     }
 
     protected void print(String template, Object... args)
