@@ -37,8 +37,9 @@ public class CursorImpl extends Cursor
     public void close()
     {
         if (mapCursor != null) {
-            checkTransaction();
-            transaction.unregisterScan(this);
+            // Don't call checkTransaction. If a transaction commits and rolls back other transactions, then
+            // cursors can be closed from the committing transaction's thread.
+            transaction.unregisterCursor(this);
             mapCursor.close();
             mapCursor = null;
             DiskPageCache.destroyRemainingTreePositions();
@@ -52,7 +53,7 @@ public class CursorImpl extends Cursor
         this.mapCursor = mapCursor;
         this.transactionManager = transactionManager;
         this.transaction = transactionManager.currentTransaction();
-        this.transaction.registerScan(this);
+        this.transaction.registerCursor(this);
     }
 
     // For use by this class

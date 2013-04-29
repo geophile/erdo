@@ -48,7 +48,7 @@ public class OrderedMapImpl extends OrderedMap
     }
 
     @Override
-    public void ensureDeleted(AbstractKey key)
+    public void ensureAbsent(AbstractKey key)
         throws IOException,
                InterruptedException,
                DeadlockException,

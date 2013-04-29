@@ -169,22 +169,24 @@ public class Transaction
         return lockedForWrite;
     }
 
-    public void registerScan(Cursor cursor)
+    public void registerCursor(Cursor cursor)
     {
-        Cursor replaced = openScans.add(cursor);
+        Cursor replaced = openCursors.add(cursor);
         assert replaced == null;
     }
 
-    public void unregisterScan(Cursor cursor)
+    public void unregisterCursor(Cursor cursor)
     {
-        Cursor removed = openScans.remove(cursor);
-        assert removed == cursor;
+        if (!ending) {
+            Cursor removed = openCursors.remove(cursor);
+            assert removed == cursor;
+        }
     }
 
     // For testing
-    public IdentitySet<Cursor> openScans()
+    public IdentitySet<Cursor> openCursors()
     {
-        return openScans;
+        return openCursors;
     }
 
     public void throwExceptionDueToTragicEnding()
@@ -277,10 +279,11 @@ public class Transaction
 
     private void closeOpenScans()
     {
-        for (Cursor cursor : openScans.values()) {
+        ending = true;
+        for (Cursor cursor : openCursors.values()) {
             cursor.close();
         }
-        openScans = null;
+        openCursors = null;
     }
 
     private Transaction(TransactionManager transactionManager, TransactionalMap transactionalMap)
@@ -312,7 +315,12 @@ public class Transaction
     private volatile AbstractKey waitingFor;
     private volatile Termination termination;
     private volatile boolean irrelevant = false;
-    private IdentitySet<Cursor> openScans = new IdentitySet<>();
+    private IdentitySet<Cursor> openCursors = new IdentitySet<>();
+    // unregisterCursor is called from CursorImpl.close. If CursorImpl.close is called from Transaction.closeOpenScans,
+    // then we get a ConcurrentModificationException on openCursors. If we are in closeOpenScans, then openCursors is
+    // about to become irrelevant. This ending variable is used to skip doing the openCursors maintenance in
+    // unregisterCursor.
+    private boolean ending = false;
 
     // Inner classes
     

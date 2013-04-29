@@ -18,7 +18,8 @@ public interface TransactionCallback
      * have been made durable.
      * @param commitInfo Second argument to
      *     {@link com.geophile.erdo.Database#commitTransaction(TransactionCallback, Object)}. Intended to identify
-     *     the transaction whose records have just become durable.
+     *     the transaction whose records have just become durable. If the transaction was committed using
+     *     {@link Database#commitTransaction(TransactionCallback)}, then commitInfo is null.
      */
     void whenDurable(Object commitInfo);
 

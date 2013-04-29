@@ -16,23 +16,26 @@ import java.io.IOException;
  * While {@link #put(AbstractRecord)} is more generally useful, {@link #ensurePresent(AbstractRecord)} is likely
  * to be faster because the implementation does not have to find the previous record.
  *
- * <p> Similarly, {@link #delete(AbstractKey)} and {@link #ensureDeleted(AbstractKey)} both accomplish deletion.
+ * <p> Similarly, {@link #delete(AbstractKey)} and {@link #ensureAbsent(AbstractKey)} both accomplish deletion.
  * {@link #delete(AbstractKey)} returns the record previously associated with the given key, while
- * {@link #ensureDeleted(AbstractKey)} does not. {@link #ensureDeleted(AbstractKey)} is therefore likely to be faster.
- *
- * <p> TBD: RETRIEVAL using find, first
+ * {@link #ensureAbsent(AbstractKey)} does not. {@link #ensureAbsent(AbstractKey)} is therefore likely to be faster.
  *
  * <p> Keys are locked for write through {@link #put(AbstractRecord)},
- * {@link #ensurePresent(AbstractRecord)}, {@link #delete(AbstractKey)}, and {@link #ensureDeleted(AbstractKey)}.
+ * {@link #ensurePresent(AbstractRecord)}, {@link #delete(AbstractKey)}, and {@link #ensureAbsent(AbstractKey)}.
  * To lock additional keys, call {@link #lock(AbstractKey)}.
+ *
+ * <p> {@link #find(AbstractKey)} returns the value associated with a given key, or null if the key is not present.
+ * {@link #cursor(AbstractKey)} returns a {@link Cursor} positioned at the given key, which can then be moved
+ * forward or backward. {@link #first()} and {@link #last()} return Cursors positioned at the first and last keys
+ * of the map, respectively.
  */
 
 public abstract class OrderedMap
 {
     /**
      * Store the record in the map, associating it with the record's key. If there was already a record
-     * associated with the key, the older record is replaced. ensurePresent is usually much faster than put,
-     * but does not return the replaced record.
+     * associated with the key, the older record is replaced. ensurePresent is usually much faster than
+     * {@link #put(AbstractRecord)}, but does not return the replaced record.
      * @param record The record being written to the map.
      */
     public abstract void ensurePresent(AbstractRecord record)
@@ -44,7 +47,7 @@ public abstract class OrderedMap
     /**
      * Store the record in the map, associating it with the record's key. If there was already a record
      * associated with the key, the older record is replaced.
-     * ensurePresent is usually much faster than put, but does not return the replaced record.
+     * put is usually much slower than {@link #ensurePresent(AbstractRecord)}, but it does return the replaced record.
      * @param record The record being written to the map.
      * @return The record previously associated with the key, or null if the key does not currently exist in the map.
      */
@@ -55,19 +58,19 @@ public abstract class OrderedMap
                TransactionRolledBackException;
 
     /**
-     * Remove from the map the record associated with the key. ensureDeleted is usually much faster than delete,
-     * but does not return the deleted record.
+     * Ensures that there is no record associated with the given key. ensureAbsent is usually much faster than
+     * {@link #delete(AbstractKey)}, but does not return the deleted record.
      * @param key The key whose record is to be deleted.
      */
-    public abstract void ensureDeleted(AbstractKey key)
+    public abstract void ensureAbsent(AbstractKey key)
         throws IOException, 
                InterruptedException,
                DeadlockException,
                TransactionRolledBackException;
 
     /**
-     * Remove from the map the record associated with the key. ensureDeleted is usually much faster than delete,
-     * but does not return the deleted record.
+     * Removes from the map the record associated with the given key. delete is usually much slower than
+     * {@link #ensureAbsent(AbstractKey)}, but it does return the deleted record.
      * @param key The key whose record is to be deleted.
      * @return The record associated with the key prior to the deletion, or null if the key does not currently
      *         exist in the map.
@@ -79,7 +82,7 @@ public abstract class OrderedMap
                TransactionRolledBackException;
 
     /**
-     * Lock the specified key for writing. This method will block if the key is already locked for
+     * Lock the given key for writing. This method will block if and only if the key is already locked for
      * writing by another transaction.
      * @param key Key to be locked.
      */

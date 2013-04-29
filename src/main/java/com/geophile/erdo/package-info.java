@@ -69,27 +69,33 @@
  *          record associated with the given key.
  *     <li>{@link com.geophile.erdo.OrderedMap#ensurePresent(AbstractRecord)}: Inserts or updates a record without
  *          returning any previous record.
- *     <li>{@link com.geophile.erdo.OrderedMap#ensureDeleted(AbstractKey)}: Deletes a record without
+ *     <li>{@link com.geophile.erdo.OrderedMap#ensureAbsent(AbstractKey)}: Deletes a record without
  *          returning the record previously associated with the given key.
  * </ul>
  *
  * <p> put and delete return the record being replaced, or null if there is no such record.
- * They therefore have to locate the previous record in the database. ensurePresent and ensureDeleted do not
+ * They therefore have to locate the previous record in the database. ensurePresent and ensureAbsent do not
  * have to locate a previous record, and
- * for this reason, they can often result in improved performance. ensurePresent and ensureDeleted should be used
+ * for this reason, they can often result in improved performance. ensurePresent and ensureAbsent should be used
  * whenever the application doesn't care about any previous state associated with a key.
  *
  * <h2>Retrieval</h2>
  *
- * <p> {@link Cursor} objects are used to access the contents of a map.
- * {@link com.geophile.erdo.OrderedMap#first()} returns a Cursor object that visits all records in key order.
- * {@link com.geophile.erdo.OrderedMap#cursor(AbstractKey)} returns a {@link Cursor} object positioned
- * at a given key, and that can visit neighboring records. (The {@link MissingKeyAction} argument specifies how
- * to position the cursor when the specified key is not present.)
+ * <p> To retrieve the record associated with a key, the simplest thing to do is to call
+ * {@link com.geophile.erdo.OrderedMap#find(AbstractKey)}.
  *
- * <p> The control of a Cursor is simple: {@link com.geophile.erdo.Cursor#next()} returns the next record, or null
- * if there are no more records. A Cursor is considered to be open until next() returns null, closed once next()
- * has returned null. Once a Cursor is closed, all subsequent calls to next() will return null.
+ * <p> {@link com.geophile.erdo.Cursor} objects are used for retrieval of multiple records, starting at a key.
+ * {@link com.geophile.erdo.OrderedMap#first()} and {@link com.geophile.erdo.OrderedMap#last()}
+ * return Cursors that visit all records in ascending and descending
+ * key order, respectively.
+ * {@link com.geophile.erdo.OrderedMap#cursor(AbstractKey)} returns a {@link com.geophile.erdo.Cursor}
+ * object positioned at a given key, and that can visit neighboring records in either direction.
+ *
+ * <p> The control of a Cursor is simple: {@link com.geophile.erdo.Cursor#next()} returns the record with the next
+ * larger key, or null if there is none. {@link com.geophile.erdo.Cursor#previous()} goes in the other direction,
+ * finding the record with the next smaller key. A Cursor is considered to be open until next() or previous() returns
+ * null, closed once null has been returned. Once a Cursor is closed, all subsequent calls to next() or previous()
+ * will return null.
  * A Cursor can also be closed explicitly using {@link com.geophile.erdo.Cursor#close()}.
  * Any cursors open at the end of a transaction will be closed by committing or rolling back the transaction.
  */

@@ -50,7 +50,7 @@ public class CursorLifecycleTest
             expectedKey++;
         }
         Assert.assertEquals(N, expectedKey);
-        assertEquals(0, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(0, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.commitTransaction();
         db.close();
     }
@@ -62,9 +62,9 @@ public class CursorLifecycleTest
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);
-        assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(1, FACTORY.transactionManager().currentTransaction().openCursors().size());
         cursor.close();
-        assertEquals(0, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(0, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.commitTransaction();
         db.close();
     }
@@ -76,9 +76,9 @@ public class CursorLifecycleTest
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);
-        assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(1, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.commitTransaction();
-        assertEquals(0, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(0, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.close();
     }
 
@@ -89,9 +89,9 @@ public class CursorLifecycleTest
         TestRecord record;
         record = (TestRecord) cursor.next();
         assertNotNull(record);
-        assertEquals(1, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(1, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.rollbackTransaction();
-        assertEquals(0, FACTORY.transactionManager().currentTransaction().openScans().size());
+        assertEquals(0, FACTORY.transactionManager().currentTransaction().openCursors().size());
         db.close();
     }
 

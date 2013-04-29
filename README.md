@@ -166,8 +166,7 @@ The following program opens an existing Erdo map and creates some records.
 
 This program can be run using the script `src/test/examples/helloworld.updatemap`.    
 The `musicians` map is opened and then updated in two stages. First, four
-`Person` objects are added. The `Person(String, String)` constructor
-creates the object's key, of type `Name`. After the `Person` objects are
+`Person` objects are added. After the `Person` objects are
 placed in the map, using `musicians.put`, the updates are made public by
 calling `db.commitTransaction()`. Once `commitTransaction` returns, the
 `Person` objects are visible to any concurrent users of the `/tmp/mydb`

@@ -118,7 +118,7 @@ public class OrderedMapTest
             map.ensurePresent(TestRecord.createRecord(i, "first"));
         }
         for (int i = 0; i < N; i++) {
-            map.ensureDeleted(new TestKey(i));
+            map.ensureAbsent(new TestKey(i));
         }
         Assert.assertNull(map.first().next());
         db.close();

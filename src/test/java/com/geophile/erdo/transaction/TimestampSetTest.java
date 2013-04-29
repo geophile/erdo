@@ -25,7 +25,7 @@ public class TimestampSetTest extends TestCase
     {
         for (int n = 1; n <= 10; n++) {
             StringBuilder expected = new StringBuilder();
-            List<TimestampSet> timestampSets = new ArrayList<TimestampSet>();
+            List<TimestampSet> timestampSets = new ArrayList<>();
             int t = 0;
             for (int intervalSize = 1; intervalSize <= 3; intervalSize++) {
                 for (int i = 0; i < n; i++) {
@@ -53,7 +53,7 @@ public class TimestampSetTest extends TestCase
     public void testAdjacent()
     {
         for (int n = 1; n <= 10; n++) {
-            List<TimestampSet> timestampSets = new ArrayList<TimestampSet>();
+            List<TimestampSet> timestampSets = new ArrayList<>();
             int t = 0;
             for (int intervalSize = 1; intervalSize <= 3; intervalSize++) {
                 for (int i = 0; i < n; i++) {
@@ -141,7 +141,7 @@ public class TimestampSetTest extends TestCase
         for (int i = 0; i < TRIALS; i++) {
             TimestampSet keepTxns = new TimestampSet();
             TimestampSet removeTxns = new TimestampSet();
-            StringBuffer expected = new StringBuffer();
+            StringBuilder expected = new StringBuilder();
             double pKeep = random.nextDouble();
             double pRemove = random.nextDouble();
             boolean inKeep = false;
