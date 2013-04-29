@@ -20,8 +20,8 @@
  *
  * <p>The configuration and state of a {@link com.geophile.erdo.Database} is stored in a directory.
  * The directory is specified when the database
- * is created or opened. The database directory must not exist prior to database creation. Obviously, when a database
- * is opened, the directory must have previously been created by database creation. Database access is permitted after
+ * is created or opened. The database directory must not exist prior to database creation.
+ * Database access is permitted after
  * the database is created or opened, and before the database is closed.
  * Within a database, ordered maps may be created and opened. All created and opened maps remain open until
  * the database is closed.
@@ -42,8 +42,8 @@
  *
  * <p> Access to a database always takes place within the scope of a transaction. Erdo transactions implement
  * <a href="http://en.wikipedia.org/wiki/Snapshot_isolation">snapshot isolation</a>, which means that a transaction
- * operates on the database as it existed at the start of the transaction. The only updates a transaction can see are
- * those uncommitted updates made by the transaction itself.
+ * operates on the database as it existed at the start of the transaction, modified only by the transaction's own
+ * updates.
  *
  * <p> Transactions are not explicitly started. A thread accessing a database is always in a transaction, starting
  * as soon as the database is open, or as soon as the previous transaction has ended. A transaction is ended by calling
@@ -54,7 +54,7 @@
  * <p> Transaction state may be written to disk synchronously or asynchronously. Synchronous commits are slower, but
  * guarantee durability once commitTransaction returns. Asynchronous commits are faster but don't guarantee durability
  * immediately. An asynchronous commit is performed by calling
- * {@link com.geophile.erdo.Database#commitTransaction(TransactionCallback)}.
+ * {@link com.geophile.erdo.Database#commitTransaction(TransactionCallback)}. The callback
  * {@link com.geophile.erdo.TransactionCallback#whenDurable(Object)} is invoked once the updates from the transaction
  * are made durable. This callback can be used to implement application-level management of committed but
  * not-yet-durable state.

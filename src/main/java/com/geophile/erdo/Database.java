@@ -127,7 +127,8 @@ public abstract class Database
     /**
      * Commit the current transaction's updates. After the call, the updates from the transaction are visible.
      * The updates are guaranteed to be durable only after the callback method
-     * {@link com.geophile.erdo.TransactionCallback#whenDurable(Object)} is invoked.
+     * {@link com.geophile.erdo.TransactionCallback#whenDurable(Object)} is invoked, (null will be passed
+     * to the callback).
      * @param transactionCallback {@link com.geophile.erdo.TransactionCallback#whenDurable(Object)} is
      *    called (passing null) once the updates from the current transaction become durable.
      * @throws IOException
