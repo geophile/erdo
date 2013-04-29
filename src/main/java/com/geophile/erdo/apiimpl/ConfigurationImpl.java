@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-public class ConfigurationImpl extends Configuration
+public class ConfigurationImpl extends Configuration implements DefaultConfiguration
 {
     // Configuration interface
 
@@ -243,22 +243,6 @@ public class ConfigurationImpl extends Configuration
         }
         return powerOf2 == x;
     }
-
-    // For use by this class
-
-    // Class state
-
-    private static final int DEFAULT_DISK_PAGE_SIZE_BYTES = 32768;
-    private static final int DEFAULT_DISK_SEGMENT_SIZE_BYTES = 4 * (1 << 20); // 4M
-    private static final int DEFAULT_DISK_CACHE_SIZE_BYTES = 10 * (1 << 20); // 10M
-    private static final int DEFAULT_DISK_CACHE_SLAB_SIZE_BYTES = 1 << 27; // 128M
-    private static final int DEFAULT_CONSOLIDATION_THREADS = 3;
-    private static final int DEFAULT_CONSOLIDATION_MIN_SIZE_BYTES = DEFAULT_DISK_SEGMENT_SIZE_BYTES;
-    private static final int DEFAULT_CONSOLIDATION_MAX_PENDING_COMMITTED_SIZE_BYTES = 100 * (1 << 20); // 100M
-    private static final int DEFAULT_CONSOLIDATION_MIN_MAPS_TO_CONSOLIDATE = 5;
-    private static final int DEFAULT_CONSOLIDATION_IDLE_TIME_SEC = 5;
-    private static final long DEFAULT_KEYS_IN_MEMORY_MAP_LIMIT = 500000;
-    private static final double DEFAULT_KEYS_BLOOM_FILTER_ERROR_RATE = 0.001;
 
     // Object state
 
