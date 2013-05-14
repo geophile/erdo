@@ -8,6 +8,8 @@ package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.ConfigurationImpl;
 
+import java.util.Map;
+
 /**
  * Provides access to a database's configuration. When a database is being created, the default configuration is used.
  * To use a different configuration, call {@link #defaultConfiguration()} to obtain an initial configuration and then
@@ -180,4 +182,10 @@ public abstract class Configuration
      * @param keysBloomFilterErrorRate The bloom filter error rate.
      */
     public abstract void keysBloomFilterErrorRate(double keysBloomFilterErrorRate);
+
+    /**
+     * Return the configuration as a map.
+     * @return the configuration as a map.
+     */
+    public abstract Map<String, String> toMap();
 }

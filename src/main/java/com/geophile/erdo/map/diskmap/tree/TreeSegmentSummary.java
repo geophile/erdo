@@ -110,8 +110,8 @@ class TreeSegmentSummary
         this.treeSegment = treeSegment;
         MemoryMonitor memoryMonitor = memoryMonitor(treeSegment);
         if (BloomFilter.USE_BLOOM_FILTER) {
-            keyHashes = new MemoryTracker<IntArray>(memoryMonitor, MemoryMonitor.TREE_SEGMENT_KEY_HASHES);
-            bloomFilter = new MemoryTracker<BloomFilter>(memoryMonitor, MemoryMonitor.TREE_SEGMENT_FILTER);
+            keyHashes = new MemoryTracker<>(memoryMonitor, MemoryMonitor.TREE_SEGMENT_KEY_HASHES);
+            bloomFilter = new MemoryTracker<>(memoryMonitor, MemoryMonitor.TREE_SEGMENT_FILTER);
         } else {
             keyHashes = null;
             bloomFilter = null;

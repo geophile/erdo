@@ -174,6 +174,12 @@ public class ConfigurationImpl extends Configuration implements DefaultConfigura
         map.value(ConfigurationKeys.KEYS_BLOOM_FILTER_ERROR_RATE, keysBloomFilterErrorRate);
     }
 
+    @Override
+    public Map<String, String> toMap()
+    {
+        return map.toMap();
+    }
+
     // ConfigurationImpl interface
 
     public void read(File file) throws IOException
