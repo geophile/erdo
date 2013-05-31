@@ -72,7 +72,7 @@ class ForestMapMatchCursor extends ForestMapCursor
                 // - keyScan uses KeyArrays, probably slower than bloom filter, but has the
                 //   advantage of finding only the most recent.
                 // - Big trees don't have KeyArrays.
-                smallTreeRecordScan = new MergeCursor(forward);
+                smallTreeRecordScan = new MergeCursor(startKey, forward);
                 smallTrees = forestSnapshot.smallTrees();
                 if (LOG.isLoggable(Level.FINE)) {
                     LOG.log(Level.FINE, "Scanning small trees: {0}", smallTrees);
@@ -94,7 +94,7 @@ class ForestMapMatchCursor extends ForestMapCursor
                         neighbor = updateRecord(key);
                     }
                 } else {
-                    bigTreeRecordScan = new MergeCursor(forward);
+                    bigTreeRecordScan = new MergeCursor(startKey, forward);
                     for (SealedMap bigTree : forestSnapshot.bigTrees()) {
                         bigTreeRecordScan.addInput(bigTree.cursor(startKey, true));
                     }

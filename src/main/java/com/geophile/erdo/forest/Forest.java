@@ -100,9 +100,9 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         try {
             recordScan =
                 slowmerge || !inputDurable // If !inputDurable, fast merge has no benefit
-                ? new MergeCursor(true)
+                ? new MergeCursor(null, true)
                 : new FastMergeCursor();
-            keyScan = new MergeCursor(true);
+            keyScan = new MergeCursor(null, true);
             List<SealedMap> obsoleteTrees = new ArrayList<>();
             for (Element element : obsolete) {
                 SealedMap map = (SealedMap) element;

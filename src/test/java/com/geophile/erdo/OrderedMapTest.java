@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static junit.framework.Assert.assertNull;
+
 public class OrderedMapTest
 {
     @BeforeClass
@@ -181,6 +183,42 @@ public class OrderedMapTest
         }
         db.close();
     }
+
+    // Problem uncovered while working on geophile-erdo. Bug #1.
+
+    @Test
+    public void testBackwardFromBeginning()
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        Database db = new DisklessTestDatabase(FACTORY);
+        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        for (int i = 0; i < 10; i++) {
+            map.ensurePresent(TestRecord.createRecord(i, null));
+        }
+        // map is represented by an empty forest and a PrivateMap containing updates. These will be combined
+        // by a MergeCursor intent on going forward.
+        Cursor cursor = map.cursor(new TestKey(-1));
+        TestRecord record = (TestRecord) cursor.previous();
+        assertNull(record);
+    }
+
+    @Test
+    public void testForwardFromEnd()
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        Database db = new DisklessTestDatabase(FACTORY);
+        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        for (int i = 0; i < 10; i++) {
+            map.ensurePresent(TestRecord.createRecord(i, null));
+        }
+        // map is represented by an empty forest and a PrivateMap containing updates. These will be combined
+        // by a MergeCursor intent on going forward.
+        Cursor cursor = map.cursor(new TestKey(99));
+        TestRecord record = (TestRecord) cursor.next();
+        assertNull(record);
+    }
+
+    // End of tests for bug #1.
 
     private int key(AbstractRecord record)
     {

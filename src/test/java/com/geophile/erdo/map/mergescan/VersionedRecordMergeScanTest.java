@@ -27,7 +27,7 @@ public class VersionedRecordMergeScanTest extends MapBehaviorTestBase
         // Value is key.version
         final int N = 10;
         // Turn off consolidation, so that we end up with N maps that need to be merged.
-        MergeCursor mergeScan = new MergeCursor(true);
+        MergeCursor mergeScan = new MergeCursor(null, true);
         for (int version = 0; version < N; version++) {
             TestArrayMap map = new TestArrayMap(FACTORY, new TimestampSet(version));
             for (int k = 0; k < N - version; k++) {

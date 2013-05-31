@@ -40,8 +40,12 @@ class ForestMapRangeCursor extends ForestMapCursor
     public void close()
     {
         if (state != State.DONE) {
+            if (cursor != null) {
+                cursor.close();
+            } else {
+                assert state == State.NEVER_USED;
+            }
             super.close();
-            cursor.close();
             for (MapCursor smallMapScan : smallMapScans.values()) {
                 smallMapScan.close();
             }
@@ -92,7 +96,7 @@ class ForestMapRangeCursor extends ForestMapCursor
         } else if (mapSize == 1) {
             cursor = maps.get(0).cursor(startKey, false);
         } else {
-            MergeCursor mergeScan = new MergeCursor(forward);
+            MergeCursor mergeScan = new MergeCursor(startKey, forward);
             for (SealedMap map : maps) {
                 mergeScan.addInput(map.keyScan(startKey, false));
             }
@@ -107,7 +111,7 @@ class ForestMapRangeCursor extends ForestMapCursor
         LazyRecord neighbor = null;
         if (state != State.DONE) {
             if (state == State.NEVER_USED) {
-                MergeCursor combinedScan = new MergeCursor(forward);
+                MergeCursor combinedScan = new MergeCursor(startKey, forward);
                 combinedScan.addInput(new KeyToUpdatedRecordCursor(merge(forestSnapshot.smallTrees(), startKey, forward)));
                 combinedScan.addInput(merge(forestSnapshot.bigTrees(), startKey, forward));
                 combinedScan.start();

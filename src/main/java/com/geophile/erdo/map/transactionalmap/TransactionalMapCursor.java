@@ -47,7 +47,7 @@ class TransactionalMapCursor extends MapCursor
             transactionalMap.updates.recordCount() == 0) {
             cursor = snapshotCursor;
         } else {
-            MergeCursor mergeCursor = new MergeCursor(true);
+            MergeCursor mergeCursor = new MergeCursor(startKey, true);
             mergeCursor.addInput(snapshotCursor);
             mergeCursor.addInput(transactionalMap.updates.cursor(startKey, singleKey));
             mergeCursor.start();

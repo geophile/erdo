@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.mergescan;
 
 import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapBehaviorTestBase;
 import com.geophile.erdo.map.MapCursor;
@@ -29,7 +28,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
     @Test
     public void testNoInputs() throws IOException, InterruptedException
     {
-        MergeCursor cursor = forwardMergeScan();
+        MergeCursor cursor = forwardMergeCursor();
         assertNull(cursor.next());
     }
 
@@ -50,7 +49,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // forward
             {
-                MergeCursor cursor = forwardMergeScan(map);
+                MergeCursor cursor = forwardMergeCursor(map);
                 int expected = 0;
                 LazyRecord record;
                 while ((record = cursor.next()) != null) {
@@ -60,7 +59,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // backward
             {
-                MergeCursor cursor = backwardMergeScan(map);
+                MergeCursor cursor = backwardMergeCursor(map);
                 int expected = n;
                 LazyRecord record;
                 while ((record = cursor.previous()) != null) {
@@ -102,7 +101,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
                 {
                     Collections.sort(expected);
                     Iterator<Integer> expectedIterator = expected.iterator();
-                    MergeCursor cursor = forwardMergeScan(evenMap, oddMap);
+                    MergeCursor cursor = forwardMergeCursor(evenMap, oddMap);
                     LazyRecord lazyRecord;
                     while ((lazyRecord = cursor.next()) != null) {
                         assertEquals(expectedIterator.next().intValue(), key(lazyRecord));
@@ -113,7 +112,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
                 {
                     Collections.reverse(expected);
                     Iterator<Integer> expectedIterator = expected.iterator();
-                    MergeCursor cursor = backwardMergeScan(evenMap, oddMap);
+                    MergeCursor cursor = backwardMergeCursor(evenMap, oddMap);
                     LazyRecord lazyRecord;
                     while ((lazyRecord = cursor.previous()) != null) {
                         assertEquals(expectedIterator.next().intValue(), key(lazyRecord));
@@ -154,7 +153,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // forward
             {
-                MergeCursor cursor = new MergeCursor(true);
+                MergeCursor cursor = new MergeCursor(null, true);
                 for (PrivateMap map : maps) {
                     cursor.addInput(map.cursor(null, false));
                 }
@@ -168,7 +167,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // backward
             {
-                MergeCursor cursor = new MergeCursor(false);
+                MergeCursor cursor = new MergeCursor(null, false);
                 for (PrivateMap map : maps) {
                     cursor.addInput(map.cursor(null, false));
                 }
@@ -182,7 +181,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // changing direction (two steps forward, one step back)
             {
-                MergeCursor cursor = new MergeCursor(true);
+                MergeCursor cursor = new MergeCursor(null, true);
                 for (PrivateMap map : maps) {
                     cursor.addInput(map.cursor(null, false));
                 }
@@ -211,7 +210,7 @@ public class MergeCursorTest extends MapBehaviorTestBase
             }
             // changing direction the other way (two steps backward, one step forward)
             {
-                MergeCursor cursor = new MergeCursor(false);
+                MergeCursor cursor = new MergeCursor(null, false);
                 for (PrivateMap map : maps) {
                     cursor.addInput(map.cursor(null, false));
                 }
@@ -237,9 +236,9 @@ public class MergeCursorTest extends MapBehaviorTestBase
         }
     }
 
-    private MergeCursor forwardMergeScan(SealedMap... inputs) throws IOException, InterruptedException
+    private MergeCursor forwardMergeCursor(SealedMap... inputs) throws IOException, InterruptedException
     {
-        MergeCursor mergeScan = new MergeCursor(true);
+        MergeCursor mergeScan = new MergeCursor(null, true);
         for (SealedMap input : inputs) {
             mergeScan.addInput(input.cursor(null, false));
         }
@@ -247,14 +246,14 @@ public class MergeCursorTest extends MapBehaviorTestBase
         return mergeScan;
     }
 
-    private MergeCursor backwardMergeScan(SealedMap... inputs) throws IOException, InterruptedException
+    private MergeCursor backwardMergeCursor(SealedMap... inputs) throws IOException, InterruptedException
     {
-        MergeCursor mergeScan = new MergeCursor(false);
+        MergeCursor mergeCursor = new MergeCursor(null, false);
         for (SealedMap input : inputs) {
-            mergeScan.addInput(input.cursor(null, false));
+            mergeCursor.addInput(input.cursor(null, false));
         }
-        mergeScan.start();
-        return mergeScan;
+        mergeCursor.start();
+        return mergeCursor;
     }
 
     private AbstractKey keyOrNull(LazyRecord record) throws IOException, InterruptedException

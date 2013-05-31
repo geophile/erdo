@@ -118,9 +118,9 @@ public class MergeCursor extends MapCursor
         root.prime();
     }
 
-    public MergeCursor(boolean forward)
+    public MergeCursor(AbstractKey startKey, boolean forward)
     {
-        this(TimestampMerger.only(), forward);
+        this(TimestampMerger.only(), startKey, forward);
     }
 
     // For use by this package
@@ -140,9 +140,9 @@ public class MergeCursor extends MapCursor
         return new FillerNode(position);
     }
 
-    MergeCursor(Merger merger, boolean forward)
+    MergeCursor(Merger merger, AbstractKey startKey, boolean forward)
     {
-        super(null, false);
+        super(startKey, false);
         this.merger = merger;
         this.forward = forward;
     }
@@ -161,6 +161,7 @@ public class MergeCursor extends MapCursor
 
     private void restartAtStartKey(boolean forward) throws IOException, InterruptedException
     {
+        this.forward = forward;
         if (startKey == null) {
             if (unboundStartAtFirstKey) {
                 goToFirst();
@@ -168,9 +169,8 @@ public class MergeCursor extends MapCursor
                 goToLast();
             }
         } else {
-            this.forward = forward;
             goTo(startKey);
-            neighbor(); // Get past the startKey, which has already been visited.
+            neighbor(); // Get past the startKey if it has already been visited.
         }
     }
 
@@ -185,7 +185,6 @@ public class MergeCursor extends MapCursor
                 root.promote();
                 break;
             case DONE:
-                assert false; // next/previous handled this case
                 break;
         }
         if (root != null) {

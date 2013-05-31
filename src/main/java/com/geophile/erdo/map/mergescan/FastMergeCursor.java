@@ -56,6 +56,6 @@ public class FastMergeCursor extends MergeCursor
 
     FastMergeCursor(Merger merger)
     {
-        super(merger, true);
+        super(merger, null, true);
     }
 }
