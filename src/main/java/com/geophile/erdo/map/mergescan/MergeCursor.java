@@ -170,7 +170,11 @@ public class MergeCursor extends MapCursor
             }
         } else {
             goTo(startKey);
-            neighbor(); // Get past the startKey if it has already been visited.
+            // Get past the startKey if it has already been visited.
+            LazyRecord current = root.record;
+            if (current != null && current.key().equals(startKey)) {
+                neighbor();
+            }
         }
     }
 
