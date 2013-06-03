@@ -15,6 +15,9 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class OrderedMapTest
 {
@@ -219,6 +222,64 @@ public class OrderedMapTest
     }
 
     // End of tests for bug #1.
+
+    // Bug #3
+    @Test
+    public void testPutAfterDelete()
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        Database db = new DisklessTestDatabase(FACTORY);
+        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        TestRecord record = TestRecord.createRecord(100, null);
+        TestRecord replaced = (TestRecord) map.put(record);
+        assertNull(replaced);
+        TestRecord removed = (TestRecord) map.delete(record.key());
+        assertTrue(!removed.deleted());
+        // Comparing TestKey objects doesn't work. record.key() has no erdoId.
+        assertEquals(record.key().key(), removed.key().key());
+        replaced = (TestRecord) map.put(record);
+        assertNull(replaced);
+    }
+
+    // Check for another version of bug #3
+    @Test
+    public void testIterationOverMapWithDeletedRecords()
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        final int N = 10;
+        Database db = new DisklessTestDatabase(FACTORY);
+        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        TestRecord[] records = new TestRecord[N];
+        for (int i = 0; i < N; i++) {
+            records[i] = TestRecord.createRecord(i, null);
+            map.ensurePresent(records[i]);
+        }
+        int firstExpected = 0;
+        TestKey key0 = new TestKey(0);
+        for (int i = 0; i < N; i++) {
+            // Check contents before deletion
+            Cursor cursor = map.cursor(key0);
+            TestRecord record;
+            int expected = firstExpected;
+            while ((record = (TestRecord) cursor.next()) != null) {
+                assertEquals(expected, record.key().key());
+                expected++;
+            }
+            assertEquals(N, expected);
+            // delete key i
+            TestRecord replaced = (TestRecord) map.delete(new TestKey(i));
+            assertEquals(i, replaced.key().key());
+            firstExpected++;
+            // Check contents after deletion
+            cursor = map.cursor(key0);
+            expected = firstExpected;
+            while ((record = (TestRecord) cursor.next()) != null) {
+                assertEquals(expected, record.key().key());
+                expected++;
+            }
+            assertEquals(N, expected);
+        }
+    }
 
     private int key(AbstractRecord record)
     {

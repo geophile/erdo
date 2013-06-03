@@ -39,12 +39,19 @@ public class OrderedMapImpl extends OrderedMap
                DeadlockException,
                TransactionRolledBackException
     {
+        AbstractRecord replaced = null;
         // Copy the record so that changes to the record, made by the caller, don't change
         // the record in the database.
         record = record.copy();
         record.key().erdoId(erdoId);
         LazyRecord lazyRecord = transactionalMap().put(record, true);
-        return lazyRecord == null ? null : lazyRecord.materializeRecord();
+        if (lazyRecord != null) {
+            replaced = lazyRecord.materializeRecord();
+            if (replaced.deleted()) {
+                replaced = null;
+            }
+        }
+        return replaced;
     }
 
     @Override

@@ -39,7 +39,12 @@ public class DeletedRecord extends AbstractRecord
 
     public DeletedRecord(AbstractKey key)
     {
-        super(key);
+        super(markDeleted(key.copy()));
+    }
+
+    private static <KEY extends AbstractKey> KEY markDeleted(KEY key)
+    {
         key.deleted(true);
+        return key;
     }
 }
