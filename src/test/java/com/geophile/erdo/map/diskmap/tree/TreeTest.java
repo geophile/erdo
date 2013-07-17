@@ -12,7 +12,7 @@ import com.geophile.erdo.TestRecord;
 import com.geophile.erdo.TransactionCallback;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.util.FileUtil;
@@ -40,7 +40,7 @@ public class TreeTest
     @Before
     public void before() throws IOException
     {
-        FACTORY.recordFactory(ERDO_ID, new RecordFactory(TestKey.class, TestRecord.class));
+        FACTORY.recordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         FileUtil.deleteDirectory(DB_STRUCTURE.dbDirectory());
         FileUtil.ensureDirectoryExists(DB_STRUCTURE.dbDirectory());
         FileUtil.ensureDirectoryExists(DB_STRUCTURE.forestDirectory());

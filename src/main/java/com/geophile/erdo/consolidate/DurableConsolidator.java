@@ -58,8 +58,9 @@ class DurableConsolidator extends Consolidator
     }
 
     @Override
-    public void noteConsolidationEnd()
+    public void noteConsolidationEnd(Throwable termination)
     {
+        super.noteConsolidationEnd(termination);
         inProgress.decrementAndGet();
     }
 

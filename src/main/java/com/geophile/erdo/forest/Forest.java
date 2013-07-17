@@ -60,26 +60,20 @@ public class Forest extends TransactionManager implements Consolidation.Containe
 
     // Consolidation.Container interface
 
+    @Override
     public Configuration configuration()
     {
         return database.configuration();
     }
 
+    @Override
     public Factory factory()
     {
         return database.factory();
     }
 
-    private TimestampSet consolidatedTimestamps(List<Element> obsolete)
-    {
-        List<TimestampSet> consolidatedTimestampsList = new ArrayList<>();
-        for (Element element : obsolete) {
-            consolidatedTimestampsList.add(element.timestamps());
-        }
-        return TimestampSet.consolidate(consolidatedTimestampsList);
-    }
-
     // Doesn't have to be synchronized as it doesn't operate on consolidationSet or transactionOwner.
+    @Override
     public Element consolidate(List<Element> obsolete,
                                boolean inputDurable,
                                boolean outputDurable)
@@ -179,6 +173,7 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         return replacement;
     }
 
+    @Override
     public void replaceObsolete(List<Element> obsolete, Element replacement)
     {
         assert Thread.holdsLock(this);
@@ -192,6 +187,12 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         if (replacement.count() > 0) {
             transactionOwners.add((SealedMap) replacement);
         }
+    }
+
+    @Override
+    public void reportCrash(Throwable crash)
+    {
+        database.reportCrash(crash);
     }
 
     // Forest interface
@@ -240,6 +241,15 @@ public class Forest extends TransactionManager implements Consolidation.Containe
     }
 
     // For use by this class
+
+    private TimestampSet consolidatedTimestamps(List<Element> obsolete)
+    {
+        List<TimestampSet> consolidatedTimestampsList = new ArrayList<>();
+        for (Element element : obsolete) {
+            consolidatedTimestampsList.add(element.timestamps());
+        }
+        return TimestampSet.consolidate(consolidatedTimestampsList);
+    }
 
     private String consolidationType(boolean durable1, boolean durable2)
     {

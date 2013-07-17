@@ -51,7 +51,7 @@ public class CommitTest
                DeadlockException,
                TransactionRolledBackException
     {
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         int count = 0;
         while (count < RECORDS) {
             map.ensurePresent(TestRecord.createRecord(count++, FILLER));
@@ -79,7 +79,7 @@ public class CommitTest
                DeadlockException,
                TransactionRolledBackException
     {
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         final List<Integer> commitCounts = new ArrayList<>();
         TransactionCallback callback =
             new TransactionCallback()

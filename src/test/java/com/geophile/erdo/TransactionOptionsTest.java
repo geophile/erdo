@@ -46,7 +46,7 @@ public class TransactionOptionsTest
     @Test
     public void testSynchronousCommitNoUpdate() throws IOException, InterruptedException
     {
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         db.commitTransaction();
         Cursor cursor = map.first();
         assertNull(cursor.next());
@@ -60,7 +60,7 @@ public class TransactionOptionsTest
                TransactionRolledBackException
     {
         final int N = 100000;
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record;
         for (int i = 0; i < N; i++) {
             record = TestRecord.createRecord(i, null);
@@ -95,7 +95,7 @@ public class TransactionOptionsTest
                     }
                 }
             };
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record;
         int i = 0;
         for (; i < N; i++) {
@@ -119,7 +119,7 @@ public class TransactionOptionsTest
     @Test
     public void testRollbackNoUpdate() throws IOException, InterruptedException
     {
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         db.rollbackTransaction();
         Cursor cursor = map.first();
         assertNull(cursor.next());

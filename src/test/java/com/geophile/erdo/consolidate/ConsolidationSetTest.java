@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.geophile.erdo.consolidate.Consolidation.Container;
 import static com.geophile.erdo.consolidate.Consolidation.Element;
+import static org.junit.Assert.fail;
 
 // Runs by itself but hangs when run with all tests?!?!
 @Ignore
@@ -247,6 +248,12 @@ public class ConsolidationSetTest
         public synchronized void addElement(TestElement element) throws InterruptedException, IOException
         {
             consolidationSet.add(element, true);
+        }
+
+        @Override
+        public void reportCrash(Throwable crash)
+        {
+            fail();
         }
 
         // Object state

@@ -9,7 +9,7 @@ package com.geophile.erdo.map.diskmap;
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;

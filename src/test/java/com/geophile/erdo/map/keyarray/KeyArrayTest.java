@@ -9,7 +9,7 @@ package com.geophile.erdo.map.keyarray;
 import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.TestKey;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,8 +22,8 @@ public class KeyArrayTest
     public static void beforeClass()
     {
         FACTORY = new TestFactory();
-        FACTORY.recordFactory(1, new RecordFactory(TestKey1.class, null));
-        FACTORY.recordFactory(2, new RecordFactory(TestKey2.class, null));
+        FACTORY.recordFactory(1, RecordFactory.simpleRecordFactory(TestKey1.class, null));
+        FACTORY.recordFactory(2, RecordFactory.simpleRecordFactory(TestKey2.class, null));
     }
 
     @After

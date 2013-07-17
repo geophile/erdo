@@ -22,7 +22,7 @@ public class OrderedMapTransactionTest
     public void before() throws IOException, InterruptedException
     {
         db = new DisklessTestDatabase(FACTORY);
-        map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
     }
 
     @After

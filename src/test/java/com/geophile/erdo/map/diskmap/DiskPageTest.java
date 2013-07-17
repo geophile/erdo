@@ -7,7 +7,7 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.*;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
 import org.junit.After;
@@ -27,7 +27,7 @@ public class DiskPageTest
     public static void beforeClass()
     {
         pageSize = FACTORY.configuration().diskPageSizeBytes();
-        FACTORY.recordFactory(ERDO_ID, new RecordFactory(TestKey.class, TestRecord.class));
+        FACTORY.recordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         Transaction.initialize(FACTORY);
     }
 

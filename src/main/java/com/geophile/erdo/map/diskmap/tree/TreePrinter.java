@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.apiimpl.ConfigurationImpl;
 import com.geophile.erdo.apiimpl.DefaultFactory;
 import com.geophile.erdo.map.Factory;
@@ -99,26 +100,25 @@ public class TreePrinter
                 mapFileReader.close();
                 StringTokenizer tokenizer = new StringTokenizer(line);
                 /* String mapName = */ tokenizer.nextToken();
-                String keyClassName = tokenizer.nextToken();
-                String recordClassName = tokenizer.nextToken();
-                registerKeyAndClassName(erdoId, keyClassName, recordClassName);
+                String recordFactoryClassName = tokenizer.nextToken();
+                registerRecordFactory(erdoId, recordFactoryClassName);
             }
         } else {
             for (Map.Entry<Integer, String> entry : keyAndRecordClassnames.entrySet()) {
                 Integer erdoId = entry.getKey();
-                String classnames = entry.getValue();
-                int comma = classnames.indexOf(",");
-                String keyClassName = classnames.substring(0, comma);
-                String recordClassName = classnames.substring(comma + 1);
-                registerKeyAndClassName(erdoId, keyClassName, recordClassName);
+                String recordFactoryClassName = entry.getValue();
+                registerRecordFactory(erdoId, recordFactoryClassName);
             }
         }
     }
 
-    private void registerKeyAndClassName(int erdoId, String keyClassName, String recordClassName)
+    private void registerRecordFactory(int erdoId, String recordFactoryClassName)
         throws ClassNotFoundException, IllegalAccessException, InstantiationException
     {
-        factory.registerKeyAndValueClasses(erdoId, keyClassName, recordClassName);
+        Class<? extends RecordFactory> recordFactoryClass =
+            (Class<RecordFactory>) Class.forName(recordFactoryClassName);
+        RecordFactory recordFactory = recordFactoryClass.newInstance();
+        factory.registerRecordFactory(erdoId, recordFactory);
     }
 
     private void computeLeafFileUsage() throws IOException

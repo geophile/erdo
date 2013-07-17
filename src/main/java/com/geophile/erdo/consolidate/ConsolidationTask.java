@@ -44,7 +44,7 @@ class ConsolidationTask implements Runnable
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, "Something has gone very wrong", e);
         } finally {
-            consolidator.noteConsolidationEnd();
+            consolidator.noteConsolidationEnd(termination);
         }
     }
 
@@ -130,11 +130,13 @@ class ConsolidationTask implements Runnable
             }
         } catch (IOException e) {
             // But this is not normal, even on shutdown
+            termination = e;
             LOG.log(Level.WARNING,
                     "{0} failed. replacement: {1}, obsolete: {2}",
                     new Object[]{this, replacement, obsolete});
             LOG.log(Level.SEVERE, e.toString(), e);
         } catch (Throwable e) {
+            termination = e;
             LOG.log(Level.SEVERE, "Well this is unexpected", e);
             throw new Error(e);
         } finally {
@@ -181,4 +183,5 @@ class ConsolidationTask implements Runnable
     private final long taskId = taskIdCounter.getAndIncrement();
     private final Container container;
     private final Element newElement;
+    private Throwable termination;
 }

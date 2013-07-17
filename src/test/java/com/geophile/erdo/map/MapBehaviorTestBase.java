@@ -6,10 +6,7 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.Configuration;
-import com.geophile.erdo.TestFactory;
-import com.geophile.erdo.TestKey;
-import com.geophile.erdo.TestRecord;
+import com.geophile.erdo.*;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.apiimpl.DeletedRecord;
 import com.geophile.erdo.map.arraymap.ArrayMap;
@@ -72,7 +69,7 @@ public class MapBehaviorTestBase
 
     protected SealedMap diskMap(List<TestRecord> testRecords) throws IOException, InterruptedException
     {
-        FACTORY.registerKeyAndValueClasses(ERDO_ID, TestKey.class, TestRecord.class);
+        FACTORY.registerRecordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         // DiskMap requires records with timestamps, so assign them.
         final long TIMESTAMP = 0L;
         for (TestRecord record : testRecords) {

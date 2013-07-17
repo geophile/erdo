@@ -6,9 +6,8 @@
 
 package com.geophile.erdo.apiimpl;
 
-import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.OrderedMap;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.UsageError;
 import com.geophile.erdo.forest.Forest;
 import com.geophile.erdo.forest.ForestRecovery;
@@ -20,7 +19,6 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class DatabaseOnDisk extends DatabaseImpl
 {
@@ -68,18 +66,17 @@ public class DatabaseOnDisk extends DatabaseImpl
 
     // synchronized to prevent race condition when two threads create maps with the same name at the
     // same time.
-    public synchronized OrderedMap createMap(String mapName,
-                                             Class<? extends AbstractKey> keyClass,
-                                             Class<? extends AbstractRecord<? extends AbstractKey>> recordClass)
-        throws UsageError, IOException
+    public synchronized OrderedMap createMap(String mapName, RecordFactory recordFactory)
+        throws UsageError, IOException, InterruptedException
     {
-        OrderedMapImpl map = ((OrderedMapImpl) super.createMap(mapName, keyClass, recordClass));
+        OrderedMapImpl map = ((OrderedMapImpl) super.createMap(mapName, recordFactory));
         // Create file representing map
         File mapFile = new File(dbStructure.mapsDirectory(), Integer.toString(map.erdoId()));
         FileUtil.createFile(mapFile);
-        FileWriter output = new FileWriter(mapFile);
-        output.write(String.format("%s %s %s", mapName, keyClass.getName(), recordClass.getName()));
-        output.close();
+        try (ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(mapFile))) {
+            output.writeObject(mapName);
+            output.writeObject(recordFactory);
+        }
         return map;
     }
 
@@ -104,7 +101,8 @@ public class DatabaseOnDisk extends DatabaseImpl
 
     // For use by this package
 
-    DatabaseOnDisk(Factory factory, DBStructure dbStructure, boolean create) throws IOException, InterruptedException
+    DatabaseOnDisk(Factory factory, DBStructure dbStructure, boolean create)
+        throws IOException, InterruptedException
     {
         super(factory);
         this.dbStructure = dbStructure;
@@ -117,13 +115,14 @@ public class DatabaseOnDisk extends DatabaseImpl
             assert mapFiles != null : dbStructure.mapsDirectory();
             for (File mapFile : mapFiles) {
                 int erdoId = Integer.parseInt(mapFile.getName());
-                BufferedReader input = new BufferedReader(new FileReader(mapFile));
-                StringTokenizer tokenizer = new StringTokenizer(input.readLine());
-                String mapName = tokenizer.nextToken();
-                String keyClassName = tokenizer.nextToken();
-                String recordClassName = tokenizer.nextToken();
-                factory.registerKeyAndValueClasses(erdoId, keyClassName, recordClassName);
-                mapNameToErdoId.put(mapName, erdoId);
+                try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(mapFile))) {
+                    String mapName = (String) input.readObject();
+                    RecordFactory recordFactory = (RecordFactory) input.readObject();
+                    mapNameToErdoId.put(mapName, erdoId);
+                    factory.registerRecordFactory(erdoId, recordFactory);
+                } catch (ClassNotFoundException e) {
+                    throw new UsageError(e);
+                }
             }
             forest = null;
             try {
@@ -136,7 +135,7 @@ public class DatabaseOnDisk extends DatabaseImpl
             assert forest != null;
             for (Map.Entry<String, Integer> entry : mapNameToErdoId.entrySet()) {
                 maps.put(entry.getKey(),
-                         new OrderedMapImpl(forest, entry.getValue()));
+                         new OrderedMapImpl(this, entry.getValue()));
             }
         }
         factory.transactionManager(forest);

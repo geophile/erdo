@@ -81,7 +81,7 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
     }
 
     @Override
-    public AbstractRecord materializeRecord() throws IOException, InterruptedException
+    public AbstractRecord<KEY> materializeRecord() throws IOException, InterruptedException
     {
         return this;
     }

@@ -237,7 +237,7 @@ public class CursorTest
     {
         // map is loaded with (x * GAP, "r.x"), 0 <= x < n
         Database db = new DisklessTestDatabase(FACTORY);
-        map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int key = 0; key < n; key++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(testKey(key), testValue(key)));
             Assert.assertNull(replaced);

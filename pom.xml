@@ -8,7 +8,7 @@
   <groupId>com.geophile</groupId>
   <artifactId>erdo</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>erdo</name>
   <url>http://maven.apache.org</url>
   <dependencies>

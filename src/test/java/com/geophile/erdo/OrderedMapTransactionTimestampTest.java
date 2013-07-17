@@ -48,7 +48,7 @@ public class OrderedMapTransactionTimestampTest
                TransactionRolledBackException
     {
         Database db = Database.createDatabase(DB_DIRECTORY, Configuration.defaultConfiguration());
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record;
         final int N = 10;
         for (int i = 0; i < N; i++) {
@@ -79,7 +79,7 @@ public class OrderedMapTransactionTimestampTest
                TransactionRolledBackException
     {
         Database db = Database.createDatabase(DB_DIRECTORY, Configuration.defaultConfiguration());
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record;
         final int N = 10;
         for (int i = 0; i < N; i++) {
@@ -114,7 +114,7 @@ public class OrderedMapTransactionTimestampTest
                TransactionRolledBackException
     {
         Database db = Database.createDatabase(DB_DIRECTORY, Configuration.defaultConfiguration());
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record;
         final int N = 10;
         for (int i = 0; i < N; i++) {

@@ -10,7 +10,6 @@ import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.forest.Forest;
 import com.geophile.erdo.forest.ForestRecovery;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.RecordFactory;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.diskmap.tree.TreePositionPool;
 import com.geophile.erdo.map.testarraymap.TestArrayMap;

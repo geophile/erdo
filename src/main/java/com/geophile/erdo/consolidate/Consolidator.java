@@ -40,8 +40,11 @@ abstract class Consolidator
     {
     }
 
-    public void noteConsolidationEnd()
+    public void noteConsolidationEnd(Throwable termination)
     {
+        if (termination != null) {
+            consolidationSet.container().reportCrash(termination);
+        }
     }
 
     public final void consolidate(Consolidation.Element newElement)

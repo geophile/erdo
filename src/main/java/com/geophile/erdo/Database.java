@@ -57,7 +57,7 @@ public abstract class Database
     public static Database useDatabase(File dbDirectory)
         throws IOException, InterruptedException
     {
-        return DatabaseImpl.openDatabase(dbDirectory, null, DefaultFactory.class);
+        return DatabaseImpl.useDatabase(dbDirectory, null, DefaultFactory.class);
     }
 
     /**
@@ -83,7 +83,7 @@ public abstract class Database
     public static Database useDatabase(File dbDirectory, Configuration configuration)
         throws IOException, InterruptedException
     {
-        return DatabaseImpl.openDatabase(dbDirectory, configuration, DefaultFactory.class);
+        return DatabaseImpl.useDatabase(dbDirectory, configuration, DefaultFactory.class);
     }
 
     /**
@@ -94,10 +94,8 @@ public abstract class Database
      * @return A new map.
      * @throws IOException
      */
-    public abstract OrderedMap createMap(String mapName,
-                                         Class<? extends AbstractKey> keyClass,
-                                         Class<? extends AbstractRecord<? extends AbstractKey>> recordClass)
-        throws IOException;
+    public abstract OrderedMap createMap(String mapName, RecordFactory recordFactory)
+        throws IOException, InterruptedException;
 
     /**
      * Provides access to the named map.
@@ -105,7 +103,7 @@ public abstract class Database
      * @return The named map.
      * @throws IOException
      */
-    public abstract OrderedMap useMap(String mapName) throws IOException;
+    public abstract OrderedMap useMap(String mapName) throws IOException, InterruptedException;
 
     public abstract void lock(AbstractKey key)
         throws InterruptedException,

@@ -13,7 +13,6 @@ import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.transaction.Transaction;
-import com.geophile.erdo.transaction.TransactionManager;
 
 import java.io.IOException;
 
@@ -24,12 +23,14 @@ public class CursorImpl extends Cursor
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         return neighbor(true);
     }
 
     @Override
     public AbstractRecord previous() throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         return neighbor(false);
     }
 
@@ -48,11 +49,11 @@ public class CursorImpl extends Cursor
 
     // CursorImpl interface
 
-    CursorImpl(TransactionManager transactionManager, MapCursor mapCursor)
+    CursorImpl(DatabaseImpl database, MapCursor mapCursor)
     {
+        this.database = database;
         this.mapCursor = mapCursor;
-        this.transactionManager = transactionManager;
-        this.transaction = transactionManager.currentTransaction();
+        this.transaction = database.transactionManager().currentTransaction();
         this.transaction.registerCursor(this);
     }
 
@@ -95,14 +96,14 @@ public class CursorImpl extends Cursor
 
     private void checkTransaction()
     {
-        if (transactionManager.currentTransaction() != transaction) {
+        if (database.transactionManager().currentTransaction() != transaction) {
             throw new UsageError("Cursor cannot be used across transaction boundaries");
         }
     }
 
     // Object state
 
-    private TransactionManager transactionManager;
-    private Transaction transaction;
+    private final DatabaseImpl database;
+    private final Transaction transaction;
     private MapCursor mapCursor;
 }

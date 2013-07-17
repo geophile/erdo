@@ -17,15 +17,11 @@ public class DeletedRecord extends AbstractRecord
 
     @Override
     public final void writeTo(ByteBuffer buffer)
-    {
-        throw new UnsupportedOperationException();
-    }
+    {}
 
     @Override
     public final void readFrom(ByteBuffer buffer)
-    {
-        throw new UnsupportedOperationException();
-    }
+    {}
 
     // DeletedRecord interface
 

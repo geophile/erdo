@@ -9,7 +9,6 @@ package com.geophile.erdo.apiimpl;
 import com.geophile.erdo.*;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
-import com.geophile.erdo.transaction.TransactionManager;
 import com.geophile.erdo.util.IdGenerator;
 
 import java.io.IOException;
@@ -25,6 +24,7 @@ public class OrderedMapImpl extends OrderedMap
                DeadlockException,
                TransactionRolledBackException
     {
+        database.checkDatabaseOpen();
         // Copy the record so that changes to the record, made by the caller, don't change
         // the record in the database.
         record = record.copy();
@@ -39,6 +39,7 @@ public class OrderedMapImpl extends OrderedMap
                DeadlockException,
                TransactionRolledBackException
     {
+        database.checkDatabaseOpen();
         AbstractRecord replaced = null;
         // Copy the record so that changes to the record, made by the caller, don't change
         // the record in the database.
@@ -78,14 +79,17 @@ public class OrderedMapImpl extends OrderedMap
     public void lock(AbstractKey key)
         throws InterruptedException,
                DeadlockException,
-               TransactionRolledBackException
+               TransactionRolledBackException,
+               IOException
     {
+        database.checkDatabaseOpen();
         transactionalMap().lock(key);
     }
 
     @Override
     public AbstractRecord find(AbstractKey key) throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         checkNotNull(key);
         key.erdoId(erdoId);
         return newCursor(key, true).next();
@@ -94,6 +98,7 @@ public class OrderedMapImpl extends OrderedMap
     @Override
     public Cursor cursor(AbstractKey startKey) throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         if (startKey != null) {
             startKey.erdoId(erdoId);
         }
@@ -103,26 +108,28 @@ public class OrderedMapImpl extends OrderedMap
     @Override
     public Cursor first() throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         return newCursor(lowestKey, false);
     }
 
     @Override
     public Cursor last() throws IOException, InterruptedException
     {
+        database.checkDatabaseOpen();
         return newCursor(highestKey, false);
     }
 
     // OrderedMapImpl interface
 
-    public OrderedMapImpl(TransactionManager transactionManager)
+    public OrderedMapImpl(DatabaseImpl database)
     {
-        this(transactionManager, (int) erdoIdGenerator.nextId());
+        this(database, (int) erdoIdGenerator.nextId());
     }
 
-    public OrderedMapImpl(TransactionManager transactionManager, int erdoId)
+    public OrderedMapImpl(DatabaseImpl database, int erdoId)
     {
-        assert transactionManager != null;
-        this.transactionManager = transactionManager;
+        assert database != null;
+        this.database = database;
         this.erdoId = erdoId;
         this.lowestKey = ErdoId.lowest(erdoId);
         this.highestKey = ErdoId.highest(erdoId);
@@ -138,12 +145,12 @@ public class OrderedMapImpl extends OrderedMap
     private Cursor newCursor(AbstractKey key, boolean singleKey)
         throws IOException, InterruptedException
     {
-        return new CursorImpl(transactionManager, transactionalMap().cursor(key, singleKey));
+        return new CursorImpl(database, transactionalMap().cursor(key, singleKey));
     }
 
     private TransactionalMap transactionalMap()
     {
-        transactionalMap = transactionManager.currentTransaction().transactionalMap();
+        transactionalMap = database.transactionManager().currentTransaction().transactionalMap();
         return transactionalMap;
     }
 
@@ -160,7 +167,7 @@ public class OrderedMapImpl extends OrderedMap
 
     // Object state
 
-    private final TransactionManager transactionManager;
+    private final DatabaseImpl database;
     private final int erdoId;
     private final ErdoId lowestKey;
     private final ErdoId highestKey; // For positioning by last()

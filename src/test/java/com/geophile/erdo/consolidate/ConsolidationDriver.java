@@ -101,6 +101,12 @@ public class ConsolidationDriver
             assert false;
             return null;
         }
+
+        @Override
+        public void reportCrash(Throwable crash)
+        {
+            fail();
+        }
     }
 
     private static class TestElement implements Element

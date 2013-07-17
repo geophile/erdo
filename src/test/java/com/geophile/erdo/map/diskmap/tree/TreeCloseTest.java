@@ -12,7 +12,7 @@ import com.geophile.erdo.TestRecord;
 import com.geophile.erdo.TransactionCallback;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
@@ -36,7 +36,7 @@ public class TreeCloseTest
         TestKey.testErdoId(ERDO_ID);
         DB_STRUCTURE = new DBStructure(new File("/tmp/erdo"));
         FACTORY = new TestFactory();
-        FACTORY.recordFactory(ERDO_ID, new RecordFactory(TestKey.class, TestRecord.class));
+        FACTORY.recordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         FACTORY.configuration().diskPageSizeBytes(4096);
         FACTORY.configuration().diskSegmentSizeBytes(8192);
         Transaction.initialize(FACTORY);

@@ -99,7 +99,7 @@ public class CursorLifecycleTest
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         db = new DisklessTestDatabase(FACTORY);
-        map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int key = 0; key < N; key++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(key, value(key)));
             Assert.assertNull(replaced);

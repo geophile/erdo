@@ -7,6 +7,7 @@
 package com.geophile.erdo.examples.helloworld;
 
 import com.geophile.erdo.Database;
+import com.geophile.erdo.RecordFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class CreateMap
     public static void main(String[] args) throws IOException, InterruptedException
     {
         Database db = Database.useDatabase(DB_DIRECTORY);
-        db.createMap("musicians", Name.class, Person.class);
+        db.createMap("musicians", RecordFactory.simpleRecordFactory(Name.class, Person.class));
         db.close();
         System.out.println(String.format("Created 'musicians' map in database %s", DB_DIRECTORY));
     }

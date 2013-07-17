@@ -91,9 +91,9 @@ public class DatabaseTest
     public void testMapCreateTwice() throws IOException, InterruptedException
     {
         db = Database.createDatabase(DB_DIRECTORY);
-        db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         try {
-            db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+            db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
             assertTrue(false);
         } catch (UsageError e) {
             // Expected
@@ -120,7 +120,7 @@ public class DatabaseTest
     public void testEmptyMapCreateAndOpen() throws IOException, InterruptedException
     {
         db = Database.createDatabase(DB_DIRECTORY);
-        db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         db.close();
         FACTORY.reset();
         db = Database.useDatabase(DB_DIRECTORY);
@@ -138,7 +138,7 @@ public class DatabaseTest
         Configuration configuration = Configuration.defaultConfiguration();
         configuration.consolidationMinSizeBytes(0);
         db = Database.createDatabase(DB_DIRECTORY, configuration);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         final int N = 1000;
         for (int i = 0; i < N; i++) {
             TestRecord record = TestRecord.createRecord(i, value(i));

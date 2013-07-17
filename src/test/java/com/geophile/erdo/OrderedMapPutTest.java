@@ -64,7 +64,7 @@ public class OrderedMapPutTest
         Database db = DatabaseOnDisk.createDatabase(new File(DB_DIRECTORY), FACTORY);
         Assert.assertTrue(N >= 4);
         Assert.assertTrue(N % 2 == 0);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         // Load map with keys 0..N-1 in one transaction
         for (int id = 0; id < N; id++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(id, "first"));

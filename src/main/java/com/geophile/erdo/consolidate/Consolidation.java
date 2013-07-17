@@ -54,5 +54,6 @@ public interface Consolidation
         Element consolidate(List<Element> elements, boolean inputDurable, boolean outputDurable)
             throws IOException, InterruptedException;
         void replaceObsolete(List<Element> obsolete, Element replacement);
+        void reportCrash(Throwable crash);
     }
 }

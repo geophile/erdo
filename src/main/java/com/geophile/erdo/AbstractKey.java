@@ -8,7 +8,6 @@ package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.ErdoId;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.map.RecordFactory;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.util.Transferrable;
 

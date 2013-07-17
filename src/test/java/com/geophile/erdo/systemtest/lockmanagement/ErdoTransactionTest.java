@@ -31,7 +31,7 @@ public class ErdoTransactionTest
         // Database setup
         FileUtil.deleteDirectory(DB_DIRECTORY);
         db = Database.createDatabase(DB_DIRECTORY, configuration());
-        accounts = db.createMap(MAP_NAME, AccountId.class, Account.class);
+        accounts = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(AccountId.class, Account.class));
         int a = 0;
         this.nAccounts = Integer.parseInt(args[a++]);
         this.threads = new ErdoTestThread[Integer.parseInt(args[a++])];

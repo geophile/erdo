@@ -6,9 +6,8 @@
 
 package com.geophile.erdo.map;
 
-import com.geophile.erdo.AbstractKey;
-import com.geophile.erdo.AbstractRecord;
 import com.geophile.erdo.Configuration;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.diskmap.tree.TreePositionPool;
@@ -26,16 +25,13 @@ import java.util.List;
 
 public abstract class Factory
 {
-    public final void registerKeyAndValueClasses(int erdoId, String keyClassName, String recordClassName)
+    public final void registerRecordFactory(int erdoId, RecordFactory recordFactory)
     {
-        recordFactories.put(erdoId, new RecordFactory(keyClassName, recordClassName));
-    }
-
-    public final void registerKeyAndValueClasses(int erdoId,
-                                                 Class<? extends AbstractKey> keyClass,
-                                                 Class<? extends AbstractRecord<? extends AbstractKey>> recordClass)
-    {
-        recordFactories.put(erdoId, new RecordFactory(keyClass, recordClass));
+        if (recordFactory == null) {
+            throw new IllegalArgumentException(String.format("No recordFactory provided for map with erdo id %s",
+                                                             erdoId));
+        }
+        recordFactories.put(erdoId, recordFactory);
     }
 
     public final RecordFactory recordFactory(int erdoId)

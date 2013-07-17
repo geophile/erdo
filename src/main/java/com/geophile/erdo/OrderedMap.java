@@ -89,7 +89,7 @@ public abstract class OrderedMap
     public abstract void lock(AbstractKey key)
         throws InterruptedException,
                DeadlockException,
-               TransactionRolledBackException;
+               TransactionRolledBackException, IOException;
 
     /**
      * Returns the record with the given key. If the key is not present in the map, then null is returned.

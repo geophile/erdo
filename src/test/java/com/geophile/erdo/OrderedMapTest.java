@@ -17,7 +17,6 @@ import java.io.IOException;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class OrderedMapTest
 {
@@ -41,7 +40,7 @@ public class OrderedMapTest
                TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, "first"));
             Assert.assertNull(replaced);
@@ -70,7 +69,7 @@ public class OrderedMapTest
                TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             map.ensurePresent(TestRecord.createRecord(i, "first"));
         }
@@ -96,7 +95,7 @@ public class OrderedMapTest
                TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, "first"));
             Assert.assertNull(replaced);
@@ -118,7 +117,7 @@ public class OrderedMapTest
                TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             map.ensurePresent(TestRecord.createRecord(i, "first"));
         }
@@ -138,7 +137,7 @@ public class OrderedMapTest
     {
         // Based on SealedMapTest.testScan
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         Cursor cursor;
         int expectedKey;
         int expectedLastKey;
@@ -194,7 +193,7 @@ public class OrderedMapTest
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < 10; i++) {
             map.ensurePresent(TestRecord.createRecord(i, null));
         }
@@ -210,7 +209,7 @@ public class OrderedMapTest
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < 10; i++) {
             map.ensurePresent(TestRecord.createRecord(i, null));
         }
@@ -229,7 +228,7 @@ public class OrderedMapTest
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord record = TestRecord.createRecord(100, null);
         TestRecord replaced = (TestRecord) map.put(record);
         assertNull(replaced);
@@ -248,7 +247,7 @@ public class OrderedMapTest
     {
         final int N = 10;
         Database db = new DisklessTestDatabase(FACTORY);
-        OrderedMap map = db.createMap(MAP_NAME, TestKey.class, TestRecord.class);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         TestRecord[] records = new TestRecord[N];
         for (int i = 0; i < N; i++) {
             records[i] = TestRecord.createRecord(i, null);

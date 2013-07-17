@@ -9,8 +9,10 @@ package com.geophile.erdo.apiimpl;
 import com.geophile.erdo.*;
 import com.geophile.erdo.forest.Forest;
 import com.geophile.erdo.map.Factory;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
+import com.geophile.erdo.transaction.TransactionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +20,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,9 +39,9 @@ public abstract class DatabaseImpl extends Database
         }
     }
 
-    public static DatabaseOnDisk openDatabase(File dbDirectory,
-                                              Configuration configuration,
-                                              Class<? extends Factory> factoryClass)
+    public static DatabaseOnDisk useDatabase(File dbDirectory,
+                                             Configuration configuration,
+                                             Class<? extends Factory> factoryClass)
         throws IOException, InterruptedException
     {
         synchronized (STATIC_LOCK) {
@@ -50,32 +53,26 @@ public abstract class DatabaseImpl extends Database
 
     // synchronized to prevent race condition when two threads create maps with the same name at the
     // same time.
-    public synchronized OrderedMap createMap(String mapName,
-                                             Class<? extends AbstractKey> keyClass,
-                                             Class<? extends AbstractRecord<? extends AbstractKey>> recordClass)
-        throws UsageError, IOException
+    @Override
+    public synchronized OrderedMap createMap(String mapName, RecordFactory recordFactory)
+        throws UsageError, IOException, InterruptedException
     {
         LOG.log(Level.WARNING, "Creating OrderedMap {0}", mapName);
-        if (keyClass == null) {
-            throw new IllegalArgumentException(String.format("No key class provided for %s", mapName));
-        }
-        if (recordClass == null) {
-            throw new IllegalArgumentException(String.format("No record class provided for %s", mapName));
-        }
         checkDatabaseOpen();
         if (maps.containsKey(mapName)) {
             throw new UsageError(String.format(
                 "Cannot create map %s because it already exists", mapName));
         }
-        OrderedMapImpl map = new OrderedMapImpl(forest);
-        factory.registerKeyAndValueClasses(map.erdoId(), keyClass, recordClass);
+        OrderedMapImpl map = new OrderedMapImpl(this);
+        factory.registerRecordFactory(map.erdoId(), recordFactory);
         maps.put(mapName, map);
         return map;
     }
 
     // synchronized so that two threads opening the same map at the same time get the same OrderedMap object.
+    @Override
     public synchronized OrderedMap useMap(String mapName)
-        throws UsageError, IOException
+        throws UsageError, IOException, InterruptedException
     {
         checkDatabaseOpen();
         OrderedMapImpl map = maps.get(mapName);
@@ -112,6 +109,7 @@ public abstract class DatabaseImpl extends Database
     @Override
     public final void flush() throws IOException, InterruptedException
     {
+        checkDatabaseOpen();
         forest.flush();
     }
 
@@ -139,6 +137,11 @@ public abstract class DatabaseImpl extends Database
     {
         return factory;
     }
+
+    public final void reportCrash(Throwable crash)
+    {
+        this.crash.set(crash);
+    }
     
     // For testing
     public static void reset()
@@ -157,7 +160,32 @@ public abstract class DatabaseImpl extends Database
         databaseOpen = true;
     }
 
+    // For use by this package
+
+    TransactionManager transactionManager()
+    {
+        return forest;
+    }
+
+    void checkDatabaseOpen() throws IOException, InterruptedException
+    {
+        if (crash.get() != null) {
+            close();
+            LOG.log(Level.SEVERE, "Shutting down because of crash in thread managed by Erdo", crash.get());
+        }
+        if (!databaseOpen) {
+            throw new UsageError("No database is open");
+        }
+    }
+
     // For use by this class
+
+    private static void checkDatabaseClosed()
+    {
+        if (databaseOpen) {
+            throw new UsageError("A database is already open.");
+        }
+    }
 
     private static Factory factory(Class<? extends Factory> factoryClass, Configuration configuration)
     {
@@ -185,20 +213,6 @@ public abstract class DatabaseImpl extends Database
         return mergedConfiguration;
     }
 
-    protected static void checkDatabaseClosed()
-    {
-        if (databaseOpen) {
-            throw new UsageError("A database is already open.");
-        }
-    }
-
-    protected static void checkDatabaseOpen()
-    {
-        if (!databaseOpen) {
-            throw new UsageError("No database is open");
-        }
-    }
-
     // Class state
 
     protected static final Logger LOG = Logger.getLogger(DatabaseImpl.class.getName());
@@ -211,4 +225,5 @@ public abstract class DatabaseImpl extends Database
     protected final Map<String, OrderedMapImpl> maps = new HashMap<>();
     protected Forest forest;
     private final DeadlockFixer deadlockFixer;
+    private final AtomicReference<Throwable> crash = new AtomicReference<>(null);
 }

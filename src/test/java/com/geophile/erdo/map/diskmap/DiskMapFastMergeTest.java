@@ -10,7 +10,7 @@ import com.geophile.erdo.*;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.map.RecordFactory;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.tree.LevelOneMultiRecord;
 import com.geophile.erdo.map.mergescan.FastMergeCursor;
 import com.geophile.erdo.map.mergescan.MultiRecordKey;
@@ -33,7 +33,7 @@ public class DiskMapFastMergeTest
     public static void beforeClass() throws IOException
     {
         TestKey.testErdoId(ERDO_ID);
-        FACTORY.recordFactory(ERDO_ID, new RecordFactory(TestKey.class, TestRecord.class));
+        FACTORY.recordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         Configuration configuration = FACTORY.configuration();
         configuration.diskPageSizeBytes(4096);
         configuration.diskSegmentSizeBytes(8192);
@@ -258,6 +258,7 @@ public class DiskMapFastMergeTest
     private static final String A_SMALL_FILLER = "a";
     private static final String B_SMALL_FILLER = "b";
     private static final int ERDO_ID = 1;
+    private static final String MAP_NAME = "map";
     private static final TestFactory FACTORY = new TestFactory();
     private static DBStructure DB_STRUCTURE;
     private static final File DB_DIRECTORY = new File("/tmp/erdo");
