@@ -72,6 +72,7 @@ public class CursorImpl extends Cursor
                     deleted = neighbor.key().deleted();
                     if (deleted) {
                         neighbor.destroyRecordReference();
+                        database.factory().testObserver().readDeletedKey();
                     }
                 }
             } while (neighbor != null && deleted);

@@ -19,6 +19,7 @@ import com.geophile.erdo.segmentfilemanager.ReferenceCountedSegmentFileManager;
 import com.geophile.erdo.segmentfilemanager.SegmentFileManager;
 import com.geophile.erdo.transaction.LockManager;
 import com.geophile.erdo.transaction.TimestampSet;
+import com.geophile.erdo.util.DefaultTestObserver;
 
 import java.io.IOException;
 import java.util.List;
@@ -90,6 +91,7 @@ public class DefaultFactory extends Factory
     {
         super(configuration);
         lockManager = new LockManager();
+        testObserver = new DefaultTestObserver();
     }
 
     // Class state
@@ -110,4 +112,5 @@ public class DefaultFactory extends Factory
     private Class forestRecoveryClass = ForestRecoveryOnDisk.class;
     private AbstractSegmentFileManager segmentFileManager;
     private MeteringSegmentFileManager meterDiskFileSystem;
+    private DefaultTestObserver testObserver;
 }

@@ -35,6 +35,9 @@ public class TransactionalMap extends OpenMapBase
                TransactionRolledBackException
     {
         lock(record.key());
+        if (record.key().deleted()) {
+            factory.testObserver().writeDeletedKey();
+        }
         LazyRecord replaced;
         LazyRecord uncommitted = updateMap().put(record, returnReplaced);
         if (returnReplaced && uncommitted == null) {

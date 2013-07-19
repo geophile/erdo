@@ -6,6 +6,7 @@
 
 package com.geophile.erdo;
 
+import com.geophile.erdo.apiimpl.DeletedRecord;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.diskmap.DiskPage;
@@ -136,9 +137,14 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
         key.readFrom(pageAccessBuffers.keyBuffer());
         key.transactionTimestamp(timestamp);
         // record
-        AbstractRecord record = factory.recordFactory(erdoId).newRecord();
-        record.key = key;
-        record.readFrom(pageAccessBuffers.recordBuffer());
+        AbstractRecord record;
+        if (key.deleted()) {
+            record = new DeletedRecord(key);
+        } else {
+            record = factory.recordFactory(erdoId).newRecord();
+            record.key = key;
+            record.readFrom(pageAccessBuffers.recordBuffer());
+        }
         return record;
     }
 

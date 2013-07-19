@@ -18,6 +18,7 @@ import com.geophile.erdo.segmentfilemanager.pagememorymanager.SubAllocatingPageM
 import com.geophile.erdo.transaction.LockManager;
 import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.transaction.TransactionManager;
+import com.geophile.erdo.util.DefaultTestObserver;
 import com.geophile.erdo.util.IdGenerator;
 
 import java.io.IOException;
@@ -113,6 +114,11 @@ public abstract class Factory
         throw new UnsupportedOperationException();
     }
 
+    public DefaultTestObserver testObserver()
+    {
+        return testObserver;
+    }
+
     protected Factory(Configuration configuration)
     {
         synchronized (getClass()) {
@@ -123,6 +129,7 @@ public abstract class Factory
         this.configuration =  configuration;
         this.pageMemoryManager = new SubAllocatingPageMemoryManager(configuration);
         this.diskPageCache = new DiskPageCache(configuration);
+        this.testObserver = new DefaultTestObserver();
     }
 
     // Class state
@@ -140,4 +147,5 @@ public abstract class Factory
     protected final IdGenerator transactionTimestampGenerator = new IdGenerator();
     protected final DiskPageCache diskPageCache;
     protected final PageMemoryManager pageMemoryManager;
+    protected DefaultTestObserver testObserver;
 }

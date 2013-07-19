@@ -20,6 +20,7 @@ import com.geophile.erdo.transaction.LockManager;
 import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
+import com.geophile.erdo.util.TestObserver;
 
 import java.io.IOException;
 import java.util.List;
@@ -76,6 +77,7 @@ public class TestFactory extends Factory
         allocatedOnce = false;
         diskPageCache.clear();
         pageMemoryManager.reset();
+        testObserver = new TestObserver();
     }
 
     public TestFactory()
