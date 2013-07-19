@@ -16,12 +16,16 @@ public class DeletedRecord extends AbstractRecord
     // Transferrable interface
 
     @Override
-    public final void writeTo(ByteBuffer buffer)
-    {}
+    public final void readFrom(ByteBuffer buffer)
+    {
+        super.readFrom(buffer);
+    }
 
     @Override
-    public final void readFrom(ByteBuffer buffer)
-    {}
+    public final void writeTo(ByteBuffer buffer)
+    {
+        super.writeTo(buffer);
+    }
 
     // DeletedRecord interface
 

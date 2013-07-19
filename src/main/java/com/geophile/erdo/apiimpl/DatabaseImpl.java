@@ -9,7 +9,6 @@ package com.geophile.erdo.apiimpl;
 import com.geophile.erdo.*;
 import com.geophile.erdo.forest.Forest;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;

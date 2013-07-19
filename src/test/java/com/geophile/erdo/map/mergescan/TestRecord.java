@@ -32,6 +32,7 @@ public class TestRecord extends AbstractRecord
 
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         int size = buffer.getInt();
         byte[] bytes = new byte[size];
         buffer.get(bytes);
@@ -40,6 +41,7 @@ public class TestRecord extends AbstractRecord
 
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         byte[] bytes = value().getBytes();
         buffer.putInt(bytes.length);
         buffer.put(bytes);

@@ -7,11 +7,11 @@
 package com.geophile.erdo.systemtest.lockmanagement;
 
 import com.geophile.erdo.Configuration;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.forest.Forest;
 import com.geophile.erdo.forest.ForestRecovery;
 import com.geophile.erdo.map.Factory;
-import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.SealedMap;
 import com.geophile.erdo.map.testarraymap.TestArrayMap;
 import com.geophile.erdo.segmentfilemanager.AbstractSegmentFileManager;

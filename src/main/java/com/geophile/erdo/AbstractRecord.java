@@ -52,14 +52,16 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
      * @param buffer contains the serialized state of the record.
      * @throws java.nio.BufferUnderflowException
      */
-    public abstract void readFrom(ByteBuffer buffer);
+    public void readFrom(ByteBuffer buffer)
+    {}
 
     /**
      * Write the state of this record to the given buffer.
      * @param buffer container of the serialized record.
      * @throws java.nio.BufferOverflowException
      */
-    public abstract void writeTo(ByteBuffer buffer);
+    public void writeTo(ByteBuffer buffer)
+    {}
 
     public int recordCount()
     {

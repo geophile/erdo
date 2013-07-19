@@ -7,7 +7,6 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.*;
-import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;
 import org.junit.After;

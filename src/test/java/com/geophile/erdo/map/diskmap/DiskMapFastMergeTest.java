@@ -10,7 +10,6 @@ import com.geophile.erdo.*;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.tree.LevelOneMultiRecord;
 import com.geophile.erdo.map.mergescan.FastMergeCursor;
 import com.geophile.erdo.map.mergescan.MultiRecordKey;

@@ -46,11 +46,13 @@ public class AccountId extends AbstractKey
 
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         key = buffer.getInt();
     }
 
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         buffer.putInt(key);
     }
 

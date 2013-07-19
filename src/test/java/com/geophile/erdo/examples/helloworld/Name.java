@@ -37,6 +37,7 @@ public class Name extends AbstractKey
     @Override
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         int size = buffer.getInt();
         byte[] bytes = new byte[size];
         buffer.get(bytes);
@@ -46,6 +47,7 @@ public class Name extends AbstractKey
     @Override
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         byte[] bytes = name.getBytes();
         buffer.putInt(bytes.length);
         buffer.put(bytes);

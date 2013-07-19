@@ -7,9 +7,9 @@
 package com.geophile.erdo.map.keyarray;
 
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.TestFactory;
 import com.geophile.erdo.TestKey;
-import com.geophile.erdo.RecordFactory;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;

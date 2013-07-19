@@ -6,13 +6,9 @@
 
 package com.geophile.erdo.map.diskmap.tree;
 
-import com.geophile.erdo.TestFactory;
-import com.geophile.erdo.TestKey;
-import com.geophile.erdo.TestRecord;
-import com.geophile.erdo.TransactionCallback;
+import com.geophile.erdo.*;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.RecordFactory;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.transaction.Transaction;
 import com.geophile.erdo.transaction.TransactionManager;

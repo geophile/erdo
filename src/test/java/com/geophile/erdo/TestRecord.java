@@ -36,6 +36,7 @@ public class TestRecord extends AbstractRecord<TestKey>
 
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         byte type = buffer.get();
         if (type == VALUE_NULL) {
             value = null;
@@ -49,6 +50,7 @@ public class TestRecord extends AbstractRecord<TestKey>
 
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         byte[] bytes = null;
         if (value == null) {
             buffer.put(VALUE_NULL);

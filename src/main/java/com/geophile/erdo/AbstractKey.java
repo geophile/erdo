@@ -79,14 +79,20 @@ public abstract class AbstractKey implements Comparable<AbstractKey>, Transferra
      * @param buffer contains the serialized state of the key.
      * @throws BufferUnderflowException
      */
-    public abstract void readFrom(ByteBuffer buffer) throws BufferUnderflowException;
+    public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
+    {
+        deleted(buffer.get() != 0);
+    }
 
     /**
      * Write the state of this key to the given buffer.
      * @param buffer container of the serialized key.
      * @throws BufferOverflowException
      */
-    public abstract void writeTo(ByteBuffer buffer) throws BufferOverflowException;
+    public void writeTo(ByteBuffer buffer) throws BufferOverflowException
+    {
+        buffer.put((byte) (deleted() ? 1 : 0));
+    }
 
     public final int recordCount()
     {

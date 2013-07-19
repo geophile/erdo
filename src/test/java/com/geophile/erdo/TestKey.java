@@ -51,12 +51,14 @@ public class TestKey extends AbstractKey
     @Override
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         key = buffer.getInt();
     }
 
     @Override
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         buffer.putInt(key);
     }
 

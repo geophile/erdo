@@ -32,12 +32,14 @@ public class Account extends AbstractRecord<AccountId>
     @Override
     public void readFrom(ByteBuffer buffer) throws BufferUnderflowException
     {
+        super.readFrom(buffer);
         balance = buffer.getLong();
     }
 
     @Override
     public void writeTo(ByteBuffer buffer) throws BufferOverflowException
     {
+        super.writeTo(buffer);
         buffer.putLong(balance);
     }
 
