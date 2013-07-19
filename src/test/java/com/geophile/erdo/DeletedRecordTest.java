@@ -2,11 +2,9 @@ package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
-import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.util.FileUtil;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
