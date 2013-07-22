@@ -131,21 +131,30 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
                                              int erdoId,
                                              long timestamp)
     {
-        // key
-        AbstractKey key = factory.recordFactory(erdoId).newKey();
-        key.erdoId(erdoId);
-        key.readFrom(pageAccessBuffers.keyBuffer());
-        key.transactionTimestamp(timestamp);
-        // record
-        AbstractRecord record;
-        if (key.deleted()) {
-            record = new DeletedRecord(key);
-        } else {
-            record = factory.recordFactory(erdoId).newRecord();
-            record.key = key;
-            record.readFrom(pageAccessBuffers.recordBuffer());
+        ByteBuffer keyBuffer = pageAccessBuffers.keyBuffer();
+        ByteBuffer recordBuffer = pageAccessBuffers.recordBuffer();
+        keyBuffer.mark();
+        recordBuffer.mark();
+        try {
+            // key
+            AbstractKey key = factory.recordFactory(erdoId).newKey();
+            key.erdoId(erdoId);
+            key.readFrom(keyBuffer);
+            key.transactionTimestamp(timestamp);
+            // record
+            AbstractRecord record;
+            if (key.deleted()) {
+                record = new DeletedRecord(key);
+            } else {
+                record = factory.recordFactory(erdoId).newRecord();
+                record.key = key;
+                record.readFrom(recordBuffer);
+            }
+            return record;
+        } finally {
+            keyBuffer.reset();
+            recordBuffer.reset();
         }
-        return record;
     }
 
     // For use by subclasses

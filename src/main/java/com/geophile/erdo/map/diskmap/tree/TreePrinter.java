@@ -15,13 +15,12 @@ import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.map.diskmap.IndexRecord;
 import com.geophile.erdo.map.diskmap.Manifest;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 public class TreePrinter
 {
@@ -36,8 +35,6 @@ public class TreePrinter
                 String arg = args[a++];
                 if (arg.equals("--keys")) {
                     keysOnly = true;
-                } else if (arg.equals("--classes")) {
-                    readClassnames(args[a++]);
                 }
             }
         } catch (Exception e) {
@@ -73,14 +70,6 @@ public class TreePrinter
         }
     }
 
-    private void readClassnames(String erdoIdAndClassnames)
-    {
-        int colon = erdoIdAndClassnames.indexOf(':');
-        int erdoId = Integer.parseInt(erdoIdAndClassnames.substring(0, colon));
-        String classnames = erdoIdAndClassnames.substring(colon + 1);
-        keyAndRecordClassnames.put(erdoId, classnames);
-    }
-
     private void readDatabaseProperties() throws IOException
     {
         ConfigurationImpl configuration = new ConfigurationImpl();
@@ -91,34 +80,15 @@ public class TreePrinter
     private void registerRecordFactories()
         throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException
     {
-        if (keyAndRecordClassnames.isEmpty()) {
-            for (String mapFileName : dbStructure.mapsDirectory().list()) {
-                int erdoId = Integer.parseInt(mapFileName);
-                File mapFile = new File(dbStructure.mapsDirectory(), mapFileName);
-                BufferedReader mapFileReader = new BufferedReader(new FileReader(mapFile));
-                String line = mapFileReader.readLine();
-                mapFileReader.close();
-                StringTokenizer tokenizer = new StringTokenizer(line);
-                /* String mapName = */ tokenizer.nextToken();
-                String recordFactoryClassName = tokenizer.nextToken();
-                registerRecordFactory(erdoId, recordFactoryClassName);
-            }
-        } else {
-            for (Map.Entry<Integer, String> entry : keyAndRecordClassnames.entrySet()) {
-                Integer erdoId = entry.getKey();
-                String recordFactoryClassName = entry.getValue();
-                registerRecordFactory(erdoId, recordFactoryClassName);
-            }
+        for (String mapFileName : dbStructure.mapsDirectory().list()) {
+            int erdoId = Integer.parseInt(mapFileName);
+            ObjectInputStream input =
+                new ObjectInputStream(new FileInputStream(new File(dbStructure.mapsDirectory(), mapFileName)));
+            /* String mapName = (String) */ input.readObject();
+            RecordFactory recordFactory = (RecordFactory) input.readObject();
+            input.close();
+            factory.registerRecordFactory(erdoId, recordFactory);
         }
-    }
-
-    private void registerRecordFactory(int erdoId, String recordFactoryClassName)
-        throws ClassNotFoundException, IllegalAccessException, InstantiationException
-    {
-        Class<? extends RecordFactory> recordFactoryClass =
-            (Class<RecordFactory>) Class.forName(recordFactoryClassName);
-        RecordFactory recordFactory = recordFactoryClass.newInstance();
-        factory.registerRecordFactory(erdoId, recordFactory);
     }
 
     private void computeLeafFileUsage() throws IOException
@@ -267,13 +237,10 @@ public class TreePrinter
     }
 
     private static final String[] USAGE = {
-        "treeprint DB_DIRECTORY TREE_ID [--classes ERDO_ID:KEY_CLASSNAME,RECORD_CLASSNAME ...] [--keys]",
+        "treeprint DB_DIRECTORY TREE_ID [--keys]",
         "    DB_DIRECTORY: Root directory of the database",
         "    TREE_ID: Tree id",
         "    --factory: Used to specify record factory class for an erdo id",
-        "    ERDO_ID: An OrderedMap's erdo id",
-        "    KEY_CLASSNAME: The key class associated with the erdo id",
-        "    RECORD_CLASSNAME: The record class associated with the erdo id",
         "    --keys: If specified, only keys are printed",
         "If the database directory containing TREE_DIR has an intact maps directory, then the erdo ids and",
         "record factory classnames will be read from it. ERDO_IDs and RECORD_FACTORY_CLASSNAMEs need only be",
@@ -283,7 +250,6 @@ public class TreePrinter
     private Manifest manifest;
     private DBStructure dbStructure;
     private int treeId;
-    private Map<Integer, String> keyAndRecordClassnames = new HashMap<>();
     private Factory factory;
     private final Map<Long, Integer> leafSegmentCounts = new HashMap<>();
     private boolean keysOnly = false;

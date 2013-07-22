@@ -88,14 +88,23 @@ public class IndexRecord extends AbstractRecord<AbstractKey>
     public static IndexRecord deserialize(Factory factory, DiskPage.AccessBuffers pageAccessBuffers, int erdoId)
     {
         // key
-        RecordFactory recordFactory = factory.recordFactory(erdoId);
-        AbstractKey key = recordFactory.newKey();
-        key.erdoId(erdoId);
-        key.readFrom(pageAccessBuffers.keyBuffer());
-        // record
-        IndexRecord record = new IndexRecord(key);
-        record.readFrom(pageAccessBuffers.recordBuffer());
-        return record;
+        ByteBuffer keyBuffer = pageAccessBuffers.keyBuffer();
+        ByteBuffer recordBuffer = pageAccessBuffers.recordBuffer();
+        keyBuffer.mark();
+        recordBuffer.mark();
+        try {
+            RecordFactory recordFactory = factory.recordFactory(erdoId);
+            AbstractKey key = recordFactory.newKey();
+            key.erdoId(erdoId);
+            key.readFrom(pageAccessBuffers.keyBuffer());
+            // record
+            IndexRecord record = new IndexRecord(key);
+            record.readFrom(pageAccessBuffers.recordBuffer());
+            return record;
+        } finally {
+            keyBuffer.reset();
+            recordBuffer.reset();
+        }
     }
 
     public IndexRecord(AbstractKey key, int childPageAddress)
