@@ -7,13 +7,16 @@
 package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.DisklessTestDatabase;
+import com.geophile.erdo.util.FileUtil;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -101,9 +104,17 @@ public class OrderedMapTest
             Assert.assertNull(replaced);
         }
         for (int i = 0; i < N; i++) {
-            AbstractRecord replaced = map.delete(new TestKey(i));
-            Assert.assertEquals(i, ((TestKey) replaced.key()).key());
-            Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
+            // Delete present key
+            {
+                AbstractRecord replaced = map.delete(new TestKey(i));
+                Assert.assertEquals(i, ((TestKey) replaced.key()).key());
+                Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
+            }
+            // Delete missing key (a version of bug #4)
+            {
+                AbstractRecord replaced = map.delete(new TestKey(-i));
+                assertNull(replaced);
+            }
         }
         Assert.assertNull(map.first().next());
         db.close();
@@ -278,6 +289,48 @@ public class OrderedMapTest
             }
             assertEquals(N, expected);
         }
+    }
+
+    // Bug #4
+    @Test
+    public void testMoreDeletion()
+        throws IOException,
+               InterruptedException,
+               DeadlockException,
+               TransactionRolledBackException
+    {
+        final File DB_DIRECTORY = new File("/tmp/erdo");
+        FileUtil.deleteDirectory(DB_DIRECTORY);
+        Database db = Database.createDatabase(DB_DIRECTORY);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
+        for (int i = 0; i < N; i++) {
+            AbstractRecord replaced = map.put(TestRecord.createRecord(i, String.format("v%s", i)));
+            Assert.assertNull(replaced);
+        }
+        // Delete odd keys
+        for (int i = 1; i < N; i += 2) {
+            TestRecord replaced = (TestRecord) map.delete(new TestKey(i));
+            assertNotNull(replaced);
+            assertEquals(i, replaced.key().key());
+        }
+        db.commitTransaction();
+        db.flush();
+        // Check that the expected even keys remain
+        assertEquals(0, N % 2);
+        int evenCount = 0;
+        for (int i = 0; i < N; i += 2) {
+            TestRecord record = (TestRecord) map.find(new TestKey(i));
+            System.out.println(String.format("even: %s", record));
+            assertEquals(i, record.key().key());
+            evenCount++;
+        }
+        assertEquals(N/2, evenCount);
+        // Delete them again, even though they aren't there
+        for (int i = 1; i < N; i += 2) {
+            TestRecord replaced = (TestRecord) map.delete(new TestKey(i));
+            assertNull(replaced);
+        }
+        db.close();
     }
 
     private int key(AbstractRecord record)

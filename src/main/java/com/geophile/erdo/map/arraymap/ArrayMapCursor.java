@@ -63,6 +63,7 @@ public class ArrayMapCursor extends MapCursor
         if (position >= 0 && position < map.recordCount()) {
             neighbor = map.records.get(position);
             if (!isOpen(neighbor.key())) {
+                neighbor.destroyRecordReference();
                 neighbor = null;
             }
         }

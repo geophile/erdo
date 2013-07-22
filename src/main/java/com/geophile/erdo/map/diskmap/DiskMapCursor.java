@@ -61,9 +61,9 @@ class DiskMapCursor extends MapCursor
 
     // DiskMapCursor interface
 
-    DiskMapCursor(Tree tree, MapCursor treeLevelCursor, boolean singleKey)
+    DiskMapCursor(Tree tree, MapCursor treeLevelCursor, AbstractKey startKey, boolean singleKey)
     {
-        super(null, singleKey);
+        super(startKey, singleKey);
         this.tree = tree;
         this.treeLevelCursor = treeLevelCursor;
     }
@@ -76,6 +76,10 @@ class DiskMapCursor extends MapCursor
         if (treeLevelCursor != null) {
             neighbor = forward ? treeLevelCursor.next() : treeLevelCursor.previous();
             if (neighbor == null) {
+                close();
+            } else if (!isOpen(neighbor.key())) {
+                neighbor.destroyRecordReference();
+                neighbor = null;
                 close();
             }
         }

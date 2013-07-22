@@ -43,7 +43,7 @@ public class DiskMap extends SealedMapBase
         throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapCursor(tree, tree.cursor(startKey), singleKey);
+        return new DiskMapCursor(tree, tree.cursor(startKey), startKey, singleKey);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class DiskMap extends SealedMapBase
     public MapCursor consolidationScan() throws IOException, InterruptedException
     {
         assert !destroyed : this;
-        return new DiskMapCursor(tree, tree.consolidationScan(), false);
+        return new DiskMapCursor(tree, tree.consolidationScan(), null, false);
     }
 
     // DiskMap interface

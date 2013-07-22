@@ -34,9 +34,7 @@ class PrivateMapKeyCursor extends MapCursor
 
     // PrivateMapKeyCursor interface
 
-    public PrivateMapKeyCursor(PrivateMap map,
-                               AbstractKey startKey,
-                               boolean singleKey)
+    public PrivateMapKeyCursor(PrivateMap map, AbstractKey startKey, boolean singleKey)
     {
         super(startKey, singleKey);
         this.map = map;

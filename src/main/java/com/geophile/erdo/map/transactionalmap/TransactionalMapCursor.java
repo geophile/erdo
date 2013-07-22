@@ -65,6 +65,8 @@ class TransactionalMapCursor extends MapCursor
             if (neighbor == null) {
                 close();
             }
+            // Don't need to consult singleKey flag to see if neighbor should be kept,
+            // as the underlying snapshot cursor does that.
         }
         return neighbor;
     }
