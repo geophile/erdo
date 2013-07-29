@@ -39,9 +39,11 @@ class ConsolidationTask implements Runnable
         } catch (InterruptedException e) {
             LOG.log(Level.WARNING, "{0} terminated by interruption", this);
         } catch (IOException e) {
+            termination = e;
             LOG.log(Level.SEVERE, "{0} terminated by IOException", this);
             LOG.log(Level.SEVERE, "stack", e);
         } catch (Throwable e) {
+            termination = e;
             LOG.log(Level.SEVERE, "Something has gone very wrong", e);
         } finally {
             consolidator.noteConsolidationEnd(termination);
@@ -130,13 +132,11 @@ class ConsolidationTask implements Runnable
             }
         } catch (IOException e) {
             // But this is not normal, even on shutdown
-            termination = e;
             LOG.log(Level.WARNING,
                     "{0} failed. replacement: {1}, obsolete: {2}",
                     new Object[]{this, replacement, obsolete});
             LOG.log(Level.SEVERE, e.toString(), e);
         } catch (Throwable e) {
-            termination = e;
             LOG.log(Level.SEVERE, "Well this is unexpected", e);
             throw new Error(e);
         } finally {

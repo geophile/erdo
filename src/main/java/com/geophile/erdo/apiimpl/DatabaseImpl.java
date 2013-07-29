@@ -113,6 +113,13 @@ public abstract class DatabaseImpl extends Database
     }
 
     @Override
+    public void consolidateAll() throws IOException, InterruptedException
+    {
+        checkDatabaseOpen();
+        forest.consolidateAll();
+    }
+
+    @Override
     public void close() throws IOException, InterruptedException
     {
         synchronized (STATIC_LOCK) {

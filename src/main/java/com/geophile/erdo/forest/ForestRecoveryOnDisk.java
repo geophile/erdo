@@ -36,7 +36,7 @@ public class ForestRecoveryOnDisk implements ForestRecovery
         Factory factory = database.factory();
         AbstractSegmentFileManager segmentFileManager = factory.segmentFileManager();
         Forest forest;
-        java.util.Map<Long, SealedMap> maps = new HashMap<>();
+        java.util.Map<Long, SealedMap> maps = new HashMap<>(); // map id -> map
         TransactionOwners transactionOwners = new TransactionOwners();
         LongArray obsoleteTreeIds = new LongArray();
         // Find trees on disk and gather ids of obsolete trees. Also compute max map id to restore
@@ -75,6 +75,7 @@ public class ForestRecoveryOnDisk implements ForestRecovery
             maxTransactionTimestamp = max(maxTransactionTimestamp, map.timestamps().maxTimestamp());
             maxSegmentId = max(maxSegmentId, maxSegmentId(map));
         }
+        transactionOwners.checkCoverage(maxTransactionTimestamp);
         factory.restoreTransactionTimestampGenerator(maxTransactionTimestamp);
         factory.restoreMapIdGenerator(maxMapId);
         segmentFileManager.restoreSegmentIdGenerator(maxSegmentId);

@@ -83,16 +83,17 @@ public class OrderedMapTransactionTimestampTest
         TestRecord record;
         final int N = 10;
         for (int i = 0; i < N; i++) {
+            // Write transaction
             record = TestRecord.createRecord(i, null);
             map.put(record);
             db.commitTransaction();
+            // Read transaction
             Cursor cursor = map.first();
             while (cursor.next() != null);
             db.commitTransaction();
         }
         db.close();
         TimestampSet allTimestamps = timestamps(manifests());
-        // System.out.println(allTimestamps);
         int count = 0;
         long minTimestamp = Long.MAX_VALUE;
         long maxTimestamp = Long.MIN_VALUE;

@@ -24,64 +24,23 @@ abstract class ConsolidationElementTracker
 {
     // ConsolidationElementTracker interface
 
+    public abstract String type();
+
     public List<Element> elements()
     {
         assert Thread.holdsLock(container);
         List<Element> elements = new ArrayList<>(nonEmptyAvailableForConsolidation);
-        if (!emptyAvailableForConsolidation.timestamps().empty()) {
-            // Copy so that the caller has a static view
-            elements.add(emptyAvailableForConsolidation.copy());
-        }
         elements.addAll(beingConsolidated);
         return elements;
     }
 
-    public void add(Element element)
-    {
-        assert Thread.holdsLock(container);
-        if (element.count() == 0) {
-            emptyAvailableForConsolidation.addEmpty((SealedMap) element);
-        } else {
-            nonEmptyAvailableForConsolidation.add(element);
-        }
-    }
+    public abstract void add(Element element);
 
-    public void removeElementBeingConsolidated(Element element)
-    {
-        assert Thread.holdsLock(container);
-        if (element.count() == 0) {
-            emptyAvailableForConsolidation.removeEmpty((SealedMap) element);
-        } else {
-            boolean removed = beingConsolidated.remove(element);
-            assert removed : element;
-        }
-    }
+    public abstract void removeElementBeingConsolidated(Element element);
 
-    public void beingConsolidated(List<Element> elements)
-    {
-        assert Thread.holdsLock(container);
-        for (Element element : elements) {
-            if (element.count() == 0) {
-                emptyAvailableForConsolidation.removeEmpty((SealedMap) element);
-            } else {
-                boolean removed = nonEmptyAvailableForConsolidation.remove(element);
-                assert removed;
-            }
-            boolean added = beingConsolidated.add(element);
-            assert added;
-        }
-    }
+    public abstract void beingConsolidated(List<Element> elements);
 
-    public List<Element> availableForConsolidation()
-    {
-        assert Thread.holdsLock(container);
-        // Copy so that the caller has a static view
-        ArrayList<Element> available = new ArrayList<>(nonEmptyAvailableForConsolidation);
-        if (!emptyAvailableForConsolidation.timestamps().empty()) {
-            available.add(emptyAvailableForConsolidation.copy());
-        }
-        return available;
-    }
+    public abstract List<Element> availableForConsolidation();
 
     public long totalBytes()
     {
@@ -139,12 +98,9 @@ abstract class ConsolidationElementTracker
         }
     }
 
-    public abstract String type();
-
     public void describe(Logger log, Level level, String label)
     {
         describe(log, level, label, nonEmptyAvailableForConsolidation, "non-empty available");
-        describe(log, level, label, Collections.<Element>singleton(emptyAvailableForConsolidation), "empty available");
         describe(log, level, label, beingConsolidated, "beingConsolidated");
     }
 
@@ -163,16 +119,13 @@ abstract class ConsolidationElementTracker
     protected ConsolidationElementTracker(Consolidation.Container container)
     {
         this.container = container;
-        this.emptyAvailableForConsolidation = new EmptyMap(container.factory());
     }
 
-    // For use by this class
-
-    private void describe(Logger log,
-                          Level level,
-                          String label,
-                          Set<Element> elements,
-                          String subLabel)
+    protected void describe(Logger log,
+                            Level level,
+                            String label,
+                            Set<Element> elements,
+                            String subLabel)
     {
         long recordCount = 0;
         for (Element element : elements) {
@@ -187,6 +140,8 @@ abstract class ConsolidationElementTracker
                     elements.size(),
                     recordCount});
     }
+
+    // For use by this class
 
     private String describeDistribution(Collection<Element> elements)
     {
@@ -217,8 +172,7 @@ abstract class ConsolidationElementTracker
 
     // Object state
 
-    private final Consolidation.Container container;
-    protected final EmptyMap emptyAvailableForConsolidation;
+    protected final Consolidation.Container container;
     protected final Set<Element> nonEmptyAvailableForConsolidation = new HashSet<>();
     protected final Set<Element> beingConsolidated = new HashSet<>();
 
@@ -235,8 +189,42 @@ abstract class ConsolidationElementTracker
         @Override
         public void add(Element element)
         {
+            // Empty element should not go to emptyAvailableForConsolidation, due to bug 4.
             assert element.durable();
-            super.add(element);
+            assert Thread.holdsLock(container);
+            nonEmptyAvailableForConsolidation.add(element);
+        }
+
+        @Override
+        public void removeElementBeingConsolidated(Element element)
+        {
+            assert Thread.holdsLock(container);
+            boolean removed = beingConsolidated.remove(element);
+            assert removed : element;
+        }
+
+        @Override
+        public void beingConsolidated(List<Element> elements)
+        {
+            assert Thread.holdsLock(container);
+            for (Element element : elements) {
+                boolean removed = nonEmptyAvailableForConsolidation.remove(element);
+                assert removed;
+                boolean added = beingConsolidated.add(element);
+                assert added;
+            }
+        }
+
+        @Override
+        public List<Element> availableForConsolidation()
+        {
+            assert Thread.holdsLock(container);
+            // Copy so that the caller has a static view
+            ArrayList<Element> available = new ArrayList<>(nonEmptyAvailableForConsolidation);
+            if (LOG.isLoggable(Level.FINER) && !available.isEmpty()) {
+                LOG.log(Level.FINER, "available for consolidation: {0}", available);
+            }
+            return available;
         }
 
         public DurableConsolidationElementTracker(Consolidation.Container container)
@@ -254,15 +242,84 @@ abstract class ConsolidationElementTracker
         }
 
         @Override
+        public List<Element> elements()
+        {
+            List<Element> elements = super.elements();
+            if (!emptyAvailableForConsolidation.timestamps().empty()) {
+                // Copy so that the caller has a static view
+                elements.add(emptyAvailableForConsolidation.copy());
+            }
+            return elements;
+        }
+
+        @Override
         public void add(Element element)
         {
             assert !element.durable();
-            super.add(element);
+            assert Thread.holdsLock(container);
+            if (element.count() == 0) {
+                emptyAvailableForConsolidation.addEmpty((SealedMap) element);
+            } else {
+                nonEmptyAvailableForConsolidation.add(element);
+            }
+        }
+
+        @Override
+        public void removeElementBeingConsolidated(Element element)
+        {
+            assert Thread.holdsLock(container);
+            if (element.count() == 0) {
+                emptyAvailableForConsolidation.removeEmpty((SealedMap) element);
+            } else {
+                boolean removed = beingConsolidated.remove(element);
+                assert removed : element;
+            }
+        }
+
+        @Override
+        public void beingConsolidated(List<Element> elements)
+        {
+            assert Thread.holdsLock(container);
+            for (Element element : elements) {
+                if (element.count() == 0) {
+                    emptyAvailableForConsolidation.removeEmpty((SealedMap) element);
+                } else {
+                    boolean removed = nonEmptyAvailableForConsolidation.remove(element);
+                    assert removed;
+                }
+                boolean added = beingConsolidated.add(element);
+                assert added;
+            }
+        }
+
+        @Override
+        public List<Element> availableForConsolidation()
+        {
+            assert Thread.holdsLock(container);
+            // Copy so that the caller has a static view
+            ArrayList<Element> available = new ArrayList<>(nonEmptyAvailableForConsolidation);
+            if (!emptyAvailableForConsolidation.timestamps().empty()) {
+                available.add(emptyAvailableForConsolidation.copy());
+            }
+            if (LOG.isLoggable(Level.FINER) && !available.isEmpty()) {
+                LOG.log(Level.FINER, "available for consolidation: {0}", available);
+            }
+            return available;
+        }
+
+        @Override
+        public void describe(Logger log, Level level, String label)
+        {
+            super.describe(log, level, label);
+            describe(log, level, label, Collections.<Element>singleton(emptyAvailableForConsolidation), "empty available");
         }
 
         public NonDurableConsolidationElementTracker(Consolidation.Container container)
         {
             super(container);
+            this.emptyAvailableForConsolidation = new EmptyMap(container.factory());
         }
+
+        private  final EmptyMap emptyAvailableForConsolidation;
     }
 }

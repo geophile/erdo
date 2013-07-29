@@ -11,7 +11,6 @@ import com.geophile.erdo.map.diskmap.tree.Tree;
 import com.geophile.erdo.map.diskmap.tree.TreeLevel;
 import com.geophile.erdo.transaction.TimestampSet;
 import com.geophile.erdo.util.Array;
-import com.geophile.erdo.util.IntArray;
 import com.geophile.erdo.util.LongArray;
 
 import java.io.File;
@@ -38,8 +37,8 @@ public class Manifest
                                        segmentIds(map.tree(), level));
             }
             configurationMap.value(RECORD_COUNT, recordCount(map.tree()));
-            configurationMap.value(OBSOLETES, obsoleteTreeIds(map));
         }
+        configurationMap.value(OBSOLETES, obsoleteTreeIds(map));
         configurationMap.value(TIMESTAMPS, map.timestamps().toString());
         configurationMap.write(manifestFile);
         return new Manifest(configurationMap);
@@ -72,18 +71,10 @@ public class Manifest
         return levels;
     }
 
-    public int segmentCount(int level)
-    {
-        if (segmentCounts == null) {
-            segmentCounts = configuration.intArray(SEGMENTS);
-        }
-        return segmentCounts.at(level);
-    }
-
     public LongArray segmentIds(int level)
     {
         if (segmentIds == null) {
-            segmentIds = new Array<LongArray>();
+            segmentIds = new Array<>();
             for (int i = 0; i < levels(); i++) {
                 segmentIds.append(null);
             }
@@ -204,7 +195,6 @@ public class Manifest
     private int treeId = Integer.MIN_VALUE;
     private TimestampSet timestamps;
     private int levels = -1;
-    private IntArray segmentCounts; // segment count for each level
     private Array<LongArray> segmentIds;
     private long recordCount = -1L;
     private LongArray obsoleteTreeIds;

@@ -38,8 +38,11 @@ public class ConsolidateAll
         Configuration configuration = Configuration.emptyConfiguration();
         configuration.consolidationThreads(0);
         DatabaseOnDisk db = (DatabaseOnDisk) Database.useDatabase(dbDirectory, configuration);
-        db.consolidateAll();
-        db.close();
+        try {
+            db.consolidateAll();
+        } finally {
+            db.close();
+        }
     }
 
     private final File dbDirectory;

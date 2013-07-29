@@ -94,11 +94,6 @@ public class DatabaseOnDisk extends DatabaseImpl
         return dbStructure;
     }
 
-    public void consolidateAll() throws IOException, InterruptedException
-    {
-        forest.consolidateAll();
-    }
-
     // For use by this package
 
     DatabaseOnDisk(Factory factory, DBStructure dbStructure, boolean create)

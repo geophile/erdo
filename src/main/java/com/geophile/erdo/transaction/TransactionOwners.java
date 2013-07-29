@@ -44,12 +44,34 @@ public class TransactionOwners
         return new TransactionOwners(new TreeMap<>(intervalToUpdates));
     }
 
+    // Intervals should cover [0, expectedMax] without overlap or holes.
+    public synchronized void checkCoverage(long expectedMax)
+    {
+        long expectedMin = 0L;
+        long observedMax = -1L;
+        for (Interval interval : intervalToUpdates.keySet()) {
+            if (interval.min() != expectedMin) {
+                reportCorruption();
+            }
+            observedMax = interval.max();
+            expectedMin = observedMax + 1;
+        }
+        if (observedMax != expectedMax) {
+            reportCorruption();
+        }
+    }
+
     public TransactionOwners()
     {
         this(new TreeMap<Interval, TransactionUpdates>());
     }
 
     // For use by this class
+
+    private void reportCorruption()
+    {
+        throw new Error(intervalToUpdates.keySet().toString());
+    }
 
     private TransactionOwners(SortedMap<Interval, TransactionUpdates> intervalToUpdates)
     {

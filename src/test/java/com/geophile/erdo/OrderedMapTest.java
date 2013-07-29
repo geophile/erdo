@@ -320,7 +320,6 @@ public class OrderedMapTest
         int evenCount = 0;
         for (int i = 0; i < N; i += 2) {
             TestRecord record = (TestRecord) map.find(new TestKey(i));
-            System.out.println(String.format("even: %s", record));
             assertEquals(i, record.key().key());
             evenCount++;
         }

@@ -49,7 +49,7 @@ public class TimestampSet implements Iterable<Interval>
 
     public static TimestampSet consolidate(List<TimestampSet> transactionTimestampsList)
     {
-        List<Interval> intervals = new ArrayList<Interval>();
+        List<Interval> intervals = new ArrayList<>();
         for (TimestampSet transactionTimestamps : transactionTimestampsList) {
             transactionTimestamps.flush();
             intervals.addAll(transactionTimestamps.intervals);
@@ -94,7 +94,7 @@ public class TimestampSet implements Iterable<Interval>
 
     public TimestampSet union(TimestampSet that)
     {
-        List<TimestampSet> transactionTimestampsList = new ArrayList<TimestampSet>();
+        List<TimestampSet> transactionTimestampsList = new ArrayList<>();
         transactionTimestampsList.add(this);
         transactionTimestampsList.add(that);
         return consolidate(transactionTimestampsList);
@@ -194,7 +194,7 @@ public class TimestampSet implements Iterable<Interval>
     synchronized List<Interval> intervals()
     {
         flush();
-        return new ArrayList<Interval>(intervals);
+        return new ArrayList<>(intervals);
     }
 
     // For use by this class
@@ -238,5 +238,5 @@ public class TimestampSet implements Iterable<Interval>
 
     private long min = -1L;
     private long max = -1L;
-    private List<Interval> intervals = new ArrayList<Interval>();
+    private List<Interval> intervals = new ArrayList<>();
 }

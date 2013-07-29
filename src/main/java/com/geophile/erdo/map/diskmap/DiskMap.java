@@ -134,7 +134,6 @@ public class DiskMap extends SealedMapBase
             closeTree();
             LOG.log(Level.INFO, "Load {0}: closed", this);
             Manifest.write(dbStructure.manifestFile(tree.treeId()), this);
-            factory.memoryMonitor().log(LOG, Level.INFO);
         } catch (InterruptedException e) {
             LOG.log(Level.WARNING, "Destroying {0} due to interruption", this);
             LOG.log(Level.WARNING, "Interruption", e);
@@ -147,7 +146,9 @@ public class DiskMap extends SealedMapBase
     public void destroyPersistentState()
     {
         Tree treeToDestroy = tree == null ? writeableTree : tree;
-        LOG.log(Level.INFO, "Destroying {0}", treeToDestroy);
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0} Destroying {1}", new Object[]{this, treeToDestroy});
+        }
         long treeId = treeToDestroy.treeId();
         FileUtil.deleteFile(dbStructure.manifestFile(treeId));
         treeToDestroy.destroy();
@@ -189,8 +190,12 @@ public class DiskMap extends SealedMapBase
     public static DiskMap recover(DatabaseOnDisk database, int treeId)
         throws IOException, InterruptedException
     {
+        DiskMap diskMap = null;
         Manifest manifest = Manifest.read(database.dbStructure().manifestFile(treeId));
-        return manifest == null ? null : new DiskMap(database, manifest);
+        if (manifest != null && manifest.recordCount() > 0) {
+            diskMap = new DiskMap(database, manifest);
+        }
+        return diskMap;
     }
 
     public static DiskMap create(DatabaseOnDisk database, TimestampSet timestamps, List<SealedMap> obsoleteTrees)

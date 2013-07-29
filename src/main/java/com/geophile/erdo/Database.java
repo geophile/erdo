@@ -169,6 +169,13 @@ public abstract class Database
     public abstract void flush() throws IOException, InterruptedException;
 
     /**
+     * Consolidates all durable state into a single tree.
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public abstract void consolidateAll() throws IOException, InterruptedException;
+
+    /**
      * Closes the database. All further actions on the database will throw exceptions.
      * @throws IOException
      * @throws InterruptedException

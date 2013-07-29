@@ -77,6 +77,7 @@ class TreeLevelCursor extends MapCursor
         super(null, false);
         this.tree = tree;
         this.startKey = startKey;
+        LOG.log(Level.INFO, "{0} created", this);
     }
 
     // For use by this class
@@ -156,7 +157,7 @@ class TreeLevelCursor extends MapCursor
             close();
         }
         if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "{0} {1}", new Object[]{this, state});
+            LOG.log(Level.INFO, "{0} restarted at {1}: {2}", new Object[]{this, startKey, state});
         }
     }
 

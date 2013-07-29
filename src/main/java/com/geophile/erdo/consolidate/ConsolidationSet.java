@@ -259,6 +259,9 @@ public class ConsolidationSet
                                   Element replacement)
     {
         assert Thread.holdsLock(container);
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "{0} obsoletes {1}", new Object[]{replacement, obsolete});
+        }
         List<Element> destroy = new ArrayList<>();
         ConsolidationElementTracker obsoleteElementTracker =
             consolidationTask.inputDurable() ? durable : nonDurable;
