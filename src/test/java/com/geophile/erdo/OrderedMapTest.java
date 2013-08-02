@@ -20,6 +20,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class OrderedMapTest
 {
@@ -292,6 +293,7 @@ public class OrderedMapTest
     }
 
     // Bug #4
+
     @Test
     public void testMoreDeletion()
         throws IOException,
@@ -331,6 +333,57 @@ public class OrderedMapTest
         }
         db.close();
     }
+
+    @Test
+    public void testEvenMoreDeletion()
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        final File DB_DIRECTORY = new File("/tmp/erdo");
+        FileUtil.deleteDirectory(DB_DIRECTORY);
+        // Make background consolidation happen more often
+        Configuration configuration = Configuration.defaultConfiguration();
+        configuration.consolidationThreads(1);
+        configuration.consolidationMinSizeBytes(100);
+        configuration.consolidationMinMapsToConsolidate(2);
+        Database db = Database.createDatabase(DB_DIRECTORY, configuration);
+        OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
+        int txn = 0;
+        {
+            // Load some records
+            int id = 0;
+            for (int t = 0; t < 100; t++) {
+                String transactionName = String.format("t%s", txn++);
+                for (int i = 0; i < 100; i++) {
+                    AbstractRecord replaced = map.put(TestRecord.createRecord(id++, transactionName));
+                    Assert.assertNull(replaced);
+                }
+                db.commitTransaction();
+            }
+        }
+        {
+            // Delete them all
+            int id = 0;
+            for (int t = 0; t < 100; t++) {
+                txn++;
+                for (int i = 0; i < 100; i++) {
+                    TestRecord deleted = (TestRecord) map.delete(new TestKey(id));
+                    assertNotNull(deleted);
+                    assertEquals(id, deleted.key().key());
+                    id++;
+                }
+                db.commitTransaction();
+            }
+        }
+        {
+            // Check empty
+            Cursor cursor = map.first();
+            while (cursor.next() != null) {
+                fail();
+            }
+        }
+    }
+
+    // End testing of bug #4
 
     private int key(AbstractRecord record)
     {

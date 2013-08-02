@@ -12,6 +12,7 @@ import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DBStructure;
 import com.geophile.erdo.map.diskmap.IndexRecord;
 import com.geophile.erdo.map.mergescan.AbstractMultiRecord;
+import com.geophile.erdo.map.mergescan.MultiRecordKey;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,6 +75,9 @@ public class WriteableTree extends Tree
 
     private int appendMultiRecord(LevelOneMultiRecord multiRecord) throws IOException, InterruptedException
     {
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: append multirecord {1}", new Object[]{this, multiRecord});
+        }
         WriteableTreeLevel leafLevel = level(0);
         // A linked segment is its own segment, so ensure that the current one is closed.
         IndexRecord indexRecord = null;
@@ -84,9 +88,6 @@ public class WriteableTree extends Tree
             propagateUp(1, indexRecord);
         }
         int linkedSegmentPageAddress = leafLevel.linkIn(multiRecord);
-        if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "{0}: append multirecord {1}", new Object[]{this, multiRecord});
-        }
         // Append index records pointing to the pages of the linked leaf file. First, ensure that level 1 exists.
         if (levels.size() == 1) {
             levels.add(WriteableTreeLevel.create(this, 1));
@@ -95,6 +96,9 @@ public class WriteableTree extends Tree
         LazyRecord lazyIndexRecord;
         while ((lazyIndexRecord = levelOneScan.next()) != null) {
             indexRecord = (IndexRecord) lazyIndexRecord.materializeRecord();
+            assert
+                indexRecord.key().compareTo(((MultiRecordKey)multiRecord.key()).hi()) <= 0
+                : String.format("multiRecord: %s, indexRecord: %s", multiRecord, indexRecord);
             indexRecord.childPageAddress(linkedSegmentPageAddress++);
             if (LOG.isLoggable(Level.FINE)) {
                 LOG.log(Level.FINE,

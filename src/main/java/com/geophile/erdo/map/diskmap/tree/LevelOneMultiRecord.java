@@ -25,7 +25,7 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     @Override
     public String toString()
     {
-        return String.format("multirecord(%s: %s)", loZeroPosition.segment(), key());
+        return String.format("multirecord(%s: %s)", loZeroPositionInclusive.segment(), key());
     }
 
     // Transferrable interface
@@ -55,8 +55,8 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     {
         LOG.log(Level.INFO,
                 "{0}: Record cursor: {1} - {2}",
-                new Object[]{this, loZeroPosition, hiZeroPosition});
-        return new LevelOneMultiRecordCursor(loZeroPosition, hiZeroPosition);
+                new Object[]{this, loZeroPositionInclusive, hiZeroPositionInclusive});
+        return LevelOneMultiRecordCursor.inclusiveAtEnd(loZeroPositionInclusive, hiZeroPositionInclusive);
     }
 
     // LazyRecord interface (key() is provided by AbstractRecord)
@@ -88,10 +88,10 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     @Override
     public void destroyRecordReference()
     {
-        loOnePosition.destroyRecordReference();
-        hiOnePosition.destroyRecordReference();
-        loZeroPosition.destroyRecordReference();
-        hiZeroPosition.destroyRecordReference();
+        loOnePositionInclusive.destroyRecordReference();
+        hiOnePositionExclusive.destroyRecordReference();
+        loZeroPositionInclusive.destroyRecordReference();
+        hiZeroPositionInclusive.destroyRecordReference();
     }
 
     // LevelOneMultiRecord interface
@@ -100,42 +100,43 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
     {
         LOG.log(Level.INFO,
                 "{0}: Level one cursor: {1} - {2}",
-                new Object[]{this, loOnePosition, hiOnePosition});
-        return new LevelOneMultiRecordCursor(loOnePosition, hiOnePosition);
+                new Object[]{this, loOnePositionInclusive, hiOnePositionExclusive});
+        return LevelOneMultiRecordCursor.exclusiveAtEnd(loOnePositionInclusive, hiOnePositionExclusive);
     }
 
     public TreeSegment leafSegment()
     {
-        return loZeroPosition.segment();
+        return loZeroPositionInclusive.segment();
     }
 
-    public LevelOneMultiRecord(TreePosition loOnePosition,
+    public LevelOneMultiRecord(TreePosition loOnePositionInclusive,
                                IndexRecord loIndexRecord,
-                               TreePosition hiOnePosition,
+                               TreePosition hiOnePositionExclusive,
                                IndexRecord hiIndexRecord)
         throws IOException, InterruptedException
     {
         super(new MultiRecordKey(loIndexRecord.key(),
                                  hiIndexRecord == null
                                  ? null
-                                 : lastKeyInLeafSegment(loOnePosition.tree(), hiIndexRecord.childPageAddress())));
-        Tree tree = loOnePosition.tree();
-        assert hiOnePosition.tree() == tree : this;
-        assert loOnePosition.level().levelNumber() == 1 : this;
-        assert hiOnePosition.level().levelNumber() == 1 : this;
-        this.loOnePosition = loOnePosition.copy();
-        this.hiOnePosition = hiOnePosition.copy();
-        this.loZeroPosition =
+                                 : lastKeyInLeafSegment(loOnePositionInclusive.tree(),
+                                                        hiIndexRecord.childPageAddress())));
+        Tree tree = loOnePositionInclusive.tree();
+        assert hiOnePositionExclusive.tree() == tree : this;
+        assert loOnePositionInclusive.level().levelNumber() == 1 : this;
+        assert hiOnePositionExclusive.level().levelNumber() == 1 : this;
+        this.loOnePositionInclusive = loOnePositionInclusive.copy();
+        this.hiOnePositionExclusive = hiOnePositionExclusive.copy();
+        this.loZeroPositionInclusive = // inclusive
             tree.newPosition().level(0).pageAddress(loIndexRecord.childPageAddress()).goToFirstRecordOfPage();
-        this.hiZeroPosition =
-            this.loZeroPosition.copy().goToLastPageOfSegment().goToLastRecordOfPage();
+        this.hiZeroPositionInclusive = // inclusive
+            this.loZeroPositionInclusive.copy().goToLastPageOfSegment().goToLastRecordOfPage();
         LOG.log(Level.INFO,
                 "Creating multirecord {0}. File bounds {1} : {2}, index bounds {3} : {4}",
                 new Object[]{this,
-                             this.loZeroPosition,
-                             this.hiZeroPosition,
-                             this.loOnePosition,
-                             this.hiOnePosition});
+                             this.loZeroPositionInclusive,
+                             this.hiZeroPositionInclusive,
+                             this.loOnePositionInclusive,
+                             this.hiOnePositionExclusive});
     }
 
         // For use by this class
@@ -151,8 +152,8 @@ public class LevelOneMultiRecord extends AbstractMultiRecord
 
     // Object state
 
-    private final TreePosition loOnePosition;
-    private final TreePosition hiOnePosition;
-    private final TreePosition loZeroPosition;
-    private final TreePosition hiZeroPosition;
+    private final TreePosition loOnePositionInclusive;
+    private final TreePosition hiOnePositionExclusive;
+    private final TreePosition loZeroPositionInclusive;
+    private final TreePosition hiZeroPositionInclusive;
 }

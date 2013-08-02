@@ -32,9 +32,7 @@ public class TreePosition
     public String toString()
     {
         StringBuilder buffer = new StringBuilder();
-        buffer.append('[');
-        buffer.append(id);
-        buffer.append("]T");
+        buffer.append('T');
         if (tree == null) {
             buffer.append('?');
         } else {
@@ -61,6 +59,9 @@ public class TreePosition
                 }
             }
         }
+        buffer.append('[');
+        buffer.append(id);
+        buffer.append(']');
         return buffer.toString();
     }
 

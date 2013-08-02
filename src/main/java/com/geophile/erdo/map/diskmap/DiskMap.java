@@ -145,17 +145,19 @@ public class DiskMap extends SealedMapBase
     @Override
     public void destroyPersistentState()
     {
-        Tree treeToDestroy = tree == null ? writeableTree : tree;
-        if (LOG.isLoggable(Level.INFO)) {
-            LOG.log(Level.INFO, "{0} Destroying {1}", new Object[]{this, treeToDestroy});
-        }
-        long treeId = treeToDestroy.treeId();
-        FileUtil.deleteFile(dbStructure.manifestFile(treeId));
-        treeToDestroy.destroy();
-        if (keys != null) {
-            keys.destroy();
-            keys = null;
-            destroyed = true;
+        if (!SAVE_OBSOLETE_TREES) {
+            Tree treeToDestroy = tree == null ? writeableTree : tree;
+            if (LOG.isLoggable(Level.INFO)) {
+                LOG.log(Level.INFO, "{0} Destroying {1}", new Object[]{this, treeToDestroy});
+            }
+            long treeId = treeToDestroy.treeId();
+            FileUtil.deleteFile(dbStructure.manifestFile(treeId));
+            treeToDestroy.destroy();
+            if (keys != null) {
+                keys.destroy();
+                keys = null;
+                destroyed = true;
+            }
         }
     }
 
@@ -328,6 +330,7 @@ public class DiskMap extends SealedMapBase
     // Class state
 
     private static final Logger LOG = Logger.getLogger(DiskMap.class.getName());
+    private static final boolean SAVE_OBSOLETE_TREES = Boolean.getBoolean("saveObsoleteTrees");
     private static int INTERRUPT_CHECK_INTERVAL = 100;
 
     // Object state
