@@ -16,7 +16,6 @@ import com.geophile.erdo.util.IdentitySet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,7 +37,6 @@ public class DiskPageCache extends ImmutableItemCache<PageId, DiskPage>
         LOG.log(Level.INFO, "cache slots: {0}", cacheSlots(configuration));
     }
 
-    private static final AtomicInteger registerCount = new AtomicInteger(0);
     public static void registerTreePosition(TreePosition treePosition)
     {
         IdentitySet<TreePosition> threadTreePositions = TREE_POSITIONS.get();
@@ -50,11 +48,6 @@ public class DiskPageCache extends ImmutableItemCache<PageId, DiskPage>
         if (LOG.isLoggable(Level.FINEST)) {
             LOG.log(Level.FINEST, "Register disk page reference {0} -> {1}",
                     new Object[]{treePosition, threadTreePositions.size()});
-/*
-            if (registerCount.getAndIncrement() < 50) {
-                LOG.log(Level.FINEST, "stack", new Exception());
-            }
-*/
         }
         assert replaced == null : treePosition;
     }

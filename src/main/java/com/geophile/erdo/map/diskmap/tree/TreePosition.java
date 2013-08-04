@@ -15,10 +15,13 @@ import com.geophile.erdo.map.diskmap.DiskPage;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.diskmap.PageId;
 import com.geophile.erdo.util.IdGenerator;
+import com.geophile.erdo.util.ThrowableUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // A TreePosition represents a position in a tree, at all levels of resolution between tree and record.
 
@@ -95,6 +98,7 @@ public class TreePosition
     @Override
     public AbstractKey key() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         // TODO: Don't call readKey unnecessarily, use key if it has the correct value.
         key = ensurePage().readKey(recordNumber, pageAccessBuffers);
@@ -104,6 +108,7 @@ public class TreePosition
     @Override
     public ByteBuffer keyBuffer() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         ensurePage();
         return pageAccessBuffers.keyBuffer();
@@ -111,6 +116,7 @@ public class TreePosition
 
     public AbstractRecord materializeRecord() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         record = ensurePage().readRecord(recordNumber, pageAccessBuffers);
         return record;
@@ -119,6 +125,7 @@ public class TreePosition
     @Override
     public ByteBuffer recordBuffer() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         ensurePage();
         return pageAccessBuffers.recordBuffer();
@@ -127,23 +134,26 @@ public class TreePosition
     @Override
     public long estimatedSizeBytes() throws IOException, InterruptedException
     {
+        assert inUse : this;
         return recordBuffer().remaining() + keyBuffer().remaining();
     }
 
     @Override
     public boolean prefersSerialized()
     {
+        assert inUse : this;
         return true;
     }
 
-    // Don't need to override destroyRecordReference, to call deactivate. super.destroyRecordReference
-    // returns the TreePosition to its pool, and AbstractPool.returnResource calls deactivate.
+    // Don't need to override destroyRecordReference, to call deactivateForPool. super.destroyRecordReference
+    // returns the TreePosition to its pool, and AbstractPool.returnResource calls deactivateForPool.
 
     // ImmutableItemManager interface
 
     @Override
     public DiskPage getItemForCache(PageId id) throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToPage();
         File file = tree.dbStructure().segmentFile(segment.segmentId());
         long offset = ((long) pageNumber) * tree.pageSizeBytes();
@@ -166,27 +176,32 @@ public class TreePosition
 
     public Tree tree()
     {
+        assert inUse : this;
         return tree;
     }
 
     public TreeLevel level()
     {
+        assert inUse : this;
         return level;
     }
 
     public TreeSegment segment()
     {
+        assert inUse : this;
         return segment;
     }
 
     public DiskPage page() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToPage();
         return ensurePage();
     }
 
     public int pageAddress()
     {
+        assert inUse : this;
         checkResolvedToPage();
         return tree.pageAddress(segment.segmentNumber(), pageNumber);
     }
@@ -195,6 +210,7 @@ public class TreePosition
 
     public TreePosition level(int levelNumber)
     {
+        assert inUse : this;
         level = tree.level(levelNumber);
         segment = null;
         pageNumber = UNDEFINED;
@@ -206,6 +222,7 @@ public class TreePosition
 
     public TreePosition goToFirstSegmentOfLevel()
     {
+        assert inUse : this;
         checkResolvedToLevel();
         segment = level.segment(0);
         return this;
@@ -213,6 +230,7 @@ public class TreePosition
 
     public TreePosition goToLastSegmentOfLevel()
     {
+        assert inUse : this;
         checkResolvedToLevel();
         segment = level.segment(level.segments() - 1);
         return this;
@@ -220,6 +238,7 @@ public class TreePosition
 
     public TreePosition goToFirstPageOfSegment()
     {
+        assert inUse : this;
         checkResolvedToSegment();
         pageNumber = 0;
         randomRead = true;
@@ -229,6 +248,7 @@ public class TreePosition
 
     public TreePosition goToLastPageOfSegment()
     {
+        assert inUse : this;
         checkResolvedToSegment();
         pageNumber = segment.pages() - 1;
         randomRead = true;
@@ -238,6 +258,7 @@ public class TreePosition
 
     public TreePosition goToFirstRecordOfPage() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToPage();
         ensurePage();
         // TODO: Assert page has at least one record
@@ -248,6 +269,7 @@ public class TreePosition
 
     public TreePosition goToLastRecordOfPage() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToPage();
         ensurePage();
         // TODO: Assert page has at least one record
@@ -258,6 +280,7 @@ public class TreePosition
 
     public TreePosition pageAddress(int pageAddress)
     {
+        assert inUse : this;
         checkResolvedToLevel();
         this.segment = level.segment(tree.segmentNumber(pageAddress));
         this.pageNumber = tree.pageNumber(pageAddress);
@@ -270,6 +293,7 @@ public class TreePosition
 
     public TreePosition recordNumber(int newRecordNumber)
     {
+        assert inUse : this;
         checkResolvedToPage();
         assert page != null : this;
         assert newRecordNumber >= 0 : newRecordNumber;
@@ -283,6 +307,10 @@ public class TreePosition
 
     public TreePosition goToEnd()
     {
+        assert inUse : this;
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: atEnd = true", name());
+        }
         atEnd = true;
         segment = null;
         pageNumber = UNDEFINED;
@@ -295,6 +323,7 @@ public class TreePosition
 
     public TreePosition goToNextSegment()
     {
+        assert inUse : this;
         checkResolvedToSegment();
         if (segment.segmentNumber() == level.segments() - 1) {
             atEnd = true;
@@ -312,6 +341,7 @@ public class TreePosition
 
     public TreePosition goToPreviousSegment()
     {
+        assert inUse : this;
         checkResolvedToSegment();
         if (segment.segmentNumber() == 0) {
             atEnd = true;
@@ -329,6 +359,7 @@ public class TreePosition
 
     public TreePosition goToNextPage()
     {
+        assert inUse : this;
         checkResolvedToPage();
         if (++pageNumber < segment.pages()) {
             page(null);
@@ -344,6 +375,7 @@ public class TreePosition
 
     public TreePosition goToPreviousPage()
     {
+        assert inUse : this;
         checkResolvedToPage();
         if (--pageNumber >= 0) {
             page(null);
@@ -359,6 +391,7 @@ public class TreePosition
 
     public TreePosition goToNextRecord() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         ensurePage();
         if (++recordNumber == page.nRecords()) {
@@ -371,6 +404,7 @@ public class TreePosition
 
     public TreePosition goToPreviousRecord() throws IOException, InterruptedException
     {
+        assert inUse : this;
         checkResolvedToRecord();
         ensurePage();
         if (recordNumber-- == 0) {
@@ -383,6 +417,7 @@ public class TreePosition
 
     public boolean atEnd()
     {
+        assert inUse : this;
         return atEnd;
     }
 
@@ -390,6 +425,7 @@ public class TreePosition
 
     public TreePosition copy()
     {
+        assert inUse : this;
         TreePosition copy = (TreePosition) pool.takeResource();
         copyTo(copy);
         return copy;
@@ -397,6 +433,10 @@ public class TreePosition
 
     public void initialize(Tree tree)
     {
+        assert inUse : this;
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: initialize for {1}", new Object[]{name(), tree});
+        }
         this.tree = tree;
         factory = tree.factory();
         diskPageCache = factory.diskPageCache();
@@ -416,6 +456,11 @@ public class TreePosition
 
     void copyTo(TreePosition that)
     {
+        assert inUse : this;
+        assert that.inUse : that;
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: copy -> {1}", new Object[]{that.name(), that});
+        }
         that.tree = this.tree;
         that.factory = this.factory;
         that.diskPageCache = this.diskPageCache;
@@ -430,13 +475,23 @@ public class TreePosition
         that.key = this.key;
     }
 
-    void activate()
+    void activateForPool()
     {
+        assert !inUse : this;
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: activateForPool", name());
+        }
         DiskPageCache.registerTreePosition(this);
+        inUse = true;
+        lastActivation = ThrowableUtil.toString(new Exception());
     }
 
-    void deactivate()
+    void deactivateForPool()
     {
+        assert inUse : this;
+        if (LOG.isLoggable(Level.INFO)) {
+            LOG.log(Level.INFO, "{0}: deactivateForPool", name());
+        }
         DiskPageCache.unregisterTreePosition(this);
         tree = null;
         factory = null;
@@ -451,6 +506,8 @@ public class TreePosition
         recordNumber = UNDEFINED;
         record = null;
         key = null;
+        inUse = false;
+        lastDeactivation = ThrowableUtil.toString(new Exception());
     }
 
     TreePosition(TreePositionPool pool)
@@ -522,11 +579,17 @@ public class TreePosition
         key = null;
     }
 
+    private String name()
+    {
+        return String.format("TP[%s]", id);
+    }
+
     // Class state
 
     private static final int UNDEFINED = -1;
     private static final int LAST_RECORD_ON_PAGE = Integer.MAX_VALUE;
     private static final IdGenerator idGenerator = new IdGenerator(0);
+    private static final Logger LOG = Logger.getLogger(TreePosition.class.getName());
 
     // Object state
 
@@ -559,4 +622,9 @@ public class TreePosition
 
     // identification (to help interpret logs)
     private final long id = idGenerator.nextId();
+
+    // Pooling
+    private boolean inUse = false;
+    private String lastActivation;
+    private String lastDeactivation;
 }

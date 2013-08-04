@@ -13,13 +13,13 @@ public class TreePositionPool extends LazyRecord.Pool
     @Override
     public void activate(LazyRecord lazyRecord)
     {
-        ((TreePosition) lazyRecord).activate();
+        ((TreePosition) lazyRecord).activateForPool();
     }
 
     @Override
     public void deactivate(LazyRecord lazyRecord)
     {
-        ((TreePosition) lazyRecord).deactivate();
+        ((TreePosition) lazyRecord).deactivateForPool();
     }
 
     @Override

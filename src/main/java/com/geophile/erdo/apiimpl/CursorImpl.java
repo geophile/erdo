@@ -78,12 +78,12 @@ public class CursorImpl extends Cursor
             } while (neighbor != null && deleted);
             if (neighbor != null) {
                 record = neighbor.materializeRecord();
-                neighbor.destroyRecordReference();
                 if (!neighbor.prefersSerialized()) {
                     // LazyRecord stores an actual record that is part of the database. Copy it so that any
                     // changes by the application don't modify database state.
                     record = record.copy();
                 }
+                neighbor.destroyRecordReference();
                 // Give application a records without a timestamp set, which will allow it to update
                 // the record, setting the transaction.
                 record.key().clearTransactionState();

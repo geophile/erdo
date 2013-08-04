@@ -6,14 +6,14 @@
 
 package com.geophile.erdo.immutableitemcache;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 // Cache of items that are never updated. Because the items never change, there are no dirty items that need to
 // be written back anywhere, which keeps things extremely simple.
 // ID: The key of the items in the cache.
 // ITEM: What's in the cache.
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ImmutableItemCache<ID, ITEM extends CacheEntry<ID, ITEM>>
 {

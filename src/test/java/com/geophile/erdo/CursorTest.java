@@ -7,11 +7,13 @@
 package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.DisklessTestDatabase;
+import com.geophile.erdo.util.FileUtil;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
@@ -35,7 +37,7 @@ public class CursorTest
         throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
     {
         for (int n = 0; n < 100; n++) {
-            loadDatabase(n);
+            loadDisklessDatabase(n);
             Cursor cursor;
             TestRecord record;
             TestKey key;
@@ -99,7 +101,7 @@ public class CursorTest
     {
         for (int n = 0; n < 100; n++) {
             // debug("n: %s", n);
-            loadDatabase(n);
+            loadDisklessDatabase(n);
             Cursor cursor;
             TestRecord record;
             TestKey key;
@@ -163,7 +165,7 @@ public class CursorTest
     {
         // Test close of cursor over empty (which starts out closed)
         {
-            loadDatabase(0);
+            loadDisklessDatabase(0);
             Cursor cursor = map.first();
             assertNull(cursor.next());
             cursor.close();
@@ -173,7 +175,7 @@ public class CursorTest
         }
         // Test repeated close of cursor that wasn't closed to start
         {
-            loadDatabase(10);
+            loadDisklessDatabase(10);
             Cursor cursor = map.first();
             assertNotNull(cursor.next());
             assertNotNull(cursor.next());
@@ -189,7 +191,7 @@ public class CursorTest
         throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
     {
         final int N = 10;
-        loadDatabase(N);
+        loadDisklessDatabase(N);
         Cursor cursor = map.first();
         TestRecord record;
         int expected = -1;
@@ -213,7 +215,7 @@ public class CursorTest
         throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
     {
         final int N = 10;
-        loadDatabase(N);
+        loadDisklessDatabase(N);
         Cursor cursor = map.last();
         TestRecord record;
         int expected = N;
@@ -232,11 +234,53 @@ public class CursorTest
         assertEquals(0, expected);
     }
 
-    private void loadDatabase(int n)
+    // Inspired by bug #5
+
+    @Test
+    public void multipleCursors()
+        throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
+    {
+        final int N = 100;
+        loadDatabase(N);
+        Cursor cursor1 = map.first();
+        Cursor cursor2 = map.first();
+        TestRecord record1;
+        TestRecord record2;
+        int expected = 0;
+        while (expected < N/2) {
+            record1 = (TestRecord) cursor1.next();
+            record2 = (TestRecord) cursor2.next();
+            checkRecord(expected, record1);
+            checkRecord(expected, record2);
+            expected++;
+        }
+        cursor1.close();
+        while (expected < N) {
+            record2 = (TestRecord) cursor2.next();
+            checkRecord(expected, record2);
+            expected++;
+        }
+    }
+
+    private void loadDisklessDatabase(int n)
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         // map is loaded with (x * GAP, "r.x"), 0 <= x < n
         Database db = new DisklessTestDatabase(FACTORY);
+        map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
+        for (int key = 0; key < n; key++) {
+            AbstractRecord replaced = map.put(TestRecord.createRecord(testKey(key), testValue(key)));
+            Assert.assertNull(replaced);
+        }
+        db.commitTransaction();
+    }
+
+    private void loadDatabase(int n)
+        throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
+    {
+        // map is loaded with (x * GAP, "r.x"), 0 <= x < n
+        FileUtil.deleteDirectory(DB_DIRECTORY);
+        Database db = Database.createDatabase(DB_DIRECTORY);
         map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int key = 0; key < n; key++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(testKey(key), testValue(key)));
@@ -267,6 +311,7 @@ public class CursorTest
         System.out.println(String.format(template, args));
     }
 
+    private static File DB_DIRECTORY = new File("/tmp/erdo");
     private static TestFactory FACTORY;
     private static final String MAP_NAME = "map";
     private static final int GAP = 10;

@@ -48,8 +48,9 @@ class TreeLevelCursor extends MapCursor
         if (state != State.DONE) {
             if (position != null) {
                 position.destroyRecordReference();
+                position = null;
             }
-            // Don't call end.destroyRecordReference. end is passed in, and is not owned by this.
+            // Don't call end.destroyRecordReference(). end is passed in, and is not owned by this.
             super.close();
             if (LOG.isLoggable(Level.INFO)) {
                 LOG.log(Level.INFO, "{0} closed", this);
@@ -239,5 +240,5 @@ class TreeLevelCursor extends MapCursor
     private final long id = idGenerator.nextId();
     private final Tree tree;
     private boolean forwardDirection;
-    protected TreePosition position;
+    private TreePosition position;
 }
