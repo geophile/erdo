@@ -268,12 +268,8 @@ abstract class ConsolidationElementTracker
         public void removeElementBeingConsolidated(Element element)
         {
             assert Thread.holdsLock(container);
-            if (element.count() == 0) {
-                emptyAvailableForConsolidation.removeEmpty((SealedMap) element);
-            } else {
-                boolean removed = beingConsolidated.remove(element);
-                assert removed : element;
-            }
+            boolean removed = beingConsolidated.remove(element);
+            assert removed : element;
         }
 
         @Override
