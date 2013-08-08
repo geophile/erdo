@@ -24,6 +24,9 @@ public class TreePositionTracker
 {
     public static void registerTreePosition(Cursor context, TreePosition treePosition)
     {
+        if (LOG.isLoggable(Level.FINEST)) {
+            LOG.log(Level.FINEST, "Register TreePosition {0} -> {1})", new Object[]{context, treePosition});
+        }
         IdentityHashMap<Cursor, IdentitySet<TreePosition>> threadTreePositions = TREE_POSITIONS.get();
         if (threadTreePositions == null) {
             threadTreePositions = new IdentityHashMap<>(); 
@@ -36,14 +39,13 @@ public class TreePositionTracker
         }
         TreePosition replaced = contextTreePositions.add(treePosition);
         assert replaced == null : context;
-        if (LOG.isLoggable(Level.FINEST)) {
-            LOG.log(Level.FINEST, "Registered TreePosition {0} -> {1} ({2})",
-                    new Object[]{context, treePosition, threadTreePositions.size()});
-        }
     }
 
     public static void unregisterTreePosition(Cursor context, TreePosition treePosition)
     {
+        if (LOG.isLoggable(Level.FINEST)) {
+            LOG.log(Level.FINEST, "Unregister TreePosition {0} -> {1}", new Object[]{context, treePosition});
+        }
         IdentityHashMap<Cursor, IdentitySet<TreePosition>> threadTreePositions = TREE_POSITIONS.get();
         assert threadTreePositions != null : treePosition;
         IdentitySet<TreePosition> contextTreePositions = threadTreePositions.get(context);
@@ -53,10 +55,6 @@ public class TreePositionTracker
             : String.format("context: %s, treePosition: %s, removed: %s", context, treePosition, removed);
         if (contextTreePositions.isEmpty()) {
             threadTreePositions.remove(context);
-        }
-        if (LOG.isLoggable(Level.FINEST)) {
-            LOG.log(Level.FINEST, "Unregistered TreePosition {0} -> {1} ({2})",
-                    new Object[]{context, treePosition, threadTreePositions.size()});
         }
     }
 

@@ -8,6 +8,7 @@ package com.geophile.erdo.apiimpl;
 
 import com.geophile.erdo.*;
 import com.geophile.erdo.map.LazyRecord;
+import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
 import com.geophile.erdo.util.IdGenerator;
 
@@ -142,10 +143,19 @@ public class OrderedMapImpl extends OrderedMap
 
     // For use by this class
 
-    private Cursor newCursor(AbstractKey key, boolean singleKey)
+    private Cursor newCursor(final AbstractKey key, final boolean singleKey)
         throws IOException, InterruptedException
     {
-        return new CursorImpl(database, transactionalMap().cursor(key, singleKey));
+        MapCursor.Expression mapCursorExpression =
+            new MapCursor.Expression()
+            {
+                @Override
+                public MapCursor evaluate() throws IOException, InterruptedException
+                {
+                    return transactionalMap().cursor(key, singleKey);
+                }
+            };
+        return new CursorImpl(database, mapCursorExpression);
     }
 
     private TransactionalMap transactionalMap()

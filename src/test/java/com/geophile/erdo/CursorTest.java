@@ -262,6 +262,19 @@ public class CursorTest
         }
     }
 
+/*
+    @Test
+    public void closeImmediatelyAfterOpen()
+        throws InterruptedException, DeadlockException, TransactionRolledBackException, IOException
+    {
+        final int N = 100;
+        loadDatabase(N);
+        Cursor cursor = map.cursor(new TestKey(testKey(-1)));
+        map.delete(new TestKey(testKey(0)));
+        cursor.close();
+    }
+*/
+
     private void loadDisklessDatabase(int n)
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {

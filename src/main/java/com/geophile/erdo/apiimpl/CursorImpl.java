@@ -71,12 +71,17 @@ public class CursorImpl extends Cursor
         return CURRENT_CURSOR.get();
     }
 
-    CursorImpl(DatabaseImpl database, MapCursor mapCursor)
+    CursorImpl(DatabaseImpl database, MapCursor.Expression mapCursorExpression) throws IOException, InterruptedException
     {
         this.database = database;
-        this.mapCursor = mapCursor;
         this.transaction = database.transactionManager().currentTransaction();
         this.transaction.registerCursor(this);
+        try {
+            CURRENT_CURSOR.set(this);
+            this.mapCursor = mapCursorExpression.evaluate();
+        } finally {
+            CURRENT_CURSOR.set(null);
+        }
     }
 
     // For use by this class

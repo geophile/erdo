@@ -100,4 +100,9 @@ public abstract class MapCursor
         // The cursor has run off one end. A call to next() or previous() will return null.
         DONE
     }
+
+    public interface Expression
+    {
+        MapCursor evaluate() throws IOException, InterruptedException;
+    }
 }

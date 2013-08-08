@@ -17,6 +17,7 @@ import com.geophile.erdo.map.diskmap.DiskPage;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.diskmap.PageId;
 import com.geophile.erdo.util.IdGenerator;
+import com.geophile.erdo.util.ThrowableUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -484,6 +485,9 @@ public class TreePosition
         }
         TreePositionTracker.registerTreePosition(CursorImpl.threadContext(), this);
         inUse = true;
+        if (RECORD_TREE_POSITION_STACKS) {
+            lastActivation = ThrowableUtil.toString(new Exception());
+        }
     }
 
     void deactivateForPool()
@@ -507,6 +511,9 @@ public class TreePosition
         record = null;
         key = null;
         inUse = false;
+        if (RECORD_TREE_POSITION_STACKS) {
+            lastDeactivation = ThrowableUtil.toString(new Exception());
+        }
     }
 
     TreePosition(TreePositionPool pool)
@@ -589,6 +596,7 @@ public class TreePosition
     private static final int LAST_RECORD_ON_PAGE = Integer.MAX_VALUE;
     private static final IdGenerator idGenerator = new IdGenerator(0);
     private static final Logger LOG = Logger.getLogger(TreePosition.class.getName());
+    private static final boolean RECORD_TREE_POSITION_STACKS = Boolean.getBoolean("recordTreePositionStacks");
 
     // Object state
 
@@ -624,4 +632,8 @@ public class TreePosition
 
     // Pooling
     private boolean inUse = false;
+
+    // Debugging
+    private String lastActivation;
+    private String lastDeactivation;
 }
