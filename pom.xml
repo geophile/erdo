@@ -38,7 +38,7 @@
         <version>2.4.1</version>
         <configuration>
           <forkMode>always</forkMode>
-          <argLine>-ea -Xmx1000m -Xms1000m -Dpid=0 -Djava.util.logging.config.file=resources/testlogging.properties</argLine>
+          <argLine>-ea -Xmx1000m -Xms1000m -Dpid=0 -Djava.util.logging.config.file=src/test/resources/logging.properties</argLine>
           <includes>
             <include>**/*Test.java</include>
           </includes>

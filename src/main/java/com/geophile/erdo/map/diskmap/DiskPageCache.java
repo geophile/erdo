@@ -37,56 +37,6 @@ public class DiskPageCache extends ImmutableItemCache<PageId, DiskPage>
         LOG.log(Level.INFO, "cache slots: {0}", cacheSlots(configuration));
     }
 
-    public static void registerTreePosition(TreePosition treePosition)
-    {
-        IdentitySet<TreePosition> threadTreePositions = TREE_POSITIONS.get();
-        if (threadTreePositions == null) {
-            threadTreePositions = new IdentitySet<>();
-            TREE_POSITIONS.set(threadTreePositions);
-        }
-        TreePosition replaced = threadTreePositions.add(treePosition);
-        if (LOG.isLoggable(Level.FINEST)) {
-            LOG.log(Level.FINEST, "Register disk page reference {0} -> {1}",
-                    new Object[]{treePosition, threadTreePositions.size()});
-        }
-        assert replaced == null : treePosition;
-    }
-
-    public static void unregisterTreePosition(TreePosition treePosition)
-    {
-        IdentitySet<TreePosition> threadTreePositions = TREE_POSITIONS.get();
-        assert threadTreePositions != null : treePosition;
-        if (LOG.isLoggable(Level.FINEST)) {
-            LOG.log(Level.FINEST, "Unregister disk page reference {0} -> {1}",
-                    new Object[]{treePosition, threadTreePositions.size()});
-        }
-        TreePosition removed = threadTreePositions.remove(treePosition);
-        assert removed == treePosition
-            : String.format("treePosition: %s, removed: %s", treePosition, removed);
-    }
-
-    public static void destroyRemainingTreePositions()
-    {
-        IdentitySet<TreePosition> threadTreePositions = TREE_POSITIONS.get();
-        if (threadTreePositions != null) {
-            if (LOG.isLoggable(Level.FINEST)) {
-                LOG.log(Level.FINEST, "Destroying {0} remaining tree positions", threadTreePositions.size());
-/*
-                LOG.log(Level.FINEST, "stack", new Exception());
-*/
-            }
-            // Need a copy because TreePosition.destroyRecordReference() removes an element from threadTreePositions.
-            List<TreePosition> copy = new ArrayList<>(threadTreePositions.values());
-            for (TreePosition treePosition : copy) {
-                if (LOG.isLoggable(Level.FINEST)) {
-                    LOG.log(Level.FINEST, "Release disk page reference {0}", treePosition);
-                }
-                treePosition.destroyRecordReference();
-            }
-            TREE_POSITIONS.remove();
-        }
-    }
-
     // For use by this class
 
     private static int cacheSlots(Configuration configuration)
@@ -99,5 +49,4 @@ public class DiskPageCache extends ImmutableItemCache<PageId, DiskPage>
     // Class state
 
     private static final Logger LOG = Logger.getLogger(DiskPageCache.class.getName());
-    private static final ThreadLocal<IdentitySet<TreePosition>> TREE_POSITIONS = new ThreadLocal<>();
 }

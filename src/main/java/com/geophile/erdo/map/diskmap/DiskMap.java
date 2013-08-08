@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.AbstractKey;
+import com.geophile.erdo.apiimpl.TreePositionTracker;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -254,7 +255,7 @@ public class DiskMap extends SealedMapBase
                     record.destroyRecordReference();
                 }
             } finally {
-                DiskPageCache.destroyRemainingTreePositions();
+                TreePositionTracker.destroyRemainingTreePositions(null);
             }
             this.keys.close();
         } else {

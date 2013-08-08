@@ -7,13 +7,13 @@
 package com.geophile.erdo.forest;
 
 import com.geophile.erdo.Configuration;
+import com.geophile.erdo.apiimpl.TreePositionTracker;
 import com.geophile.erdo.apiimpl.DatabaseImpl;
 import com.geophile.erdo.consolidate.Consolidation;
 import com.geophile.erdo.consolidate.ConsolidationSet;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.SealedMap;
-import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.mergescan.FastMergeCursor;
 import com.geophile.erdo.map.mergescan.MergeCursor;
 import com.geophile.erdo.map.transactionalmap.TransactionalMap;
@@ -150,7 +150,7 @@ public class Forest extends TransactionManager implements Consolidation.Containe
             if (keyScan != null) {
                 keyScan.close();
             }
-            DiskPageCache.destroyRemainingTreePositions();
+            TreePositionTracker.destroyRemainingTreePositions(null);
         }
         if (outputDurable) {
             // The replacement's transactions have just become durable.
@@ -179,12 +179,12 @@ public class Forest extends TransactionManager implements Consolidation.Containe
         assert Thread.holdsLock(this);
         for (Element element : obsolete) {
             SealedMap map = (SealedMap) element;
-            // Maps with no records aren't tracked in transactionOwners
-            if (map.recordCount() > 0) {
+            // Non-durable maps with no records aren't tracked in transactionOwners
+            if (map.durable() || map.recordCount() > 0) {
                 transactionOwners.remove(map);
             }
         }
-        if (replacement.count() > 0) {
+        if (replacement.durable() || replacement.count() > 0) {
             transactionOwners.add((SealedMap) replacement);
         }
     }

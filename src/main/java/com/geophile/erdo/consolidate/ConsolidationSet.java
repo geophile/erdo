@@ -9,12 +9,11 @@ package com.geophile.erdo.consolidate;
 import com.geophile.erdo.Configuration;
 import com.geophile.erdo.map.MapCursor;
 import com.geophile.erdo.map.diskmap.DiskMap;
+import com.geophile.erdo.util.IdentitySet;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -166,10 +165,11 @@ public class ConsolidationSet
                 firstDurableConsolidator.stopThreads();
                 laterDurableConsolidator.stopThreads();
                 inMemoryConsolidator.stopThreads();
-                treeDeleter.shutdown();
                 LOG.log(Level.INFO, "Running final consolidation to make last commits durable.");
                 flushConsolidator.consolidate(null);
                 flushConsolidator.stopThreads();
+                treeDeleter.delete(new ArrayList<>(destroyWhenUnused.keySet())); // No elements are in use at shutdown.
+                treeDeleter.shutdown();
             }
             shutdown.set(true);
         }
@@ -245,9 +245,9 @@ public class ConsolidationSet
             for (Element element : elements) {
                 long id = element.id();
                 boolean unused = usageCounts.unregister(id);
-                if (unused && destroyWhenUnused.contains(id)) {
+                if (unused && destroyWhenUnused.contains(element)) {
                     destroy.add(element);
-                    destroyWhenUnused.remove(id);
+                    destroyWhenUnused.remove(element);
                 }
             }
         }
@@ -273,7 +273,7 @@ public class ConsolidationSet
                 destroy.add(element);
             } else {
                 LOG.log(Level.FINE, "Destroy {0} when unused", element);
-                destroyWhenUnused.add(element.id());
+                destroyWhenUnused.add(element);
             }
         }
         if (replacement.durable()) {
@@ -299,6 +299,11 @@ public class ConsolidationSet
         return
             inProgress == 0 &&
             System.currentTimeMillis() - lastActivityTime.get() >= idleTimeMsec;
+    }
+
+    void deleteElements(List<Element> elements)
+    {
+        treeDeleter.delete(elements);
     }
 
     // For use by this class
@@ -373,7 +378,7 @@ public class ConsolidationSet
     private final Consolidation.Container container;
     private final ConsolidationElementTracker nonDurable;
     private final ConsolidationElementTracker durable;
-    private final Set<Long> destroyWhenUnused = new HashSet<>();
+    private final IdentitySet<Element> destroyWhenUnused = new IdentitySet<>();
     private final long maxPendingBytes;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final TreeDeleter treeDeleter;

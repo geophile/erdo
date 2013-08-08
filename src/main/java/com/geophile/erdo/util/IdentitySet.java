@@ -14,4 +14,9 @@ public class IdentitySet<T> extends IdentityHashMap<T, T>
     {
         return put(t, t);
     }
+
+    public boolean contains(T t)
+    {
+        return containsKey(t);
+    }
 }

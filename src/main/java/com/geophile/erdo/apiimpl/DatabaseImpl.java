@@ -124,9 +124,9 @@ public abstract class DatabaseImpl extends Database
     {
         synchronized (STATIC_LOCK) {
             if (databaseOpen) {
+                databaseOpen = false;
                 deadlockFixer.stop();
                 forest.close();
-                databaseOpen = false;
             }
         }
     }

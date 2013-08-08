@@ -119,15 +119,7 @@ class ConsolidationTask implements Runnable
                 }
                 // Transactions in obsolete are now durable and public.
                 // Destroy elements that were unused when they became obsolete.
-                for (Element element : destroy) {
-                    if (Thread.interrupted()) {
-                        throw new InterruptedException();
-                    }
-                    LOG.log(Level.FINE,
-                            "{0} destroying {1} after becoming obsolete (no users)",
-                            new Object[]{this, element});
-                    element.destroyPersistentState();
-                }
+                consolidationSet.deleteElements(destroy);
                 LOG.log(Level.FINE, "{0} consolidation complete", this);
             }
         } catch (IOException e) {

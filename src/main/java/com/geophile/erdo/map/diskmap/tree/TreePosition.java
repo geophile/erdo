@@ -8,6 +8,8 @@ package com.geophile.erdo.map.diskmap.tree;
 
 import com.geophile.erdo.AbstractKey;
 import com.geophile.erdo.AbstractRecord;
+import com.geophile.erdo.apiimpl.CursorImpl;
+import com.geophile.erdo.apiimpl.TreePositionTracker;
 import com.geophile.erdo.immutableitemcache.ImmutableItemManager;
 import com.geophile.erdo.map.Factory;
 import com.geophile.erdo.map.LazyRecord;
@@ -15,7 +17,6 @@ import com.geophile.erdo.map.diskmap.DiskPage;
 import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.map.diskmap.PageId;
 import com.geophile.erdo.util.IdGenerator;
-import com.geophile.erdo.util.ThrowableUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -481,9 +482,8 @@ public class TreePosition
         if (LOG.isLoggable(Level.INFO)) {
             LOG.log(Level.INFO, "{0}: activateForPool", name());
         }
-        DiskPageCache.registerTreePosition(this);
+        TreePositionTracker.registerTreePosition(CursorImpl.threadContext(), this);
         inUse = true;
-        lastActivation = ThrowableUtil.toString(new Exception());
     }
 
     void deactivateForPool()
@@ -492,7 +492,7 @@ public class TreePosition
         if (LOG.isLoggable(Level.INFO)) {
             LOG.log(Level.INFO, "{0}: deactivateForPool", name());
         }
-        DiskPageCache.unregisterTreePosition(this);
+        TreePositionTracker.unregisterTreePosition(CursorImpl.threadContext(), this);
         tree = null;
         factory = null;
         diskPageCache = null;
@@ -507,7 +507,6 @@ public class TreePosition
         record = null;
         key = null;
         inUse = false;
-        lastDeactivation = ThrowableUtil.toString(new Exception());
     }
 
     TreePosition(TreePositionPool pool)
@@ -625,6 +624,4 @@ public class TreePosition
 
     // Pooling
     private boolean inUse = false;
-    private String lastActivation;
-    private String lastDeactivation;
 }

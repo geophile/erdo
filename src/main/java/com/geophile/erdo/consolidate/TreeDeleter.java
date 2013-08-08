@@ -32,6 +32,9 @@ public class TreeDeleter extends Thread
                 }
                 if (!stopped) {
                     for (Element element : queueCopy) {
+                        if (Thread.interrupted()) {
+                            throw new InterruptedException();
+                        }
                         LOG.log(Level.FINE, "Destroy {0} now", element);
                         element.destroyPersistentState();
                     }
@@ -39,7 +42,7 @@ public class TreeDeleter extends Thread
                 }
             }
         } catch (InterruptedException e) {
-            // Exiting
+            LOG.log(Level.WARNING, "TreeDeleter interrupted");
         }
     }
 

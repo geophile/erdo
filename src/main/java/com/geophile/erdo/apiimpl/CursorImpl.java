@@ -11,7 +11,6 @@ import com.geophile.erdo.Cursor;
 import com.geophile.erdo.UsageError;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
-import com.geophile.erdo.map.diskmap.DiskPageCache;
 import com.geophile.erdo.transaction.Transaction;
 
 import java.io.IOException;
@@ -23,31 +22,54 @@ public class CursorImpl extends Cursor
     @Override
     public AbstractRecord next() throws IOException, InterruptedException
     {
-        database.checkDatabaseOpen();
-        return neighbor(true);
+        try {
+            CURRENT_CURSOR.set(this);
+            database.checkDatabaseOpen();
+            return neighbor(true);
+        } finally {
+            CURRENT_CURSOR.set(null);
+        }
     }
 
     @Override
     public AbstractRecord previous() throws IOException, InterruptedException
     {
-        database.checkDatabaseOpen();
-        return neighbor(false);
+        try {
+            CURRENT_CURSOR.set(this);
+            database.checkDatabaseOpen();
+            return neighbor(false);
+        } finally {
+            CURRENT_CURSOR.set(null);
+        }
     }
 
     @Override
     public void close()
     {
-        if (mapCursor != null) {
-            // Don't call checkTransaction. If a transaction commits and rolls back other transactions, then
-            // cursors can be closed from the committing transaction's thread.
-            transaction.unregisterCursor(this);
-            mapCursor.close();
-            mapCursor = null;
-            DiskPageCache.destroyRemainingTreePositions();
+        try {
+            CURRENT_CURSOR.set(this);
+            if (mapCursor != null) {
+                // Don't call checkTransaction. If a transaction commits and rolls back other transactions, then
+                // cursors can be closed from the committing transaction's thread.
+                transaction.unregisterCursor(this);
+                mapCursor.close();
+                mapCursor = null;
+                TreePositionTracker.destroyRemainingTreePositions(threadContext());
+            }
+        } finally {
+            CURRENT_CURSOR.set(null);
         }
     }
 
     // CursorImpl interface
+
+    // The Cursor currently being operated on by this thread. Returns null if there is no Cursor method on the
+    // stack. CursorImpl is an API implementation object, not internal like a MapCursor. It is therefore not possible
+    // to next CursorImpl method invocations, so the current cursor need not be tracked using a stack.
+    public static CursorImpl threadContext()
+    {
+        return CURRENT_CURSOR.get();
+    }
 
     CursorImpl(DatabaseImpl database, MapCursor mapCursor)
     {
@@ -101,6 +123,10 @@ public class CursorImpl extends Cursor
             throw new UsageError("Cursor cannot be used across transaction boundaries");
         }
     }
+
+    // Class state
+
+    private static final ThreadLocal<CursorImpl> CURRENT_CURSOR = new ThreadLocal<>();
 
     // Object state
 

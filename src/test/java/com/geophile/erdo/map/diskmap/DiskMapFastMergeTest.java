@@ -7,6 +7,7 @@
 package com.geophile.erdo.map.diskmap;
 
 import com.geophile.erdo.*;
+import com.geophile.erdo.apiimpl.TreePositionTracker;
 import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.map.LazyRecord;
 import com.geophile.erdo.map.MapCursor;
@@ -151,7 +152,7 @@ public class DiskMapFastMergeTest
         assertEquals(2 * N - 1, ((TestKey) key.hi()).key());
         // There should be no more records
         assertTrue(merge.next() == null);
-        DiskPageCache.destroyRemainingTreePositions();
+        TreePositionTracker.destroyRemainingTreePositions(null);
     }
 
     @Test
