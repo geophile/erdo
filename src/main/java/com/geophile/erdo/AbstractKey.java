@@ -33,7 +33,7 @@ public abstract class AbstractKey implements Comparable<AbstractKey>, Transferra
         return
             erdoId == ERDO_ID_UNSET ? "?" :
             erdoId == ERDO_ID_UNSET_DELETED ? "?D" :
-            erdoId < 0 ? String.format("%sD", Integer.toString(-erdoId)) : Integer.toString(erdoId);
+            deleted() ? String.format("%sD", erdoId()) : Integer.toString(erdoId());
     }
 
     @Override

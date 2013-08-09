@@ -27,6 +27,14 @@ public class DeletedRecord extends AbstractRecord
         super.writeTo(buffer);
     }
 
+    // AbstractRecord interface
+
+    @Override
+    public boolean deleted()
+    {
+        return true;
+    }
+
     // DeletedRecord interface
 
     @Override

@@ -56,7 +56,7 @@ public abstract class DatabaseImpl extends Database
     public synchronized OrderedMap createMap(String mapName, RecordFactory recordFactory)
         throws UsageError, IOException, InterruptedException
     {
-        LOG.log(Level.WARNING, "Creating OrderedMap {0}", mapName);
+        LOG.log(Level.INFO, "Creating OrderedMap {0}", mapName);
         checkDatabaseOpen();
         if (maps.containsKey(mapName)) {
             throw new UsageError(String.format(

@@ -39,9 +39,6 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
             buffer.append("/");
             buffer.append(transaction.toString());
         }
-        if (key.deleted()) {
-            buffer.append("/d");
-        }
         buffer.append(')');
         return buffer.toString();
     }
@@ -114,7 +111,7 @@ public abstract class AbstractRecord<KEY extends AbstractKey> extends LazyRecord
 
     // AbstractRecord interface
 
-    public final boolean deleted()
+    public boolean deleted()
     {
         return key.deleted();
     }

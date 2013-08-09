@@ -16,7 +16,7 @@ public class TestKey extends AbstractKey
 
     public String toString()
     {
-        return Integer.toString(key);
+        return String.format("%s/%s", super.toString(), key);
     }
 
     @Override

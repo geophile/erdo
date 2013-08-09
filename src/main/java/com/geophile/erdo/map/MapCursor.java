@@ -49,7 +49,7 @@ public abstract class MapCursor
             // cursor is closed because we've run off the end
             return false;
         }
-        if (startKey == null) {
+        if (fullScan) {
             // scanning the entire map, regardless of erdoId, so any non-null key is part of the cursor
             return true;
         }
@@ -63,9 +63,11 @@ public abstract class MapCursor
 
     protected MapCursor(AbstractKey startKey, boolean singleKey)
     {
+        assert startKey != null || !singleKey;
         this.startKey = startKey;
         this.singleKey = singleKey;
         this.state = State.NEVER_USED;
+        this.fullScan = startKey == null;
     }
 
     // Object state
@@ -81,6 +83,7 @@ public abstract class MapCursor
     // unboundStartAtFirstKey is used to indicate where to position the cursor while in the NEVER_USED state,
     // with startKey = null. true means start at the first key, false means start at the last key.
     protected boolean unboundStartAtFirstKey;
+    private final boolean fullScan;
 
     // Inner classes
 

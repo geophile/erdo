@@ -49,6 +49,12 @@ public class PrivateMap extends OpenOrSealedMapBase
         estimatedSizeBytes += record.estimatedSizeBytes();
         if (replaced != null) {
             estimatedSizeBytes -= replaced.estimatedSizeBytes();
+            // When TreeMap.put replaces a record, it keeps the key. If the deletion status (carried by the key)
+            // has changed, then the record needs to be removed and reinserted with the new key.
+            if (key.deleted() != replaced.key().deleted()) {
+                contents.remove(key);
+                contents.put(key, record);
+            }
         }
         return returnReplaced ? replaced : null;
     }

@@ -8,7 +8,6 @@ package com.geophile.erdo;
 
 import com.geophile.erdo.apiimpl.DisklessTestDatabase;
 import com.geophile.erdo.util.FileUtil;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.*;
 
@@ -45,21 +43,21 @@ public class OrderedMapTest
         OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, "first"));
-            Assert.assertNull(replaced);
+            assertNull(replaced);
         }
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, "second"));
-            Assert.assertEquals(i, ((TestKey) replaced.key()).key());
-            Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
+            assertEquals(i, ((TestKey) replaced.key()).key());
+            assertEquals("first", ((TestRecord) replaced).stringValue());
         }
         Cursor cursor = map.first();
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
-            Assert.assertEquals(expected++, record.key().key());
-            Assert.assertEquals("second", record.stringValue());
+            assertEquals(expected++, record.key().key());
+            assertEquals("second", record.stringValue());
         }
-        Assert.assertEquals(N, expected);
+        assertEquals(N, expected);
         db.close();
     }
 
@@ -82,10 +80,10 @@ public class OrderedMapTest
         TestRecord record;
         int expected = 0;
         while ((record = (TestRecord) cursor.next()) != null) {
-            Assert.assertEquals(expected++, ((TestKey) record.key()).key());
-            Assert.assertEquals("second", record.stringValue());
+            assertEquals(expected++, ((TestKey) record.key()).key());
+            assertEquals("second", record.stringValue());
         }
-        Assert.assertEquals(N, expected);
+        assertEquals(N, expected);
         db.close();
     }
 
@@ -100,14 +98,15 @@ public class OrderedMapTest
         OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, "first"));
-            Assert.assertNull(replaced);
+            assertNull(replaced);
         }
         for (int i = 0; i < N; i++) {
             // Delete present key
             {
                 AbstractRecord replaced = map.delete(new TestKey(i));
-                Assert.assertEquals(i, ((TestKey) replaced.key()).key());
-                Assert.assertEquals("first", ((TestRecord) replaced).stringValue());
+                assertNotNull(replaced);
+                assertEquals(i, ((TestKey) replaced.key()).key());
+                assertEquals("first", ((TestRecord) replaced).stringValue());
             }
             // Delete missing key (a version of bug #4)
             {
@@ -115,7 +114,7 @@ public class OrderedMapTest
                 assertNull(replaced);
             }
         }
-        Assert.assertNull(map.first().next());
+        assertNull(map.first().next());
         db.close();
     }
 
@@ -134,7 +133,7 @@ public class OrderedMapTest
         for (int i = 0; i < N; i++) {
             map.ensureAbsent(new TestKey(i));
         }
-        Assert.assertNull(map.first().next());
+        assertNull(map.first().next());
         db.close();
     }
 
@@ -162,10 +161,10 @@ public class OrderedMapTest
         cursor = map.first();
         expectedKey = 0;
         while ((record = cursor.next()) != null) {
-            Assert.assertEquals(expectedKey, key(record));
+            assertEquals(expectedKey, key(record));
             expectedKey += gap;
         }
-        Assert.assertEquals(N * gap, expectedKey);
+        assertEquals(N * gap, expectedKey);
         // Try scans starting at, before, and after each key and ending at, before and after each key.
         for (int i = 0; i < N; i++) {
             int startBase = gap * i;
@@ -180,14 +179,14 @@ public class OrderedMapTest
                         expectedEmpty = start > end || start <= end && (end >= startBase || start <= endBase);
                         boolean empty = true;
                         while ((record = cursor.next()) != null && record.key().compareTo(endKey) <= 0) {
-                            Assert.assertEquals(expectedKey, key(record));
+                            assertEquals(expectedKey, key(record));
                             expectedKey += gap;
                             empty = false;
                         }
                         if (empty) {
-                            Assert.assertTrue(expectedEmpty);
+                            assertTrue(expectedEmpty);
                         } else {
-                            Assert.assertEquals(expectedLastKey + gap, expectedKey);
+                            assertEquals(expectedLastKey + gap, expectedKey);
                         }
                     }
                 }
@@ -305,7 +304,7 @@ public class OrderedMapTest
         OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         for (int i = 0; i < N; i++) {
             AbstractRecord replaced = map.put(TestRecord.createRecord(i, String.format("v%s", i)));
-            Assert.assertNull(replaced);
+            assertNull(replaced);
         }
         // Delete odd keys
         for (int i = 1; i < N; i += 2) {
@@ -353,7 +352,7 @@ public class OrderedMapTest
                 String transactionName = String.format("t%s", txn++);
                 for (int i = 0; i < 100; i++) {
                     AbstractRecord replaced = map.put(TestRecord.createRecord(id++, transactionName));
-                    Assert.assertNull(replaced);
+                    assertNull(replaced);
                 }
                 db.commitTransaction();
             }

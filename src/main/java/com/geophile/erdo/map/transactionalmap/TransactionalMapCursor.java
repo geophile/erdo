@@ -41,7 +41,7 @@ class TransactionalMapCursor extends MapCursor
     TransactionalMapCursor(TransactionalMap transactionalMap, AbstractKey startKey, boolean singleKey)
          throws IOException, InterruptedException
     {
-        super(null, singleKey);
+        super(startKey, singleKey);
         MapCursor snapshotCursor = ForestMapCursor.newCursor(transactionalMap.forestSnapshot, startKey, singleKey);
         if (transactionalMap.updates == null || // dynamic map was rolled back.
             transactionalMap.updates.recordCount() == 0) {
