@@ -89,8 +89,7 @@ public abstract class Database
     /**
      * Creates a new map in the database.
      * @param mapName The name of the map.
-     * @param keyClass The class defining the map's keys.
-     * @param recordClass The class defining the map's records.
+     * @param recordFactory Used to create new keys and records for the new map.
      * @return A new map.
      * @throws IOException
      */

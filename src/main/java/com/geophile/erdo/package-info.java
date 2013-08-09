@@ -86,8 +86,7 @@
  *
  * <p> {@link com.geophile.erdo.Cursor} objects are used for retrieval of multiple records, starting at a key.
  * {@link com.geophile.erdo.OrderedMap#first()} and {@link com.geophile.erdo.OrderedMap#last()}
- * return Cursors that visit all records in ascending and descending
- * key order, respectively.
+ * start at the first and last records of the map, respectively.
  * {@link com.geophile.erdo.OrderedMap#cursor(AbstractKey)} returns a {@link com.geophile.erdo.Cursor}
  * object positioned at a given key, and that can visit neighboring records in either direction.
  *
@@ -97,7 +96,7 @@
  * null, closed once null has been returned. Once a Cursor is closed, all subsequent calls to next() or previous()
  * will return null.
  * A Cursor can also be closed explicitly using {@link com.geophile.erdo.Cursor#close()}.
- * Any cursors open at the end of a transaction will be closed by committing or rolling back the transaction.
+ * Any cursors open at the end of a transaction will be closed.
  */
 
 package com.geophile.erdo;
