@@ -48,13 +48,13 @@
  * <p> Transactions are not explicitly started. A thread accessing a database is always in a transaction, starting
  * as soon as the database is open, or as soon as the previous transaction has ended. A transaction is ended by calling
  * either {@link com.geophile.erdo.Database#commitTransaction()} or
- * {@link com.geophile.erdo.Database#rollbackTransaction()}. commitTransaction makes the transaction's updates (if any)
+ * {@link com.geophile.erdo.Database#rollbackTransaction()}. commitTransactionAsynchronously makes the transaction's updates (if any)
  * durable and visible to new transactions. rollbackTransaction discards the transaction's updates.
  *
  * <p> Transaction state may be written to disk synchronously or asynchronously. Synchronous commits are slower, but
- * guarantee durability once commitTransaction returns. Asynchronous commits are faster but don't guarantee durability
+ * guarantee durability once commitTransactionAsynchronously returns. Asynchronous commits are faster but don't guarantee durability
  * immediately. An asynchronous commit is performed by calling
- * {@link com.geophile.erdo.Database#commitTransaction(TransactionCallback)}. The callback
+ * {@link com.geophile.erdo.Database#commitTransactionAsynchronously(TransactionCallback)}. The callback
  * {@link com.geophile.erdo.TransactionCallback#whenDurable(Object)} is invoked once the updates from the transaction
  * are made durable. This callback can be used to implement application-level management of committed but
  * not-yet-durable state.

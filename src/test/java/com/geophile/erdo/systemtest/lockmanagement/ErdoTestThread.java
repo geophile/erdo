@@ -54,7 +54,7 @@ public class ErdoTestThread extends Thread
                         description.append(String.format(" -> %s, %s", fromAccount, toAccount));
                         accounts.ensurePresent(fromAccount);
                         accounts.ensurePresent(toAccount);
-                        db.commitTransaction(transactionCallback);
+                        db.commitTransactionAsynchronously(transactionCallback);
                         committed = true;
                         if (LOG.isLoggable(Level.INFO)) {
                             LOG.log(Level.INFO,

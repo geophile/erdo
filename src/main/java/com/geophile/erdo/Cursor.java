@@ -9,7 +9,7 @@ package com.geophile.erdo;
 import java.io.IOException;
 
 /**
- * A {@link Cursor} object is used to visit the records of an {@link com.geophile.erdo.OrderedMap}.
+ * A {@link Cursor} is used to visit the records of an {@link com.geophile.erdo.OrderedMap}.
  * Key order is defined by {@link com.geophile.erdo.AbstractKey#compareTo(AbstractKey)}.
  */
 

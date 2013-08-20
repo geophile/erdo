@@ -91,7 +91,7 @@ public abstract class DatabaseImpl extends Database
     }
 
     @Override
-    public final void commitTransaction(TransactionCallback transactionCallback, Object commitInfo)
+    public final void commitTransactionAsynchronously(TransactionCallback transactionCallback, Object commitInfo)
         throws IOException, InterruptedException
     {
         checkDatabaseOpen();

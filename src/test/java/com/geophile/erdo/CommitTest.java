@@ -106,7 +106,7 @@ public class CommitTest
                 System.out.println(String.format("%s: Commit %s",
                                                  System.currentTimeMillis(), count));
 */
-                db.commitTransaction(callback, count);
+                db.commitTransactionAsynchronously(callback, count);
             }
         }
         db.flush();

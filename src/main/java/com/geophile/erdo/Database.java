@@ -118,7 +118,7 @@ public abstract class Database
     public final void commitTransaction()
         throws IOException, InterruptedException
     {
-        commitTransaction(null);
+        commitTransactionAsynchronously(null);
     }
 
     /**
@@ -131,10 +131,10 @@ public abstract class Database
      * @throws IOException
      * @throws InterruptedException
      */
-    public final void commitTransaction(TransactionCallback transactionCallback)
+    public final void commitTransactionAsynchronously(TransactionCallback transactionCallback)
         throws IOException, InterruptedException
     {
-        commitTransaction(transactionCallback, null);
+        commitTransactionAsynchronously(transactionCallback, null);
     }
 
     /**
@@ -149,8 +149,8 @@ public abstract class Database
      * @throws IOException
      * @throws InterruptedException
      */
-    public abstract void commitTransaction(TransactionCallback transactionCallback,
-                                           Object commitInfo)
+    public abstract void commitTransactionAsynchronously(TransactionCallback transactionCallback,
+                                                         Object commitInfo)
         throws IOException, InterruptedException;
 
     /**

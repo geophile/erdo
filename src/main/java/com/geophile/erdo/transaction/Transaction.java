@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 // timestamps are dense, they compress better.
 //
 // commitTime order is consistent with timestamp order because Transaction.commit is called by
-// TransactionManager.commitTransaction inside the TransactionManager's monitor.
+// TransactionManager.commitTransactionAsynchronously inside the TransactionManager's monitor.
 
 public class Transaction
 {

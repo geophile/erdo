@@ -101,7 +101,7 @@ public class TransactionOptionsTest
         for (; i < N; i++) {
             record = TestRecord.createRecord(i, null);
             map.put(record);
-            db.commitTransaction(callback, i);
+            db.commitTransactionAsynchronously(callback, i);
         }
         synchronized (lock) {
             while (lock.get() < N) {

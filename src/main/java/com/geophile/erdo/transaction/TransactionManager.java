@@ -48,7 +48,7 @@ public class TransactionManager
     }
 
     // TODO: What sort of cleanup should be done in case of exceptions thrown during
-    // TODO: commitTransaction and rollbackTransaction?
+    // TODO: commitTransactionAsynchronously and rollbackTransaction?
 
     public final void commitTransaction(TransactionCallback transactionCallback, Object commitInfo)
         throws IOException, InterruptedException
