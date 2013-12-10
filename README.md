@@ -61,12 +61,11 @@ The following program creates an empty Erdo database.
         {
             public static void main(String[] args) throws IOException, InterruptedException
             {
+                File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "mydb");
                 Database db = Database.createDatabase(DB_DIRECTORY);
                 db.close();
                 System.out.println(String.format("Database created in %s", DB_DIRECTORY));
             }
-        
-            private static final File DB_DIRECTORY = new File("/tmp/mydb");
         }
 
 This program can be run using the script
@@ -90,14 +89,12 @@ empty map within it:
         {
             public static void main(String[] args) throws IOException, InterruptedException
             {
+                File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "mydb");
                 Database db = Database.useDatabase(DB_DIRECTORY);
-                db.createMap("musicians", Name.class, Person.class);
+                db.createMap("musicians", RecordFactory.simpleRecordFactory(Name.class, Person.class));
                 db.close();
-                System.out.println(String.format("Created 'musicians' map in database %s", 
-                                   DB_DIRECTORY));
+                System.out.println(String.format("Created 'musicians' map in database %s", DB_DIRECTORY));
             }
-        
-            private static final File DB_DIRECTORY = new File("/tmp/mydb");
         }
 
 This program can be run using the script `src/test/examples/helloworld.createmap`
@@ -123,6 +120,7 @@ The following program opens an existing Erdo map and creates some records.
                        DeadlockException,
                        TransactionRolledBackException
             {
+                File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "mydb");
                 Database db = Database.useDatabase(DB_DIRECTORY);
                 OrderedMap musicians = db.useMap("musicians");
         
@@ -160,8 +158,6 @@ The following program opens an existing Erdo map and creates some records.
                                                      name.name, person.birthDate));
                 }
             }
-        
-            private static final File DB_DIRECTORY = new File("/tmp/mydb");
         }
 
 This program can be run using the script `src/test/examples/helloworld.updatemap`.    
