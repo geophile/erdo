@@ -37,9 +37,10 @@ public class FileUtil
     public static ByteBuffer readFile(File file) throws IOException
     {
         byte[] buffer = new byte[(int) file.length()];
-        FileInputStream fileReader = new FileInputStream(file);
-        int bytesRead = fileReader.read(buffer);
-        fileReader.close();
+        int bytesRead;
+        try (FileInputStream fileReader = new FileInputStream(file)) {
+            bytesRead = fileReader.read(buffer);
+        }
         assert bytesRead == file.length() : file;
         return ByteBuffer.wrap(buffer);
     }
@@ -48,9 +49,9 @@ public class FileUtil
     {
         boolean created = file.createNewFile();
         assert created : file;
-        FileOutputStream fileWriter = new FileOutputStream(file);
-        fileWriter.write(buffer.array(), 0, buffer.remaining());
-        fileWriter.close();
+        try (FileOutputStream fileWriter = new FileOutputStream(file)) {
+            fileWriter.write(buffer.array(), 0, buffer.remaining());
+        }
     }
 
     public static void deleteFile(File file)
