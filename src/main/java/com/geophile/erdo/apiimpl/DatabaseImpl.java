@@ -32,6 +32,7 @@ public abstract class DatabaseImpl extends Database
                                                 Class<? extends Factory> factoryClass)
         throws IOException, InterruptedException
     {
+        setPID();
         synchronized (STATIC_LOCK) {
             checkDatabaseClosed();
             return DatabaseOnDisk.createDatabase(dbDirectory, factory(factoryClass, configuration));
@@ -43,6 +44,7 @@ public abstract class DatabaseImpl extends Database
                                              Class<? extends Factory> factoryClass)
         throws IOException, InterruptedException
     {
+        setPID();
         synchronized (STATIC_LOCK) {
             checkDatabaseClosed();
             return DatabaseOnDisk.openDatabase
@@ -148,6 +150,11 @@ public abstract class DatabaseImpl extends Database
     {
         this.crash.set(crash);
     }
+
+    public static int pid()
+    {
+        return pid;
+    }
     
     // For testing
     public static void reset()
@@ -186,6 +193,21 @@ public abstract class DatabaseImpl extends Database
 
     // For use by this class
 
+    private static void setPID()
+    {
+        if (PID_SYSTEM_PROPERTY == null) {
+            throw new UsageError("The pid system variable must be set to the process id of the current process.");
+        }
+        try {
+            pid = Integer.parseInt(PID_SYSTEM_PROPERTY);
+        } catch (NumberFormatException e) {
+            throw new UsageError(
+                String.format("The pid system variable must be set to the process id of the current process. " +
+                              "pid was set to %s",
+                              PID_SYSTEM_PROPERTY));
+        }
+    }
+
     private static void checkDatabaseClosed()
     {
         if (databaseOpen) {
@@ -223,6 +245,8 @@ public abstract class DatabaseImpl extends Database
 
     protected static final Logger LOG = Logger.getLogger(DatabaseImpl.class.getName());
     private static final Object STATIC_LOCK = new Object();
+    private static final String PID_SYSTEM_PROPERTY = System.getProperty("pid", null);
+    private static int pid;
     private static volatile boolean databaseOpen = false;
 
     // Object state

@@ -21,6 +21,7 @@ public abstract class Database
 {
     /**
      * Create a new Database, using the default configuration.
+     * The pid system variable must be set to the pid of the current process.
      * @param dbDirectory The directory to contain the database. It must not exist upon invocation.
      * @return A new Database.
      * @throws IOException
@@ -34,6 +35,7 @@ public abstract class Database
 
     /**
      * Create a new Database, using the given configuration.
+     * The pid system variable must be set to the pid of the current process.
      * @param dbDirectory The directory to contain the database. It must not exist upon invocation.
      * @param configuration The configuration of the database.
      * @return A new Database.
@@ -49,6 +51,7 @@ public abstract class Database
     /**
      * Provides access to an existing Database. The configuration will be the one provided when the database
      * was created, (or the default configuration if none was supplied).
+     * The pid system variable must be set to the pid of the current process.
      * @param dbDirectory The directory containing the database.
      * @return The database contained in the given directory.
      * @throws IOException
@@ -64,6 +67,7 @@ public abstract class Database
      * Provides access to an existing Database. The configuration will be the one provided when the database
      * was created, (or the default configuration if none was supplied),
      * but with overrides from the given configuration.
+     * The pid system variable must be set to the pid of the current process.
      * @param dbDirectory The directory containing the database.
      * @param configuration Overrides to the current database configuration, which apply only to the current process.
      * Only the following configuration properties may be specified:
