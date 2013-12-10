@@ -19,23 +19,24 @@ public class ConfigurationMap
     {
         List<String> keys = new ArrayList<String>(map.keySet());
         Collections.sort(keys);
-        PrintWriter output = new PrintWriter(file);
-        for (String key : keys) {
-            output.println(String.format("%s = %s", key, map.get(key)));
+        try (PrintWriter output = new PrintWriter(file)) {
+            for (String key : keys) {
+                output.println(String.format("%s = %s", key, map.get(key)));
+            }
         }
-        output.close();
     }
 
     public void read(File file) throws IOException
     {
         map.clear();
-        BufferedReader input = new BufferedReader(new FileReader(file));
-        String line;
-        while ((line = input.readLine()) != null) {
-            StringTokenizer tokenizer = new StringTokenizer(line, "=");
-            String key = tokenizer.nextToken();
-            String value = tokenizer.nextToken();
-            map.put(key.trim(), value.trim());
+        try (BufferedReader input = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = input.readLine()) != null) {
+                StringTokenizer tokenizer = new StringTokenizer(line, "=");
+                String key = tokenizer.nextToken();
+                String value = tokenizer.nextToken();
+                map.put(key.trim(), value.trim());
+            }
         }
     }
 
