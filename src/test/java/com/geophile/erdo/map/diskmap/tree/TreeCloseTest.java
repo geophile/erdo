@@ -30,7 +30,7 @@ public class TreeCloseTest
     public static void beforeClass() throws IOException
     {
         TestKey.testErdoId(ERDO_ID);
-        DB_STRUCTURE = new DBStructure(new File("/tmp/erdo"));
+        DB_STRUCTURE = new DBStructure(new File(FileUtil.tempDirectory(), "erdo"));
         FACTORY = new TestFactory();
         FACTORY.recordFactory(ERDO_ID, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
         FACTORY.configuration().diskPageSizeBytes(4096);

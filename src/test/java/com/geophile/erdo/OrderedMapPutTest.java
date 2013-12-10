@@ -25,15 +25,16 @@ import java.io.IOException;
 public class OrderedMapPutTest
 {
     @BeforeClass
-    public static void beforeClass()
+    public static void beforeClass() throws IOException
     {
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         FACTORY = new TestFactory();
     }
 
     @Before
     public void before()
     {
-        FileUtil.deleteDirectory(new File(DB_DIRECTORY));
+        FileUtil.deleteDirectory(DB_DIRECTORY);
     }
 
     @After
@@ -61,7 +62,7 @@ public class OrderedMapPutTest
         // For FractalConsolidationPlanner
         configuration.consolidationMinSizeBytes(0);
         configuration.consolidationMinMapsToConsolidate(0);
-        Database db = DatabaseOnDisk.createDatabase(new File(DB_DIRECTORY), FACTORY);
+        Database db = DatabaseOnDisk.createDatabase(DB_DIRECTORY, FACTORY);
         Assert.assertTrue(N >= 4);
         Assert.assertTrue(N % 2 == 0);
         OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
@@ -120,5 +121,6 @@ public class OrderedMapPutTest
     private static TestFactory FACTORY;
     private static final String MAP_NAME = "map";
     private static final int N = 10;
-    private static final String DB_DIRECTORY = "/tmp/erdo";
+    private static final String DB_NAME = "erdo";
+    private static File DB_DIRECTORY;
 }

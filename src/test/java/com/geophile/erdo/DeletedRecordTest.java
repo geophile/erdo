@@ -5,6 +5,7 @@ import com.geophile.erdo.apiimpl.DatabaseOnDisk;
 import com.geophile.erdo.util.FileUtil;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -21,6 +22,12 @@ import static org.junit.Assert.assertTrue;
 
 public class DeletedRecordTest
 {
+    @BeforeClass
+    public static void beforeClass() throws IOException
+    {
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
+    }
+
     @Before
     public void before()
     {
@@ -135,7 +142,8 @@ public class DeletedRecordTest
         }
     }
 
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
+    private static final String DB_NAME = "erdo";
+    private static File DB_DIRECTORY;
 
     private DatabaseImpl db;
     private OrderedMap map;

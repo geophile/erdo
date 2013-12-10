@@ -29,6 +29,7 @@ public class ErdoTransactionTest
         throws IOException, InterruptedException
     {
         // Database setup
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         FileUtil.deleteDirectory(DB_DIRECTORY);
         db = Database.createDatabase(DB_DIRECTORY, configuration());
         accounts = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(AccountId.class, Account.class));
@@ -132,9 +133,9 @@ public class ErdoTransactionTest
     }
 
     private static final Logger LOG = Logger.getLogger(ErdoTransactionTest.class.getName());
+    private static final String DB_NAME = "erdo";
     private static final String MAP_NAME = "account";
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
-    
+
     private final Database db;
     private final int nAccounts;
     private final OrderedMap accounts;

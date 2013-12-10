@@ -38,6 +38,7 @@ public class DiskMapFastMergeTest
         configuration.diskPageSizeBytes(4096);
         configuration.diskSegmentSizeBytes(8192);
         configuration.keysInMemoryMapLimit(0);
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         DB_STRUCTURE = new DBStructure(DB_DIRECTORY.getCanonicalFile());
     }
 
@@ -258,9 +259,9 @@ public class DiskMapFastMergeTest
     private static final String A_SMALL_FILLER = "a";
     private static final String B_SMALL_FILLER = "b";
     private static final int ERDO_ID = 1;
-    private static final String MAP_NAME = "map";
+    private static final String DB_NAME = "erdo";
     private static final TestFactory FACTORY = new TestFactory();
+    private static File DB_DIRECTORY;
     private static DBStructure DB_STRUCTURE;
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
     private DatabaseOnDisk db;
 }

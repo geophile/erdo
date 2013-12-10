@@ -298,7 +298,7 @@ public class OrderedMapTest
                DeadlockException,
                TransactionRolledBackException
     {
-        final File DB_DIRECTORY = new File("/tmp/erdo");
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "erdo");
         FileUtil.deleteDirectory(DB_DIRECTORY);
         Database db = Database.createDatabase(DB_DIRECTORY);
         OrderedMap map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
@@ -335,7 +335,7 @@ public class OrderedMapTest
     public void testEvenMoreDeletion()
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
-        final File DB_DIRECTORY = new File("/tmp/erdo");
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "erdo");
         FileUtil.deleteDirectory(DB_DIRECTORY);
         // Make background consolidation happen more often
         Configuration configuration = Configuration.defaultConfiguration();

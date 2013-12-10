@@ -26,6 +26,7 @@ public class DatabaseTest
     @BeforeClass
     public static void beforeClass() throws IOException
     {
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         DB_STRUCTURE = new DBStructure(DB_DIRECTORY);
         FACTORY = new TestFactory();
     }
@@ -173,10 +174,11 @@ public class DatabaseTest
     }
 
     private static DBStructure DB_STRUCTURE;
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
+    private static File DB_DIRECTORY;
     private static TestFactory FACTORY;
     private static final Logger LOG = Logger.getLogger(DatabaseTest.class.getName());
 
     private Database db;
+    private static final String DB_NAME = "erdo";
     private static final String MAP_NAME = "test";
 }

@@ -19,6 +19,7 @@ public class ProcessExclusionTest
 {
     public static void main(String[] args) throws IOException, InterruptedException
     {
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         new ProcessExclusionTest(args).run();
     }
 
@@ -46,7 +47,8 @@ public class ProcessExclusionTest
         return System.getProperty("pid");
     }
 
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
+    private static final String DB_NAME = "erod";
+    private static File DB_DIRECTORY;
     private static final int PAUSE_TIME_MSEC = 5_000;
 
     private boolean createDB;

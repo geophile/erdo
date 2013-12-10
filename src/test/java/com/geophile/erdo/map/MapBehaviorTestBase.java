@@ -38,6 +38,7 @@ public class MapBehaviorTestBase
     @Before
     public void before() throws IOException, InterruptedException
     {
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         FileUtil.deleteDirectory(DB_DIRECTORY);
         db = DatabaseOnDisk.createDatabase(DB_DIRECTORY, FACTORY);
         Transaction.initialize(FACTORY);
@@ -150,7 +151,7 @@ public class MapBehaviorTestBase
     }
 
     private static final int ERDO_ID = 1;
-    private final static File DB_DIRECTORY = new File("/tmp/erdo");
+    private static final String DB_NAME = "erdo";
     protected static TestFactory FACTORY;
 
     protected DatabaseOnDisk db;

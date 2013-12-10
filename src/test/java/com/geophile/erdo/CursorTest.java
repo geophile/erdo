@@ -292,6 +292,7 @@ public class CursorTest
         throws IOException, InterruptedException, DeadlockException, TransactionRolledBackException
     {
         // map is loaded with (x * GAP, "r.x"), 0 <= x < n
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         FileUtil.deleteDirectory(DB_DIRECTORY);
         Database db = Database.createDatabase(DB_DIRECTORY);
         map = db.createMap(MAP_NAME, RecordFactory.simpleRecordFactory(TestKey.class, TestRecord.class));
@@ -324,8 +325,8 @@ public class CursorTest
         System.out.println(String.format(template, args));
     }
 
-    private static File DB_DIRECTORY = new File("/tmp/erdo");
     private static TestFactory FACTORY;
+    private static final String DB_NAME = "erdo";
     private static final String MAP_NAME = "map";
     private static final int GAP = 10;
 

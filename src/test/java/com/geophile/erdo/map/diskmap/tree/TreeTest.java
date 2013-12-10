@@ -29,7 +29,7 @@ public class TreeTest
     public static void beforeClass() throws IOException
     {
         TestKey.testErdoId(ERDO_ID);
-        DB_STRUCTURE = new DBStructure(new File("/tmp/erdo"));
+        DB_STRUCTURE = new DBStructure(new File(FileUtil.tempDirectory(), "erdo"));
         Transaction.initialize(FACTORY);
     }
 

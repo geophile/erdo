@@ -7,6 +7,7 @@
 package com.geophile.erdo.examples.helloworld;
 
 import com.geophile.erdo.*;
+import com.geophile.erdo.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class UpdateMap
                DeadlockException,
                TransactionRolledBackException
     {
+        File DB_DIRECTORY = new File(FileUtil.tempDirectory(), "mydb");
         Database db = Database.useDatabase(DB_DIRECTORY);
         OrderedMap musicians = db.useMap("musicians");
 
@@ -55,6 +57,4 @@ public class UpdateMap
             System.out.println(String.format("    %s: %s", name.name, person.birthDate));
         }
     }
-
-    private static final File DB_DIRECTORY = new File("/tmp/mydb");
 }

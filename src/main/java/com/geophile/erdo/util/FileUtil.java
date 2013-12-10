@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 
 public class FileUtil
 {
@@ -98,4 +99,15 @@ public class FileUtil
                 String.format("%s exists but is not a directory.", directory));
         }
     }
+
+    public static File tempDirectory() throws IOException
+    {
+        String tempDirSystemVariable = System.getProperty(TEMP_DIR_SYSTEM_VARIABLE);
+        return
+            tempDirSystemVariable == null
+            ? Files.createTempDirectory("erdo").toFile()
+            : new File(tempDirSystemVariable);
+    }
+
+    private static final String TEMP_DIR_SYSTEM_VARIABLE = "tempDir";
 }

@@ -13,6 +13,7 @@ import com.geophile.erdo.util.FileUtil;
 import com.geophile.erdo.util.Interval;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,6 +29,12 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderedMapTransactionTimestampTest
 {
+    @BeforeClass
+    public static void beforeClass() throws IOException
+    {
+        DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
+    }
+
     @Before
     public void before()
     {
@@ -165,6 +172,7 @@ public class OrderedMapTransactionTimestampTest
     }
 
     private static final TestFactory FACTORY = new TestFactory();
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
+    private static final String DB_NAME = "erdo";
+    private static File DB_DIRECTORY;
     private static final String MAP_NAME = "map";
 }

@@ -44,7 +44,7 @@ The Java sources of a simple Erdo application are located in
 `src/test/java/com/geophile/erdo/examples/helloworld`. The scripts
 running the example are in `src/test/examples`. To run the examples,
 set the CLASSPATH to contain target/erdo-1.0.jar and
-target/test-classes.
+target/test-classes. (The scripts are written in bash.)
 
 ### Creating a database
 

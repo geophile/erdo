@@ -34,6 +34,7 @@ public class CommitTest
     @Before
     public void before() throws IOException, InterruptedException
     {
+        final File DB_DIRECTORY = new File(FileUtil.tempDirectory(), DB_NAME);
         FileUtil.deleteDirectory(DB_DIRECTORY);
         db = DatabaseOnDisk.createDatabase(DB_DIRECTORY, FACTORY);
     }
@@ -157,8 +158,8 @@ public class CommitTest
         }
     }
 
+    private static final String DB_NAME = "erdo";
     private static final String MAP_NAME = "map";
-    private static final File DB_DIRECTORY = new File("/tmp/erdo");
     private static final int RECORDS = 1000000;
     private static final int RECORDS_PER_TRANSACTION = 1000;
     private static final int TRANSACTIONS = RECORDS / RECORDS_PER_TRANSACTION;
