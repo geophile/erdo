@@ -186,5 +186,4 @@ public abstract class Database
      * @return The database's configuration.
      */
     public abstract Configuration configuration();
-
 }
